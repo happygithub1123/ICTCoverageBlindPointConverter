@@ -1,9 +1,9 @@
-# ICT 盲点表工具 · WHAPPY v0.3.1
+# ICT 盲点表工具 · WHAPPY v0.3.2
 
 **设计人员：王开心 · WANG KAIXIN**
 **Designed by WHAPPY**
 
-[下载 Windows x64 运行包](https://github.com/happygithub1123/ICTCoverageBlindPointConverter/releases/latest) · [当前版本说明](docs/RELEASE-v0.3.1.md)
+[下载 Windows x64 运行包](https://github.com/happygithub1123/ICTCoverageBlindPointConverter/releases/latest) · [当前版本说明](docs/RELEASE-v0.3.2.md)
 
 本地运行的 C# WinForms 软件，将已经确认的 Coverage 报告整理成 ICT 盲点表。
 
@@ -50,7 +50,7 @@
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\build.ps1
-powershell -ExecutionPolicy Bypass -File .\publish.ps1 -Version 0.3.1
+powershell -ExecutionPolicy Bypass -File .\publish.ps1 -Version 0.3.2
 ```
 
 源码中的 samples 用于回归测试，运行包不依赖它。原始规则台账和历史差异在 docs 中保留；当前行为以v0.3.0说明及用户最新确认的符号规则为准。
@@ -58,3 +58,7 @@ powershell -ExecutionPolicy Bypass -File .\publish.ps1 -Version 0.3.1
 ## v0.3.1 更新
 
 D/Q/IC与其他元件统一使用报告符号筛选，不查看程序。规则总览分别显示“当前执行”和“历史依据”，旧程序字段只保留兼容和追溯用途，不参与校验或拦截。默认运行规则版本2.1.1，原有自定义规则及其版本保留。每次仍只生成一个盲点表.xlsx。
+
+## v0.3.2 文件占用修复
+
+Coverage在Excel/WPS中打开时，可读取其已保存内容。导入期间使用同一份只读副本，不修改源文件；会话指纹不再反复读取原文件。若程序对文件使用完全独占锁，请保存并关闭该报告后重试。未保存的编辑内容需要先保存，再点击“读取分析”。

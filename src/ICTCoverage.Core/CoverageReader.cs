@@ -15,9 +15,10 @@ public sealed class CoverageReader
             if (m.IsInRange(r,c)) return Text(s.GetRow(m.FirstRow)?.GetCell(m.FirstColumn));
         return Text(s.GetRow(r)?.GetCell(c));
     }
-    public List<FieldMap> Locate(string path)
+    public List<FieldMap> Locate(string path)=>Locate(CoverageSnapshot.Read(path));
+    public List<FieldMap> Locate(CoverageSnapshot snapshot)
     {
-        using var stream = File.OpenRead(path);
+        using var stream = snapshot.OpenRead();
         using var wb = WorkbookFactory.Create(stream);
         var result = new List<FieldMap>();
         for (int si=0; si<wb.NumberOfSheets; si++)
@@ -43,12 +44,13 @@ public sealed class CoverageReader
         }
         return result.Distinct().ToList();
     }
-    public Analysis Read(string path, FieldMap map)
+    public Analysis Read(string path, FieldMap map)=>Read(CoverageSnapshot.Read(path),map);
+    public Analysis Read(CoverageSnapshot snapshot, FieldMap map)
     {
-        using var stream=File.OpenRead(path); using var wb=WorkbookFactory.Create(stream);
+        using var stream=snapshot.OpenRead(); using var wb=WorkbookFactory.Create(stream);
         var s=wb.GetSheet(map.Sheet) ?? throw new InvalidDataException("工作表不存在");
-        var a=new Analysis { SourcePath=Path.GetFullPath(path) };
-        var ids=Regex.Match(Path.GetFileName(path),@"(?<board>MG[A-Za-z0-9]+)-(?<product>P\d+)");
+        var a=new Analysis { SourcePath=snapshot.SourcePath,SourceFingerprint=snapshot.Fingerprint };
+        var ids=Regex.Match(Path.GetFileName(snapshot.SourcePath),@"(?<board>MG[A-Za-z0-9]+)-(?<product>P\d+)");
         if(ids.Success) { a.BoardNumber=ids.Groups["board"].Value; a.ProductNumber=ids.Groups["product"].Value; }
         for(int r=0;r<=map.HeaderRow;r++)
         {

@@ -47,7 +47,7 @@ public sealed class MainForm : Form
         brand.Controls.Add(new Label{Text="ICT 盲点表工具",AutoSize=true,ForeColor=Color.White,Font=new Font("Microsoft YaHei UI",16,FontStyle.Bold)});brand.Controls.Add(new Label{Text="Coverage → Blind Points",AutoSize=true,ForeColor=Color.FromArgb(174,190,216),Margin=new Padding(4,8,0,0)});p.Controls.Add(brand,0,0);
         string[] names=["分类筛选 / 复制","异常 / 待确认","规则设置","V2规则总览","人工修改日志"];
         for(int i=0;i<names.Length;i++){string name=names[i];var b=AppTheme.Button(name,AppTheme.Navy,(_,_)=>ShowPage(name));b.Dock=DockStyle.Fill;b.TextAlign=ContentAlignment.MiddleLeft;b.Font=new Font(Font,i<2?FontStyle.Bold:FontStyle.Regular);nav[name]=b;p.Controls.Add(b,0,i+1);}
-        p.Controls.Add(new Label{Dock=DockStyle.Fill,Text="Designed by WHAPPY\n设计人员：王开心\nWANG KAIXIN  ·  v0.3.1",ForeColor=Color.FromArgb(208,218,235),Font=new Font("Microsoft YaHei UI",9),TextAlign=ContentAlignment.BottomLeft},0,7);return p;
+        p.Controls.Add(new Label{Dock=DockStyle.Fill,Text="Designed by WHAPPY\n设计人员：王开心\nWANG KAIXIN  ·  v0.3.2",ForeColor=Color.FromArgb(208,218,235),Font=new Font("Microsoft YaHei UI",9),TextAlign=ContentAlignment.BottomLeft},0,7);return p;
     }
     Control BuildImport()
     {
@@ -96,8 +96,8 @@ public sealed class MainForm : Form
     }
     async Task ReadAsync()=>await RunBusy(async()=>
     {
-        if(!File.Exists(input.Text))throw new FileNotFoundException("请选择 Coverage 报告");SaveSession();string path=input.Text;var reader=new CoverageReader();status.Text="正在整理报告…";var maps=await Task.Run(()=>reader.Locate(path));if(maps.Count==0)throw new InvalidDataException("未找到 ICT → 缺件、标准值和位号，请检查报告表头");var map=maps[0];if(maps.Count>1){using var form=new ChoiceForm<FieldMap>("选择检测工作表",maps);if(form.ShowDialog(this)!=DialogResult.OK)return;map=form.Selected!;}
-        string selected=profile.SelectedIndex>1?profile.Text:profile.SelectedIndex==0?cfg.ProfileValueOverrides.Keys.FirstOrDefault(p=>Path.GetFileName(path).StartsWith(p,StringComparison.OrdinalIgnoreCase))??"":"";analysis=await Task.Run(()=>{var a=reader.Read(path,map);new AnalysisEngine(cfg).Analyze(a,selected);return a;});LoadSession();board.Text=analysis.BoardNumber;product.Text=analysis.ProductNumber;RefreshResults();if(analysis.Issues.Count==0)status.Text=$"已整理 {analysis.Total} 个元件 / {analysis.Untestable} 个盲点，仅根据 X / √ / ∕。";
+        if(!File.Exists(input.Text))throw new FileNotFoundException("请选择 Coverage 报告");SaveSession();string path=input.Text;var reader=new CoverageReader();status.Text="正在整理报告…";var snapshot=await Task.Run(()=>CoverageSnapshot.Read(path));var maps=await Task.Run(()=>reader.Locate(snapshot));if(maps.Count==0)throw new InvalidDataException("未找到 ICT → 缺件、标准值和位号，请检查报告表头");var map=maps[0];if(maps.Count>1){using var form=new ChoiceForm<FieldMap>("选择检测工作表",maps);if(form.ShowDialog(this)!=DialogResult.OK)return;map=form.Selected!;}
+        string selected=profile.SelectedIndex>1?profile.Text:profile.SelectedIndex==0?cfg.ProfileValueOverrides.Keys.FirstOrDefault(p=>Path.GetFileName(path).StartsWith(p,StringComparison.OrdinalIgnoreCase))??"":"";analysis=await Task.Run(()=>{var a=reader.Read(snapshot,map);new AnalysisEngine(cfg).Analyze(a,selected);return a;});LoadSession();board.Text=analysis.BoardNumber;product.Text=analysis.ProductNumber;RefreshResults();if(analysis.Issues.Count==0)status.Text=$"已整理 {analysis.Total} 个元件 / {analysis.Untestable} 个盲点，仅根据 X / √ / ∕（读取已保存内容）。";
     });
     void RefreshResults()
     {
@@ -131,7 +131,7 @@ public sealed class MainForm : Form
         string? id=SelectedRule();if(id==null)return;var rule=cfg.Rules.Single(r=>r.RuleId==id);if(archive==rule.Archived)return;using var form=new ChangeReasonForm(archive?"删除规则（可恢复）":"恢复规则");if(form.ShowDialog(this)!=DialogResult.OK)return;try{await ApplyRules(RuleManagementService.Archive(cfg,id,archive,form.Reviewer,form.Justification));}catch(Exception ex){MessageBox.Show(this,ex.Message);}
     }
     async Task ApplyRules(RuleConfig next){SaveSession();RuleManagementService.Save(next,RulePath);cfg=next;RefreshChoices();if(analysis!=null){analysis=null;if(File.Exists(input.Text))await ReadAsync();}status.Text="规则已保存并应用，原人工选择保留在历史会话中。";}
-    string SessionPath()=>Path.Combine(userDir,Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(analysis!.SourcePath)))+"-"+Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cfg,RuleConfig.JsonOptions)+analysis.Profile)))[..12]+".session.json");
+    string SessionPath()=>Path.Combine(userDir,(string.IsNullOrEmpty(analysis!.SourceFingerprint)?CoverageSnapshot.Read(analysis.SourcePath).Fingerprint:analysis.SourceFingerprint)+"-"+Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cfg,RuleConfig.JsonOptions)+analysis.Profile)))[..12]+".session.json");
     void SaveSession(){if(analysis==null||analysis.Edits.Count==0)return;analysis.BoardNumber=board.Text;analysis.ProductNumber=product.Text;File.WriteAllText(SessionPath(),JsonSerializer.Serialize(analysis,RuleConfig.JsonOptions));}
-    void LoadSession(){if(analysis==null)return;string p=SessionPath();if(File.Exists(p)&&MessageBox.Show(this,"找到此报告的原因选择记录，是否恢复？","恢复记录",MessageBoxButtons.YesNo)==DialogResult.Yes){var saved=JsonSerializer.Deserialize<Analysis>(File.ReadAllText(p),RuleConfig.JsonOptions);if(saved!=null){saved.SourcePath=analysis.SourcePath;analysis=saved;}}}
+    void LoadSession(){if(analysis==null)return;string p=SessionPath();if(File.Exists(p)&&MessageBox.Show(this,"找到此报告的原因选择记录，是否恢复？","恢复记录",MessageBoxButtons.YesNo)==DialogResult.Yes){var saved=JsonSerializer.Deserialize<Analysis>(File.ReadAllText(p),RuleConfig.JsonOptions);if(saved!=null){saved.SourcePath=analysis.SourcePath;saved.SourceFingerprint=analysis.SourceFingerprint;analysis=saved;}}}
 }

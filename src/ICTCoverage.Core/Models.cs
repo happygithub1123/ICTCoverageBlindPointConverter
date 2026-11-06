@@ -38,6 +38,7 @@ public record EditLog(DateTimeOffset Time, int SourceRow, string Before, string 
 public sealed class Analysis
 {
     public string SourcePath { get; set; } = "";
+    public string SourceFingerprint { get; set; } = "";
     public string Profile { get; set; } = "";
     public string BoardNumber { get; set; } = "";
     public string ProductNumber { get; set; } = "";
