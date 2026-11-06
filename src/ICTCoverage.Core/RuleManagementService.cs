@@ -52,10 +52,12 @@ public static class RuleManagementService
     {
         var next=Clone(existing);var fresh=Clone(defaults);
         foreach(var pair in fresh.Reasons)next.Reasons.TryAdd(pair.Key,pair.Value);
-        foreach(var prefix in new[]{"Z","ZD","TVS","M"})if(fresh.PrefixTypes.TryGetValue(prefix,out var type))next.PrefixTypes.TryAdd(prefix,type);
+        foreach(var item in fresh.PrefixTypes)next.PrefixTypes.TryAdd(item.Key,item.Value);
         if(fresh.TypeValues.TryGetValue("瞬态抑制器",out var tvs))next.TypeValues.TryAdd("瞬态抑制器",tvs);
         if(fresh.SuffixAliases.TryGetValue("TVS",out var alias))next.SuffixAliases.TryAdd("TVS",alias);
-        foreach(var rule in fresh.Rules)if(rule.RuleId.StartsWith("LEARN-",StringComparison.Ordinal)&&!next.Rules.Any(r=>r.RuleId==rule.RuleId))next.Rules.Add(rule);
+        foreach(var rule in fresh.Rules)if((rule.RuleId.StartsWith("LEARN-",StringComparison.Ordinal)||rule.RuleId.StartsWith("BASE5-",StringComparison.Ordinal))&&!next.Rules.Any(r=>r.RuleId==rule.RuleId))next.Rules.Add(rule);
+        foreach(var item in fresh.TypeValues)next.TypeValues.TryAdd(item.Key,item.Value);
+        foreach(var item in fresh.ComponentOverrides)if(!next.ComponentOverrides.Any(o=>o.Project==item.Project&&o.Reference==item.Reference&&o.RawValue==item.RawValue))next.ComponentOverrides.Add(item);
         foreach(var pair in fresh.ProjectPrefixTypes){if(!next.ProjectPrefixTypes.TryGetValue(pair.Key,out var map))next.ProjectPrefixTypes[pair.Key]=map=[];foreach(var item in pair.Value)map.TryAdd(item.Key,item.Value);}
         foreach(var pair in fresh.ProjectSuffixAliases){if(!next.ProjectSuffixAliases.TryGetValue(pair.Key,out var map))next.ProjectSuffixAliases[pair.Key]=map=[];foreach(var item in pair.Value)map.TryAdd(item.Key,item.Value);}
         next.Version=fresh.Version;next.Validate();return next;

@@ -10,12 +10,15 @@ internal class EditorBase : Form
     readonly TableLayoutPanel fields=new(){Dock=DockStyle.Top,AutoSize=true,ColumnCount=2,Padding=new Padding(12)};
     protected readonly FlowLayoutPanel actions=AppTheme.Flow();
     int row;
+    readonly List<Control> advanced=[];
     protected EditorBase(string title,int height=500)
     {
         Text=title;Width=760;Height=height;MinimumSize=new Size(640,380);StartPosition=FormStartPosition.CenterParent;Font=new Font("Microsoft YaHei UI",11);BackColor=AppTheme.Background;AutoScaleMode=AutoScaleMode.Dpi;
         fields.ColumnStyles.Add(new(SizeType.Absolute,140));fields.ColumnStyles.Add(new(SizeType.Percent,100));var scroll=new Panel{Dock=DockStyle.Fill,AutoScroll=true};scroll.Controls.Add(fields);Controls.Add(scroll);actions.Dock=DockStyle.Bottom;actions.Padding=new Padding(12);Controls.Add(actions);actions.Controls.Add(AppTheme.Button("取消",AppTheme.Muted,(_,_)=>DialogResult=DialogResult.Cancel));
     }
     protected void Add(string label,Control c){fields.RowStyles.Add(new(SizeType.AutoSize));fields.Controls.Add(AppTheme.Label(label,9),0,row);c.Dock=DockStyle.Fill;c.Margin=new Padding(5,7,5,7);fields.Controls.Add(c,1,row++);}
+    protected void AddAdvanced(string label,Control c){Add(label,c);var caption=fields.GetControlFromPosition(0,row-1)!;caption.Visible=c.Visible=false;advanced.Add(caption);advanced.Add(c);}
+    protected void AdvancedToggle(){var link=new LinkLabel{Text="展开高级设置",AutoSize=true};bool open=false;link.LinkClicked+=(_,_)=>{open=!open;foreach(var c in advanced)c.Visible=open;link.Text=open?"收起高级设置":"展开高级设置";};Add("",link);}
     protected void SaveButton(Action action)=>actions.Controls.Add(AppTheme.Button("保存并应用",AppTheme.Green,(_,_)=>{try{action();DialogResult=DialogResult.OK;}catch(Exception ex){MessageBox.Show(this,ex.Message,"请检查填写内容");}}));
 }
 
@@ -44,25 +47,26 @@ internal sealed class RuleEditorForm : EditorBase
     readonly RuleConfig cfg;readonly ClassificationRule original;
     readonly ComboBox type=new(){DropDownStyle=ComboBoxStyle.DropDownList},reason=new(){DropDownStyle=ComboBoxStyle.DropDown};
     readonly TextBox prefixes=new(),suffix=new(),exclude=new(),value=new(),reference=new(),project=new(),source=new(),reviewer=new(){Text=Environment.UserName},why=new(),supersedes=new();
-    readonly CheckedListBox inspectionScopes=new(){CheckOnClick=true,Height=84};readonly TextBox references=new(),displayValue=new();
+    readonly TextBox references=new(),displayValue=new();readonly string initialPrefix;
     readonly NumericUpDown priority=new(){Minimum=0,Maximum=10000,Value=160};readonly CheckBox enabled=new(){Text="启用规则",Checked=true,AutoSize=true},reviewOnly=new(){Text="仅记录参考，不自动归因",AutoSize=true},noSuffix=new(){Text="不含任何分类后缀",AutoSize=true};
     public ClassificationRule Rule {get;private set;}=new();public string? NewReasonText{get;private set;}public string Reviewer=>reviewer.Text.Trim();public string Justification=>why.Text.Trim();
     static string? Optional(string s)=>string.IsNullOrWhiteSpace(s)?null:s.Trim();
     static string[] Tokens(string s)=>s.ToUpperInvariant().Split([',','，',' ','/',';','；'],StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries);
     public RuleEditorForm(RuleConfig cfg,ClassificationRule? rule):this(cfg,rule,InspectionKind.Missing){}
-    public RuleEditorForm(RuleConfig cfg,ClassificationRule? rule,InspectionKind inspection):base(rule==null?"新增分类规则":"编辑规则 · "+rule.RuleId,760)
+    public RuleEditorForm(RuleConfig cfg,ClassificationRule? rule,InspectionKind inspection):base(rule==null?"新增分类规则":"编辑规则 · "+rule.RuleId,560)
     {
-        this.cfg=cfg;original=rule==null?new(){RuleId=RuleManagementService.NewId(cfg),Stage="原因分类",Status="用户自定义",Source="用户自定义",Priority=160,Inspections=[inspection]}:JsonSerializer.Deserialize<ClassificationRule>(JsonSerializer.Serialize(rule,RuleConfig.JsonOptions),RuleConfig.JsonOptions)!;
+        this.cfg=cfg;original=rule==null?new(){RuleId=RuleManagementService.NewId(cfg),Stage="原因分类",Status="用户自定义",Source="用户自定义",Priority=160,Inspections=Enum.GetValues<InspectionKind>()}:JsonSerializer.Deserialize<ClassificationRule>(JsonSerializer.Serialize(rule,RuleConfig.JsonOptions),RuleConfig.JsonOptions)!;why.Text="维护分类规则";
         type.Items.AddRange(cfg.KnownTypes.Cast<object>().ToArray());if(original.Types.Length>0)type.SelectedItem=original.Types[0];reason.Items.AddRange(cfg.ActiveReasons.Select(p=>p.Value).Cast<object>().ToArray());reason.Text=!cfg.IsReasonActive(original.Reason)?"":cfg.ReasonText(original.Reason);prefixes.Text=string.Join(",",original.Prefixes);suffix.Text=original.Suffix??"";exclude.Text=string.Join(",",original.ExcludeSuffixes);value.Text=original.ExactValue??"";reference.Text=original.Reference??"";project.Text=original.Profile??"";source.Text=original.Source;supersedes.Text=string.Join(",",original.Supersedes);priority.Value=Math.Clamp(original.Priority,0,10000);enabled.Checked=original.Enabled;reviewOnly.Checked=original.ReviewOnly;
-        foreach(var k in Enum.GetValues<InspectionKind>())inspectionScopes.Items.Add(k.Name(),original.Inspections.Contains(k));references.Text=string.Join(",",original.References);displayValue.Text=original.DisplayValue??"";
-        noSuffix.Checked=original.NoOtherSuffixes;Add("规则编号",new Label{Text=original.RuleId,AutoSize=true});Add("适用检测项目",inspectionScopes);Add("元件类型",type);Add("前缀（逗号分隔）",prefixes);Add("包含后缀",suffix);Add("排除后缀",exclude);Add("无后缀条件",noSuffix);Add("精确标准值",value);Add("指定元件位号",reference);Add("位号集合（可选）",references);Add("输出标准值（可选）",displayValue);Add("盲点原因（可新建）",reason);Add("优先级（小数值优先）",priority);Add("覆盖规则编号",supersedes);Add("指定项目（空=通用）",project);Add("来源",source);Add("启用",enabled);Add("参考规则",reviewOnly);Add("修改人",reviewer);Add("修改理由",why);SaveButton(BuildRule);
+        references.Text=string.Join(",",original.References);displayValue.Text=original.DisplayValue??"";if(prefixes.Text.Length==0)prefixes.Text=original.Reference??string.Join(",",original.References);initialPrefix=prefixes.Text;
+        noSuffix.Checked=original.NoOtherSuffixes;Add("元件类型",type);Add("前缀或位号",prefixes);Add("后缀条件",suffix);Add("标准值",value);Add("盲点原因",reason);
+        AddAdvanced("规则编号",new Label{Text=original.RuleId,AutoSize=true});AddAdvanced("排除后缀",exclude);AddAdvanced("无后缀条件",noSuffix);AddAdvanced("指定位号",reference);AddAdvanced("位号集合",references);AddAdvanced("输出标准值",displayValue);AddAdvanced("优先级",priority);AddAdvanced("覆盖规则编号",supersedes);AddAdvanced("项目（空=通用）",project);AddAdvanced("来源",source);AddAdvanced("启用",enabled);AddAdvanced("参考规则",reviewOnly);AddAdvanced("修改人",reviewer);AddAdvanced("修改说明",why);AdvancedToggle();SaveButton(BuildRule);
     }
     void BuildRule()
     {
         if(type.SelectedIndex<0||source.Text.Trim().Length==0||Reviewer.Length==0||Justification.Length==0)throw new InvalidDataException("请填写类型、来源、修改人和修改理由");
-        var ps=Tokens(prefixes.Text);if(ps.Any(p=>!Regex.IsMatch(p,"^[A-Z]+$")))throw new InvalidDataException("前缀只填写字母，例如 R,RA,RB");
-        Rule=JsonSerializer.Deserialize<ClassificationRule>(JsonSerializer.Serialize(original,RuleConfig.JsonOptions),RuleConfig.JsonOptions)!;Rule.Types=[type.Text];Rule.Prefixes=ps;Rule.Suffix=Optional(suffix.Text)?.TrimStart('/').ToUpperInvariant();Rule.ExcludeSuffixes=Tokens(exclude.Text);Rule.ExactValue=Optional(value.Text);Rule.Reference=Optional(reference.Text)?.ToUpperInvariant();Rule.Priority=(int)priority.Value;Rule.Profile=Optional(project.Text);Rule.Scope=Rule.Profile==null?"report_profile":"project";Rule.Source=source.Text.Trim();Rule.Enabled=enabled.Checked;Rule.ReviewOnly=reviewOnly.Checked;Rule.Supersedes=Tokens(supersedes.Text);
-        Rule.Inspections=Enum.GetValues<InspectionKind>().Where(k=>inspectionScopes.CheckedItems.Contains(k.Name())).ToArray();if(Rule.Inspections.Length==0)throw new InvalidDataException("请选择适用检测项目");Rule.References=Tokens(references.Text);Rule.DisplayValue=Optional(displayValue.Text);
+        var ps=Tokens(prefixes.Text);if(ps.Any(p=>!Regex.IsMatch(p,"^[A-Z]+(?:[0-9]+)?$")))throw new InvalidDataException("请输入前缀R、RA或位号R103，多个用逗号分隔");
+        Rule=JsonSerializer.Deserialize<ClassificationRule>(JsonSerializer.Serialize(original,RuleConfig.JsonOptions),RuleConfig.JsonOptions)!;if(original.Types.Length==0||original.Types[0]!=type.Text)Rule.Types=[type.Text];Rule.Suffix=Optional(suffix.Text)?.TrimStart('/').ToUpperInvariant();Rule.ExcludeSuffixes=Tokens(exclude.Text);Rule.ExactValue=Optional(value.Text);Rule.Reference=Optional(reference.Text)?.ToUpperInvariant();Rule.Priority=(int)priority.Value;Rule.Profile=Optional(project.Text);Rule.Scope=Rule.Profile==null?"report_profile":"project";Rule.Source=source.Text.Trim();Rule.Enabled=enabled.Checked;Rule.ReviewOnly=reviewOnly.Checked;Rule.Supersedes=Tokens(supersedes.Text);Rule.References=Tokens(references.Text);Rule.DisplayValue=Optional(displayValue.Text);
+        if(prefixes.Text!=initialPrefix||original.Prefixes.Length==0&&original.Reference==null&&original.References.Length==0){Rule.Prefixes=ps.Where(p=>Regex.IsMatch(p,"^[A-Z]+$")).ToArray();var ids=ps.Except(Rule.Prefixes).ToArray();Rule.Reference=ids.Length==1?ids[0]:null;Rule.References=ids.Length>1?ids:[];}
         Rule.NoOtherSuffixes=noSuffix.Checked;if(Rule.NoOtherSuffixes&&Rule.Suffix!=null)throw new InvalidDataException("无后缀条件与包含后缀不能同时设置");
         if(Rule.ReviewOnly){Rule.Reason="";return;}
         string text=reason.Text.Trim();if(text.Length==0)throw new InvalidDataException("请选择或输入盲点原因");var found=cfg.ActiveReasons.FirstOrDefault(p=>p.Value==text);Rule.Reason=found.Key??("CUSTOM_REASON_"+Guid.NewGuid().ToString("N")[..8]);NewReasonText=found.Key==null?text:null;

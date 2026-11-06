@@ -13,9 +13,12 @@ public sealed class AnalysisEngine(RuleConfig config)
         {
             c.Issues.Clear(); c.Reference=""; c.ReasonCode=""; c.RuleId="";c.ManuallyReviewed=false;c.MatchedRules.Clear();c.AppliedRuleIds=["F-01","N-01","N-02","V-02","V-03"];
             var match=Regex.Match(c.RawReference.Trim(),@"^(?<ref>(?<prefix>[A-Za-z]+)\d+)(?<pins>(?:_[A-Za-z0-9]+)*)(?<suffix>(?:/.*)?)$");
-            if(!match.Success) { c.Reference=c.RawReference; c.Type="待确认"; c.Issues.Add(new("reference","无法识别位号")); }
+            if(c.RawReference.Trim().Equals("PCB",StringComparison.OrdinalIgnoreCase)){c.Reference="PCB";c.Type="PCB";}
+            else if(!match.Success) { c.Reference=c.RawReference; c.Type="待确认"; c.Issues.Add(new("reference","无法识别位号")); }
             else { c.Reference=match.Groups["ref"].Value.ToUpperInvariant(); c.Type=config.PrefixTypes.GetValueOrDefault(match.Groups["prefix"].Value.ToUpperInvariant(),"待确认"); }
             if(match.Success&&config.ProjectPrefixTypes.TryGetValue(profile,out var prefixMap)&&prefixMap.TryGetValue(match.Groups["prefix"].Value.ToUpperInvariant(),out var mapped))c.Type=mapped;
+            var special=config.ComponentOverrides.FirstOrDefault(o=>o.Project==profile&&o.Reference==c.Reference&&o.RawValue==c.RawValue);
+            if(special?.Type!=null&&!special.Review)c.Type=special.Type;
             if(match.Success&&match.Groups["pins"].Length>0&&!Regex.IsMatch(match.Groups["pins"].Value,@"^(?:_\d+)+$|^_[A-Za-z]_\d+$"))c.Issues.Add(new("pins","未知管脚/门电路后缀"));
             var suffix=c.RawReference.Split('/').Skip(1).Where(x=>x.Length>0).Select(x=>x.ToUpperInvariant()).ToArray();
             var normalized=new HashSet<string>();
@@ -28,13 +31,15 @@ public sealed class AnalysisEngine(RuleConfig config)
             c.AppliedRuleIds.Add(no?"F-02":yes||na?"F-03":"F-04");
             if(c.State==TestState.Unknown) c.Issues.Add(new("status","空白或未知检测状态"));
             c.Value=config.TypeValues.GetValueOrDefault(c.Type,c.RawValue);
+            if(special?.DisplayValue!=null&&!special.Review)c.Value=special.DisplayValue;
             if(c.Type=="电阻" && config.Rules.Any(r=>r.RuleId=="V-01"&&r.Enabled) && config.ProfileValueOverrides.TryGetValue(profile,out var overrides)){c.Value=overrides.GetValueOrDefault(c.RawValue,c.RawValue);c.AppliedRuleIds.Add("V-01");}
             if(yes||na){c.Issues.Clear();continue;}
             if(c.State==TestState.Untestable)
             {
+                if(special?.Review==true){c.Value=c.RawValue;c.Issues.Add(new("classification","训练样表与源值/分类矛盾，待人工确认："+special.Source));continue;}
                 if(c.Type=="待确认") c.Issues.Add(new("type","未知元件前缀"));
                 if(string.IsNullOrWhiteSpace(c.RawValue)) c.Issues.Add(new("value","标准值为空"));
-                var matches=config.Rules.Where(r=>r.Enabled && !r.Archived && r.Inspections.Contains(a.Inspection) && (r.Stage is "原因分类" or "可测性扩展") && (r.Profile==null||r.Profile==profile) && r.Types.Contains(c.Type) &&
+                var matches=config.Rules.Where(r=>r.Enabled && !r.Archived && r.Inspections.Contains(a.Inspection) && (r.Stage is "原因分类" or "可测性扩展") && (r.Profile==null||r.Profile==profile) && !r.ExcludeProfiles.Contains(profile) && r.Types.Contains(c.Type) &&
                     (r.Prefixes.Length==0||r.Prefixes.Contains(match.Groups["prefix"].Value.ToUpperInvariant())) &&
                     (r.Suffix==null||normalized.Contains(r.Suffix)) && !r.ExcludeSuffixes.Any(normalized.Contains) && (!r.NoOtherSuffixes||normalized.Count==0) &&
                     (r.ExactValue==null||r.ExactValue==c.RawValue) && (r.Reference==null||r.Reference==c.Reference)&&(r.References.Length==0||r.References.Contains(c.Reference))).OrderBy(r=>r.Priority).ThenBy(r=>r.RuleId,StringComparer.Ordinal).ToList();
@@ -69,7 +74,7 @@ public sealed class AnalysisEngine(RuleConfig config)
     public static void Edit(Analysis a, Component c, string reference,string type,string value,TestState state,string reasonCode,string note,string justification,RuleConfig cfg,string? reviewer=null,string? programEvidence=null)
     {
         if(string.IsNullOrWhiteSpace(justification))throw new InvalidDataException("请填写修改理由");
-        if(!Regex.IsMatch(reference,@"^[A-Za-z]+\d+$"))throw new InvalidDataException("规范位号必须为字母前缀加数字，例如 R103");
+        if(!Regex.IsMatch(reference,@"^[A-Za-z]+\d+$")&&!(reference=="PCB"&&c.RawReference.Trim().Equals("PCB",StringComparison.OrdinalIgnoreCase)))throw new InvalidDataException("规范位号必须为字母前缀加数字，例如 R103");
         if(state is TestState.Unknown or TestState.Conflict)throw new InvalidDataException("请选择明确的可测或不可测状态");
         if(c.SourceState!=TestState.Untestable||state!=c.SourceState)throw new InvalidDataException("检测结果以Coverage为准，仅能为打X的元件选择原因");
         if(!cfg.KnownTypes.Contains(type))throw new InvalidDataException("请选择已有元件类型");

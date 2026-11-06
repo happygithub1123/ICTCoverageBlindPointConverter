@@ -10,7 +10,7 @@ public sealed class ReasonCatalogTests
     static RuleConfig Config()=>RuleConfig.Load(Path.Combine(ConverterTests.Root,"config","rules.json"));
     [Fact]public void DiodeTvsAndIcNeverMergeEvenWithIdenticalValueAndUnknownCause()
     {
-        var cfg=Config();cfg.TypeValues.Clear();cfg.PrefixTypes["TVS"]="二极管";
+        var cfg=Config();cfg.TypeValues.Clear();cfg.PrefixTypes["TVS"]="二极管";foreach(var rule in cfg.Rules.Where(r=>r.RuleId.StartsWith("BASE5-")))rule.Enabled=false;
         string[] diode=["D62","D64","D66","Z2","ZD1","ZD2","ZD3","ZD4","ZD9"];
         var tvs=Enumerable.Range(1,29).Where(i=>i!=21).Select(i=>"TVS"+i).ToArray();string[] ic=["M45","M46","M48","M52","M54","M55","M57","M58","M59","M61"];
         var a=new Analysis{Inspection=InspectionKind.Short,Components=diode.Concat(tvs).Concat(ic).Select((r,i)=>new Component{SourceRow=i+10,RawReference=r,RawValue="0.750V",StatusSymbol="Х"}).ToList()};new AnalysisEngine(cfg).Analyze(a,"");

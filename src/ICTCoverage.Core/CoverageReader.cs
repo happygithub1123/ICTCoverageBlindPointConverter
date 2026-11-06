@@ -82,7 +82,7 @@ public sealed class CoverageReader
     {
         var s=wb.GetSheet(map.Sheet) ?? throw new InvalidDataException("工作表不存在");
         var a=new Analysis { SourcePath=snapshot.SourcePath,SourceFingerprint=snapshot.Fingerprint,Inspection=inspection };
-        var ids=Regex.Match(Path.GetFileName(snapshot.SourcePath),@"^(?<board>[A-Za-z0-9_]+)-(?<product>[A-Za-z0-9_]+)(?:-|$)");
+        var ids=Regex.Match(Path.GetFileName(snapshot.SourcePath),@"^(?<board>[A-Za-z0-9_]+)-(?<product>[A-Za-z0-9_.]+)(?:-|$)");
         if(ids.Success) { a.BoardNumber=ids.Groups["board"].Value; a.ProductNumber=ids.Groups["product"].Value; }
         for(int r=0;r<=map.HeaderRow;r++)
         {

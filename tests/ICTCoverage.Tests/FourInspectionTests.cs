@@ -39,7 +39,7 @@ public sealed class FourInspectionTests
     }
     static Analysis Editable(InspectionKind kind)
     {
-        var a=new Analysis{Inspection=kind,SourceFingerprint="fixture",Components=[new(){SourceRow=20,RawReference="C1/SG",RawValue="1uF",StatusSymbol="X"}]};new AnalysisEngine(Config()).Analyze(a,"");return a;
+        var a=new Analysis{Inspection=kind,SourceFingerprint="fixture",Components=[new(){SourceRow=20,RawReference="C1",RawValue="1uF",StatusSymbol="X"}]};new AnalysisEngine(Config()).Analyze(a,"");return a;
     }
     [Fact]public void ManualResultsShowOnlyFinalChangesPerInspectionAndRestore()
     {
@@ -56,7 +56,7 @@ public sealed class FourInspectionTests
     {
         var cfg=Config();var rule=cfg.Rules.Single(r=>r.RuleId=="C-04");Assert.Equal(InspectionKind.Missing,Assert.Single(rule.Inspections));
         var custom=new ClassificationRule{RuleId="CUSTOM-SHORT",Stage="原因分类",Source="测试",Types=["电容"],Reason="SHORT_GROUP",Inspections=[InspectionKind.Short],Suffix="SG",Priority=20};cfg=RuleManagementService.Update(cfg,custom,"测试","仅短路规则",true);
-        var missing=Editable(InspectionKind.Missing);var shorted=Editable(InspectionKind.Short);new AnalysisEngine(cfg).Analyze(missing,"");new AnalysisEngine(cfg).Analyze(shorted,"");Assert.True(missing.Pending>0);Assert.Equal(0,shorted.Pending);
+        cfg.Rules.Single(r=>r.RuleId=="BASE5-SG").Enabled=false;var missing=Editable(InspectionKind.Missing);var shorted=Editable(InspectionKind.Short);missing.Components[0].RawReference=shorted.Components[0].RawReference="C1/SG";new AnalysisEngine(cfg).Analyze(missing,"");new AnalysisEngine(cfg).Analyze(shorted,"");Assert.True(missing.Pending>0);Assert.Equal(0,shorted.Pending);
         string old="{\"ruleId\":\"OLD\",\"stage\":\"原因分类\"}";Assert.Equal(InspectionKind.Missing,Assert.Single(JsonSerializer.Deserialize<ClassificationRule>(old,RuleConfig.JsonOptions)!.Inspections));
     }
     [Fact]public void ExportUsesFilteredXOnlyAndCorrectScopeWithoutCompanionFiles()
@@ -70,7 +70,7 @@ public sealed class FourInspectionTests
     {
         var cfg=Config();var report=Sample();report.SourcePath="另一个报告.xls";foreach(var a in report.Analyses.Values){a.BoardNumber="OTHER";a.ProductNumber="OTHER";}Assert.Equal("",ProjectIdentification.Detect(report,cfg));
         report.SourcePath=cfg.SampleProfile+"-Coverage报告.xls";Assert.Equal("",ProjectIdentification.Detect(report,cfg));
-        var unrelated=new Analysis{Components=[new(){RawReference="TVS1/TVS",RawValue="0.750V",StatusSymbol="X"}]};new AnalysisEngine(cfg).Analyze(unrelated,"");Assert.Equal("瞬态抑制器",unrelated.Components[0].Type);Assert.Equal("",unrelated.Components[0].ReasonCode);Assert.True(unrelated.Pending>0);Assert.Equal(0,unrelated.DataIssues);
+        var unrelated=new Analysis{Components=[new(){RawReference="TVS1/TVS",RawValue="0.750V",StatusSymbol="X"}]};new AnalysisEngine(cfg).Analyze(unrelated,"");Assert.Equal("瞬态抑制器",unrelated.Components[0].Type);Assert.Equal("BASE5-TVS",unrelated.Components[0].RuleId);Assert.False(unrelated.Pending>0);Assert.Equal(0,unrelated.DataIssues);
         var older=RuleManagementService.Clone(cfg);older.Rules.RemoveAll(r=>r.RuleId.StartsWith("LEARN-"));older.ProjectPrefixTypes.Clear();var custom=new ClassificationRule{RuleId="USER",Stage="原因分类",Types=["电阻"],Reason="NO_POINT",Source="原用户规则",Priority=77};older.Rules.Add(custom);var upgraded=RuleManagementService.Upgrade(older,cfg);Assert.Contains(upgraded.Rules,r=>r.RuleId=="USER"&&r.Priority==77);Assert.Contains(upgraded.Rules,r=>r.RuleId.StartsWith("LEARN-"));
     }
     [Fact]public void PendingCauseFilterMatchesPreviewAndExportWithoutChangingDenominator()

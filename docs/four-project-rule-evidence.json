@@ -1,0 +1,411 @@
+[
+  {
+    "project": "65021023_V04-25023895_V04",
+    "sourceFile": "65021023_V04-25023895_V04-Coverage报告.xls",
+    "sourceSha256": "8b76a4b333ef51a24c8517de32c97c401c8b197981420dd262672c10184d6700",
+    "manualFile": "65021023_V04-25023895_V04-盲点表.xlsx",
+    "manualSha256": "c50c747dde9b651cdc2abb33e348c3e9bbb7897d71fe069df17745118a88c3a6",
+    "sourceTotal": 221,
+    "sourceX": 54,
+    "statistics": [
+      {
+        "√": 167,
+        "Х": 54
+      },
+      {
+        "Х": 33,
+        "√": 188
+      },
+      {
+        "√": 167,
+        "Х": 54
+      },
+      {
+        "√": 167,
+        "Х": 54
+      }
+    ],
+    "manualGroups": 17,
+    "manualDeclaredTotal": 54,
+    "manualListed": 54,
+    "manualUnique": 54,
+    "projectRulesAdded": 17,
+    "reviewReferences": [],
+    "differences": []
+  },
+  {
+    "project": "BC60756002-BA24ACSC101V0.0.1",
+    "sourceFile": "BC60756002-BA24ACSC101V0.0.1-Coverage报告.xls",
+    "sourceSha256": "46ba07a375d4894498cc5ec6e6cb3251859b1b1c8083040011f9ba135d9d11d6",
+    "manualFile": "BC60756002-BA24ACSC101V0.0.1- 盲点表.xlsx",
+    "manualSha256": "c12be6407a10ae3435160982c82ef33ed0868541111e4f129da94bf9833ea4db",
+    "sourceTotal": 704,
+    "sourceX": 358,
+    "statistics": [
+      {
+        "Х": 358,
+        "√": 346
+      },
+      {
+        "Х": 299,
+        "√": 405
+      },
+      {
+        "Х": 358,
+        "√": 346
+      },
+      {
+        "Х": 358,
+        "√": 346
+      }
+    ],
+    "manualGroups": 18,
+    "manualDeclaredTotal": 358,
+    "manualListed": 357,
+    "manualUnique": 357,
+    "projectRulesAdded": 19,
+    "reviewReferences": [],
+    "differences": [
+      {
+        "kind": "数量不符",
+        "row": 21,
+        "listed": 1,
+        "quantity": 2
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "CB10"
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "RA87"
+      },
+      {
+        "kind": "手工多出或源为可测",
+        "reference": "AB10",
+        "source": null
+      }
+    ],
+    "namedSourceRecords": [
+      {
+        "reference": "PCB",
+        "row": 723,
+        "status": "四项均√",
+        "note": "报告与人工表均按704统计，其中703条带数字位号和1条PCB记录"
+      }
+    ]
+  },
+  {
+    "project": "MG10P0B3270335-P25085800101",
+    "sourceFile": "MG10P0B3270335-P25085800101-Coverage报告.xls",
+    "sourceSha256": "54e49405253bdff533740626d397a24d27b87a9bb74614ebf531333726add049",
+    "manualFile": "MG10P0B3270335-P25085800101-盲点表.xlsx",
+    "manualSha256": "91e0317b1eddbe2c11d51a4d9725de8fe12d64b68523308b75ee229dcd90573d",
+    "sourceTotal": 1740,
+    "sourceX": 1144,
+    "statistics": [
+      {
+        "√": 596,
+        "Х": 1144
+      },
+      {
+        "Х": 848,
+        "√": 892
+      },
+      {
+        "√": 596,
+        "Х": 1144
+      },
+      {
+        "√": 596,
+        "Х": 1144
+      }
+    ],
+    "manualGroups": 101,
+    "manualDeclaredTotal": 1144,
+    "manualListed": 1137,
+    "manualUnique": 1136,
+    "projectRulesAdded": 99,
+    "reviewReferences": [
+      "B19",
+      "B20",
+      "B25",
+      "B41",
+      "B42",
+      "L14",
+      "L2",
+      "L31",
+      "L4",
+      "L53",
+      "L9",
+      "R610",
+      "R762",
+      "R84",
+      "R9039"
+    ],
+    "differences": [
+      {
+        "kind": "数量不符",
+        "row": 33,
+        "listed": 4,
+        "quantity": 3
+      },
+      {
+        "kind": "数量不符",
+        "row": 34,
+        "listed": 24,
+        "quantity": 14
+      },
+      {
+        "kind": "数量不符",
+        "row": 38,
+        "listed": 5,
+        "quantity": 4
+      },
+      {
+        "kind": "数量不符",
+        "row": 42,
+        "listed": 2,
+        "quantity": 12
+      },
+      {
+        "kind": "数量不符",
+        "row": 63,
+        "listed": 1,
+        "quantity": 10
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "C415"
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "C692"
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "C730"
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "C731"
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "R344"
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "R345"
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "R432"
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "R661"
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "R829"
+      },
+      {
+        "kind": "手工漏列",
+        "reference": "R845"
+      },
+      {
+        "kind": "手工多出或源为可测",
+        "reference": "C592",
+        "source": [
+          {
+            "ref": "C592",
+            "raw": "C592",
+            "value": "1.000nF",
+            "row": 1223,
+            "states": [
+              "√",
+              "√",
+              "√",
+              "√"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "手工多出或源为可测",
+        "reference": "C829",
+        "source": [
+          {
+            "ref": "C829",
+            "raw": "C829",
+            "value": "2.200uF",
+            "row": 1449,
+            "states": [
+              "√",
+              "√",
+              "√",
+              "√"
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "R610",
+        "rawValue": "0.02",
+        "manualValue": "1Ω",
+        "row": 9
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "R9039",
+        "rawValue": "0.005",
+        "manualValue": "1Ω",
+        "row": 9
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "L2",
+        "rawValue": "1.000H",
+        "manualValue": "导电泡棉",
+        "row": 32
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "L4",
+        "rawValue": "10.000uH",
+        "manualValue": "导电泡棉",
+        "row": 32
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "L9",
+        "rawValue": "4.700uH",
+        "manualValue": "导电泡棉",
+        "row": 32
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "L14",
+        "rawValue": "6.800uH",
+        "manualValue": "导电泡棉",
+        "row": 32
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "L31",
+        "rawValue": "3.300uH",
+        "manualValue": "导电泡棉",
+        "row": 32
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "L53",
+        "rawValue": "2.200uH",
+        "manualValue": "导电泡棉",
+        "row": 32
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "B19",
+        "rawValue": "0",
+        "manualValue": "1Ω",
+        "row": 52
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "B20",
+        "rawValue": "0",
+        "manualValue": "1Ω",
+        "row": 52
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "B25",
+        "rawValue": "0",
+        "manualValue": "1Ω",
+        "row": 52
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "B41",
+        "rawValue": "0",
+        "manualValue": "1Ω",
+        "row": 52
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "B42",
+        "rawValue": "0",
+        "manualValue": "1Ω",
+        "row": 52
+      },
+      {
+        "kind": "手工重复",
+        "reference": "R84",
+        "rawValue": "33",
+        "manualValue": "33Ω",
+        "row": 55
+      },
+      {
+        "kind": "手工重复",
+        "reference": "R84",
+        "rawValue": "33",
+        "manualValue": "27.40K",
+        "row": 57
+      },
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "R762",
+        "rawValue": "10",
+        "manualValue": "1",
+        "row": 63
+      }
+    ]
+  },
+  {
+    "project": "MG10P0B3270336-P25085790101",
+    "sourceFile": "MG10P0B3270336-P25085790101-Coverage报告.xls",
+    "sourceSha256": "1025ead444d3fea6901d1a9389b35bde242ee1b392e563736d2588d3ca335ea7",
+    "manualFile": "MG10P0B3270336-P25085790101-盲点表.xlsx",
+    "manualSha256": "b94ed97b3d06bc24792d4bb2743b23f4b95909e45a3b55a2445d0a307ad4b8a0",
+    "sourceTotal": 1415,
+    "sourceX": 1022,
+    "statistics": [
+      {
+        "Х": 1022,
+        "√": 393
+      },
+      {
+        "Х": 717,
+        "√": 698
+      },
+      {
+        "Х": 1022,
+        "√": 393
+      },
+      {
+        "Х": 1022,
+        "√": 393
+      }
+    ],
+    "manualGroups": 75,
+    "manualDeclaredTotal": 1022,
+    "manualListed": 1022,
+    "manualUnique": 1022,
+    "projectRulesAdded": 75,
+    "reviewReferences": [
+      "LD4"
+    ],
+    "differences": [
+      {
+        "kind": "分类或标准值矛盾",
+        "reference": "LD4",
+        "rawValue": "2.000H",
+        "manualValue": "1Ω",
+        "row": 10
+      }
+    ]
+  }
+]

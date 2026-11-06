@@ -98,9 +98,11 @@ public sealed class ClassificationRule
     public string[] References { get; set; } = [];
     public string? DisplayValue { get; set; }
     public string? Profile { get; set; }
+    public string[] ExcludeProfiles { get; set; } = [];
     [JsonPropertyName("reasonCode")] public string Reason { get; set; } = "";
     [JsonExtensionData] public Dictionary<string,JsonElement> Metadata { get; set; } = [];
 }
+public record ComponentOverride(string Project,string Reference,string RawValue,string? Type,string? DisplayValue,bool Review,string Source);
 public sealed class RuleConfig
 {
     public int SchemaVersion { get; set; }
@@ -111,7 +113,8 @@ public sealed class RuleConfig
     public Dictionary<string,string> PrefixTypes { get; set; } = [];
     public Dictionary<string,Dictionary<string,string>> ProjectPrefixTypes { get; set; } = [];
     public Dictionary<string,Dictionary<string,string>> ProjectSuffixAliases { get; set; } = [];
-    [JsonIgnore] public IEnumerable<string> KnownTypes=>PrefixTypes.Values.Concat(ProjectPrefixTypes.Values.SelectMany(m=>m.Values)).Distinct();
+    public List<ComponentOverride> ComponentOverrides { get; set; } = [];
+    [JsonIgnore] public IEnumerable<string> KnownTypes=>PrefixTypes.Values.Concat(ProjectPrefixTypes.Values.SelectMany(m=>m.Values)).Concat(ComponentOverrides.Where(o=>o.Type!=null).Select(o=>o.Type!)).Concat(TypeValues.Keys).Distinct();
     public Dictionary<string,string> SuffixAliases { get; set; } = [];
     public string[] UntestableSymbols { get; set; } = ["X", "Х", "×"];
     public string[] TestableSymbols { get; set; } = ["√", "✓", "✔"];

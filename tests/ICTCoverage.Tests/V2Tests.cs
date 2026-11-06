@@ -14,7 +14,7 @@ public sealed class V2Tests
     }
     [Fact]public void Catalog_All34RulesAndLegacyIdsArePreserved()
     {
-        var cfg=Config();Assert.Equal(34,cfg.Rules.Count(r=>!r.RuleId.StartsWith("LEARN-")));Assert.Equal(cfg.Rules.Count,cfg.Rules.Select(r=>r.RuleId).Distinct().Count());Assert.All(cfg.Rules,r=>Assert.NotEmpty(r.Source));
+        var cfg=Config();Assert.Equal(34,cfg.Rules.Count(r=>!r.RuleId.StartsWith("LEARN-")&&!r.RuleId.StartsWith("BASE5-")));Assert.Equal(cfg.Rules.Count,cfg.Rules.Select(r=>r.RuleId).Distinct().Count());Assert.All(cfg.Rules,r=>Assert.NotEmpty(r.Source));
         Assert.Equal(2,cfg.SchemaVersion);Assert.Equal(105,cfg.Rules.Single(r=>r.RuleId=="C-02").Priority);
         var path=Path.Combine(Path.GetTempPath(),Guid.NewGuid()+".json");try{File.WriteAllText(path,JsonSerializer.Serialize(cfg,RuleConfig.JsonOptions));var reload=RuleConfig.Load(path);Assert.Equal(cfg.Rules[0].Metadata.Count,reload.Rules[0].Metadata.Count);Assert.Equal(cfg.Metadata.Count,reload.Metadata.Count);}finally{File.Delete(path);}
     }
@@ -25,11 +25,11 @@ public sealed class V2Tests
     {
         var a=Analyze("Q7_2_3/NP",status:"√");var c=a.Components[0];Assert.Equal(1,a.Testable);Assert.False(c.Pending);
         Assert.Throws<InvalidDataException>(()=>AnalysisEngine.Edit(a,c,"Q7","三极管","Q",TestState.Untestable,"DQ","","不能改判",Config()));
-        a=Analyze("C1/SG","1uF");c=a.Components[0];Assert.True(c.Pending);AnalysisEngine.Edit(a,c,"C1","电容","1uF",TestState.Untestable,"SHORT_GROUP","","手工选择原因",Config(),"王开心");Assert.False(c.Pending);Assert.Equal("王开心",a.Edits.Single().Reviewer);Assert.Equal(1,a.SourceUntestable);
+        a=Analyze("C1","1uF");c=a.Components[0];Assert.True(c.Pending);AnalysisEngine.Edit(a,c,"C1","电容","1uF",TestState.Untestable,"SHORT_GROUP","","手工选择原因",Config(),"王开心");Assert.False(c.Pending);Assert.Equal("王开心",a.Edits.Single().Reviewer);Assert.Equal(1,a.SourceUntestable);
     }
     [Theory][InlineData("D1/NP","D-01")][InlineData("Q1/NP","Q-01")][InlineData("U1/NP","U-01")]
     public void DqIcReasonsDoNotRequireProgramReview(string reference,string rule)
-    {var a=Analyze(reference);var c=a.Components[0];Assert.False(c.Pending);Assert.Equal(rule,c.RuleId);Assert.DoesNotContain(c.Issues,i=>i.Code=="program");Assert.Equal(rule,c.MatchedRules.Single().RuleId);}
+    {var a=Analyze(reference);var c=a.Components[0];Assert.False(c.Pending);Assert.Equal(rule,c.RuleId);Assert.DoesNotContain(c.Issues,i=>i.Code=="program");Assert.Contains(c.MatchedRules,m=>m.RuleId==rule);}
     [Fact]public void ProgramEvidenceIsTraceableButDoesNotChangeSourceState()
     {
         var a=new Analysis{Components=[new(){RawReference="Q1/NP",RawValue="Q",StatusSymbol="√",ProgramEvidence="程序有Q1测试项"}]};new AnalysisEngine(Config()).Analyze(a,"");Assert.Equal(1,a.Testable);Assert.False(a.Components[0].Pending);
@@ -38,7 +38,7 @@ public sealed class V2Tests
     {var c=Analyze("R382/NP/R","22.00K").Components[0];Assert.Equal("R-02",c.RuleId);Assert.Equal("NO_POINT",c.ReasonCode);Assert.False(c.Pending);Assert.Contains(c.MatchedRules,r=>r.RuleId=="R-03");}
     [Fact]public void ShortGroupDoesNotInventEvidenceOrFormula()
     {
-        var c=Analyze("C1/SG","1uF").Components[0];Assert.True(c.Pending);Assert.Equal("",c.ReasonCode);Assert.Contains(c.MatchedRules,r=>r.RuleId=="C-04");
+        var c=Analyze("C1/SG","1uF").Components[0];Assert.False(c.Pending);Assert.Equal("SHORT_GROUP",c.ReasonCode);Assert.Equal("BASE5-SG",c.RuleId);Assert.Contains(c.MatchedRules,r=>r.RuleId=="C-04");
         var p=Config().Metadata["referenceParameters"];foreach(var entry in p.EnumerateArray()){Assert.False(entry.GetProperty("computeEnabled").GetBoolean());Assert.Equal(JsonValueKind.Null,entry.GetProperty("formula").ValueKind);}
     }
     [Fact]public void CapacitorThirtyPercentIsReferenceOnlyAndPrecedenceIsExplicit()

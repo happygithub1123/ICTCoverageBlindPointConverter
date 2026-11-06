@@ -2,6 +2,7 @@ namespace ICTCoverage.WinForms;
 internal static class AppTheme
 {
     public static readonly Color Background=Color.FromArgb(243,246,251),Ink=Color.FromArgb(28,40,61),Muted=Color.FromArgb(104,117,137),Blue=Color.FromArgb(44,104,224),Green=Color.FromArgb(22,146,104),Orange=Color.FromArgb(220,133,24),Yellow=Color.FromArgb(250,220,78),Navy=Color.FromArgb(26,39,63);
+    public static readonly Font StatusFont=new("Microsoft YaHei UI",12,FontStyle.Bold);
     public static Button Button(string text,Color color,EventHandler action)
     {
         var b=new Button{Text=text,BackColor=color,ForeColor=color==Yellow?Ink:Color.White,FlatStyle=FlatStyle.Flat,AutoSize=true,MinimumSize=new Size(110,38),Padding=new Padding(10,4,10,4),Margin=new Padding(5),Cursor=Cursors.Hand};b.FlatAppearance.BorderSize=0;b.Click+=action;return b;

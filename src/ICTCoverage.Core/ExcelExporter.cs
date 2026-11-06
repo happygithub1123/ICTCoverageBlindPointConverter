@@ -44,6 +44,20 @@ public sealed class ExcelExporter(RuleConfig cfg)
         var order=Enumerable.Range(start,oldCount).Select((r,i)=>new {Key=(s.Cell(r,4).GetFormattedString(),NormalizeReason(s.Cell(r,5).GetString())),Index=i,Row=r}).ToList();
         groups=groups.OrderBy(g=>order.FirstOrDefault(o=>o.Key==(g.Value,NormalizeReason(cfg.ReasonText(g.ReasonCode))))?.Index??int.MaxValue)
             .ThenBy(g=>Array.IndexOf(cfg.Reasons.Keys.ToArray(),g.ReasonCode)).ThenBy(g=>g.Value,StringComparer.Ordinal).ToList();
+        // Excel每行最多409磅；超长分组按完整位号续行，保持类别、原因和字号。
+        groups=groups.SelectMany(g=>
+        {
+            var match=order.FirstOrDefault(o=>o.Key==(g.Value,NormalizeReason(cfg.ReasonText(g.ReasonCode))));int styleRow=match?.Row??start+Math.Min(oldCount-1,1);
+            int maxLines=Math.Max(1,(int)Math.Floor((409-5)/(s.Cell(styleRow,2).Style.Font.FontSize*1.3)));
+            var parts=new List<BlindGroup>();var items=new List<Component>();int line=1,length=0,characters=0;
+            foreach(var c in g.Items)
+            {
+                int token=c.Reference.Length+1;bool wrap=length>0&&length+token>options.WrapWidth;
+                if(items.Count>0&&(wrap&&line>=maxLines||characters+token+line>32767)){parts.Add(new(g.Value,g.ReasonCode,items));items=[];line=1;length=0;characters=0;wrap=false;}
+                if(wrap){line++;length=0;}items.Add(c);length+=token;characters+=token;
+            }
+            if(items.Count>0)parts.Add(new(g.Value,g.ReasonCode,items));return parts;
+        }).ToList();
         // 保存样式到临时工作表，避免插删行影响来源行。
         var styles=wb.AddWorksheet("__styles_"+Guid.NewGuid().ToString("N")[..8]);
         s.Range(start,1,start+oldCount-1,6).CopyTo(styles.Cell(1,1));
