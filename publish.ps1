@@ -1,4 +1,4 @@
-param([string]$Version = '0.4.1')
+param([string]$Version = '0.4.2')
 $ErrorActionPreference = 'Stop'
 if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw '版本号格式应为 0.1.0' }
 $releaseName = "ICT盲点表工具-v$Version-win-x64"
@@ -17,7 +17,7 @@ $validationDir = Join-Path $publishDir 'validation'
 New-Item -ItemType Directory -Force -Path $validationDir | Out-Null
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'outputs\test-results\regression.trx') -Destination $validationDir
 $sourceHashes = Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'src'),(Join-Path $PSScriptRoot 'config') -Recurse -File | Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' } | Get-FileHash -Algorithm SHA256 | Select-Object Path,Hash
-$metadata = [ordered]@{ version=$Version; releaseDate='2026-11-06'; target='win-x64'; selfContained=$true; ruleStatus='2.2.1; category grouping; reason catalog CRUD and history; unknown causes allowed; single workbook export'; sourceHashes=$sourceHashes }
+$metadata = [ordered]@{ version=$Version; releaseDate='2026-11-06'; target='win-x64'; selfContained=$true; ruleStatus='2.2.1; readable sidebar; five overview cards; compact inspections; group cause selection; single workbook export'; sourceHashes=$sourceHashes }
 $metadata | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $publishDir 'release-info.json') -Encoding UTF8
 $manifest = Get-ChildItem -LiteralPath $publishDir -Recurse -File | Sort-Object FullName | ForEach-Object { $hash=Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256; '{0}  {1}' -f $hash.Hash,$_.FullName.Substring($publishDir.Length+1) }
 $manifest | Set-Content -LiteralPath (Join-Path $publishDir 'SHA256SUMS.txt') -Encoding UTF8

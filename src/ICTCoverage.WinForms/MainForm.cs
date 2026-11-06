@@ -12,12 +12,13 @@ public sealed partial class MainForm : Form
     readonly TextBox input=new(){Dock=DockStyle.Fill,ReadOnly=true,PlaceholderText="选择或拖入 Coverage 报告（.xls / .xlsx）"},refFilter=new(){Width=185,PlaceholderText="搜索位号"},valueFilter=new(){Width=145,PlaceholderText="标准值"},reasonFilter=new(){Width=175,PlaceholderText="盲点原因"},board=new(){Width=150},product=new(){Width=150},needle=new(){Width=85},note=new(){Width=155,PlaceholderText="留空沿用模板"};
     readonly ComboBox type=new(){Width=120,DropDownStyle=ComboBoxStyle.DropDownList},inspection=new(){Width=90,DropDownStyle=ComboBoxStyle.DropDownList},stateFilter=new(){Width=105,DropDownStyle=ComboBoxStyle.DropDownList};
     readonly Dictionary<InspectionKind,InspectionCard> cards=[];
-    readonly Label sidebarStats=new(){Dock=DockStyle.Fill,ForeColor=Color.White,Font=new Font("Microsoft YaHei UI",9),TextAlign=ContentAlignment.MiddleLeft},scopeStats=AppTheme.Label("导入报告后显示四项检测统计",9),projectInfo=AppTheme.Label("项目：自动识别",9);
+    readonly Label sidebarStats=new(){Dock=DockStyle.Fill,ForeColor=Color.White,Font=new Font("Microsoft YaHei UI",13.5f,FontStyle.Bold),TextAlign=ContentAlignment.MiddleLeft},scopeStats=AppTheme.Label("导入报告后显示检测统计及原因待选择数量",10),projectInfo=AppTheme.Label("项目：自动识别",11);
     readonly NumericUpDown width=new(){Minimum=20,Maximum=150,Value=48,Width=65};
     readonly DataGridView grid=AppTheme.Grid(),issues=AppTheme.Grid(),rulesGrid=AppTheme.Grid(),ruleList=AppTheme.Grid(),log=AppTheme.Grid();
-    readonly TextBox refs=new(){Dock=DockStyle.Fill,Multiline=true,ReadOnly=true,ScrollBars=ScrollBars.Both,WordWrap=false,Font=new Font("Consolas",11),BorderStyle=BorderStyle.None,BackColor=Color.White};
+    readonly TextBox refs=new(){Dock=DockStyle.Fill,Multiline=true,ReadOnly=true,ScrollBars=ScrollBars.Both,WordWrap=false,Font=new Font("Consolas",12.5f),BorderStyle=BorderStyle.None,BackColor=Color.White};
     readonly Label status=AppTheme.Label("按 ICT 检测项目筛选；打 Х 的元件纳入盲点表，√ 和 ∕ 排除。",9),title=AppTheme.Label("分类筛选 / 复制",19,true);
     readonly Panel content=new(){Dock=DockStyle.Fill,BackColor=Color.White,Padding=new Padding(12)};
+    Control statsPanel=null!;
     readonly Dictionary<string,Control> pages=[]; readonly Dictionary<string,Button> nav=[];
     readonly CheckBox archived=new(){Text="显示已删除规则",AutoSize=true,Margin=new Padding(12,15,0,0)};
     readonly Button copyOne,copyFour;
@@ -33,14 +34,15 @@ public sealed partial class MainForm : Form
         try{cfg=RuleConfig.Load(RulePath);}catch{File.Copy(RulePath,RulePath+".invalid-"+DateTime.Now.ToString("yyyyMMddHHmmss"),true);cfg=RuleConfig.Load(defaults);RuleManagementService.Save(cfg,RulePath);}
         var bundled=RuleConfig.Load(defaults);
         if(System.Version.TryParse(cfg.Version,out var previous)&&System.Version.TryParse(bundled.Version,out var latest)&&previous<latest){File.Copy(RulePath,RulePath+".before-v0.4.1",true);cfg=RuleManagementService.Upgrade(cfg,bundled);RuleManagementService.Save(cfg,RulePath);}
-        Text="ICT 盲点表工具 · WHAPPY";Font=new Font("Microsoft YaHei UI",10);BackColor=AppTheme.Background;ForeColor=AppTheme.Ink;Width=1440;Height=960;MinimumSize=new Size(1120,760);AutoScaleMode=AutoScaleMode.Dpi;StartPosition=FormStartPosition.CenterScreen;
+        Text="ICT 盲点表工具 · WHAPPY";Font=new Font("Microsoft YaHei UI",11);BackColor=AppTheme.Background;ForeColor=AppTheme.Ink;Width=1440;Height=960;MinimumSize=new Size(1120,760);AutoScaleMode=AutoScaleMode.Dpi;StartPosition=FormStartPosition.CenterScreen;
+        title.Margin=new Padding(5,2,5,2);content.Padding=new Padding(8);grid.MinimumSize=new Size(0,126);
         using(var stream=GetType().Assembly.GetManifestResourceStream("ICTCoverage.whappy.ico"))if(stream!=null)Icon=new Icon(stream);
         copyOne=AppTheme.Button("复制本组位号",AppTheme.Blue,(_,_)=>CopyGroup(false));copyFour=AppTheme.Button("复制本组四列",AppTheme.Green,(_,_)=>CopyGroup(true));
-        var root=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,RowCount=1};root.ColumnStyles.Add(new(SizeType.Absolute,220));root.ColumnStyles.Add(new(SizeType.Percent,100));Controls.Add(root);root.Controls.Add(BuildNav(),0,0);
+        var root=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,RowCount=1};root.ColumnStyles.Add(new(SizeType.Absolute,252));root.ColumnStyles.Add(new(SizeType.Percent,100));Controls.Add(root);root.Controls.Add(BuildNav(),0,0);
         var work=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=5,Padding=new Padding(18,8,18,8)};for(int i=0;i<3;i++)work.RowStyles.Add(new(SizeType.AutoSize));work.RowStyles.Add(new(SizeType.Percent,100));work.RowStyles.Add(new(SizeType.AutoSize));root.Controls.Add(work,1,0);
-        work.Controls.Add(title,0,0);work.Controls.Add(BuildImport(),0,1);work.Controls.Add(BuildStats(),0,2);work.Controls.Add(content,0,3);work.Controls.Add(status,0,4);
+        statsPanel=BuildStats();work.Controls.Add(title,0,0);work.Controls.Add(BuildImport(),0,1);work.Controls.Add(statsPanel,0,2);work.Controls.Add(content,0,3);work.Controls.Add(status,0,4);
         AddPage("分类筛选 / 复制",BuildPreview());AddPage("异常 / 待确认",BuildIssues());AddPage("盲点设置",BuildReasons());AddPage("规则设置",BuildRules());AddPage("V2规则总览",BuildRuleOverview());AddPage("人工修改日志",log);RefreshChoices();ShowPage("分类筛选 / 复制");
-        grid.SelectionChanged+=(_,_)=>ShowGroup();type.SelectedIndexChanged+=(_,_)=>{if(!refreshing)RefreshResults();};foreach(var f in new[]{refFilter,valueFilter,reasonFilter})f.TextChanged+=(_,_)=>RefreshResults();width.ValueChanged+=(_,_)=>ShowGroup();archived.CheckedChanged+=(_,_)=>RefreshRules();inspection.SelectedIndexChanged+=(_,_)=>{if(!refreshing)ActivateInspection();};stateFilter.SelectedIndexChanged+=(_,_)=>{if(!refreshing)RefreshResults();};needle.TextChanged+=(_,_)=>RefreshSidebar();
+        grid.SelectionChanged+=(_,_)=>ShowGroup();type.SelectedIndexChanged+=(_,_)=>{if(!refreshing)RefreshResults();};foreach(var f in new[]{refFilter,valueFilter,reasonFilter})f.TextChanged+=(_,_)=>RefreshResults();width.ValueChanged+=(_,_)=>ShowGroup();archived.CheckedChanged+=(_,_)=>RefreshRules();inspection.SelectedIndexChanged+=(_,_)=>{if(!refreshing){onlyCausePending=false;ActivateInspection();}};stateFilter.SelectedIndexChanged+=(_,_)=>{if(!refreshing){onlyCausePending=false;RefreshResults();}};needle.TextChanged+=(_,_)=>RefreshSidebar();
         AllowDrop=true;DragEnter+=(_,e)=>{if(e.Data?.GetDataPresent(DataFormats.FileDrop)==true)e.Effect=DragDropEffects.Copy;};DragDrop+=async(_,e)=>{if(!busy&&e.Data?.GetData(DataFormats.FileDrop) is string[] p&&p.Length>0){input.Text=p[0];await ReadAsync();}};
         FormClosing+=(_,e)=>{if(busy){e.Cancel=true;return;}SaveSession();};
     }
@@ -52,7 +54,7 @@ public sealed partial class MainForm : Form
         string[] names=["分类筛选 / 复制","异常 / 待确认","盲点设置","规则设置","V2规则总览","人工修改日志"];
         for(int i=0;i<names.Length;i++){string name=names[i];var b=AppTheme.Button(name,AppTheme.Navy,(_,_)=>ShowPage(name));b.Dock=DockStyle.Fill;b.TextAlign=ContentAlignment.MiddleLeft;b.Font=new Font(Font,i<2?FontStyle.Bold:FontStyle.Regular);nav[name]=b;p.Controls.Add(b,0,i+1);}
         p.Controls.Add(sidebarStats,0,7);
-        p.Controls.Add(new Label{Dock=DockStyle.Fill,Text="Designed by WHAPPY\n设计人员：王开心\nWANG KAIXIN  ·  v0.4.1",ForeColor=Color.FromArgb(208,218,235),Font=new Font("Microsoft YaHei UI",9),TextAlign=ContentAlignment.BottomLeft},0,8);return p;
+        p.Controls.Add(new Label{Dock=DockStyle.Fill,Text="Designed by WHAPPY\n设计人员：王开心\nWANG KAIXIN  ·  v0.4.2",ForeColor=Color.FromArgb(208,218,235),Font=new Font("Microsoft YaHei UI",10),TextAlign=ContentAlignment.BottomLeft},0,8);return p;
     }
     Control BuildImport()
     {
@@ -62,15 +64,17 @@ public sealed partial class MainForm : Form
     }
     Control BuildStats()
     {
-        var p=new TableLayoutPanel{Dock=DockStyle.Fill,AutoSize=true,ColumnCount=4,RowCount=2,Padding=new Padding(0,3,0,7)};p.RowStyles.Add(new(SizeType.Absolute,132));p.RowStyles.Add(new(SizeType.AutoSize));
+        var p=new TableLayoutPanel{Dock=DockStyle.Fill,AutoSize=true,ColumnCount=4,RowCount=3,Padding=new Padding(0,3,0,4)};p.RowStyles.Add(new(SizeType.Absolute,84));p.RowStyles.Add(new(SizeType.Absolute,74));p.RowStyles.Add(new(SizeType.AutoSize));
+        p.Controls.Add(BuildOverview(),0,0);p.SetColumnSpan(p.GetControlFromPosition(0,0)!,4);
         Color[] colors=[AppTheme.Blue,Color.FromArgb(133,85,201),Color.FromArgb(16,150,167),AppTheme.Orange];
-        foreach(var kind in Enum.GetValues<InspectionKind>()){p.ColumnStyles.Add(new(SizeType.Percent,25));var card=new InspectionCard(kind,colors[(int)kind],ChooseInspection);cards[kind]=card;p.Controls.Add(card,(int)kind,0);}
-        p.Controls.Add(scopeStats,0,1);p.SetColumnSpan(scopeStats,4);return p;
+        foreach(var kind in Enum.GetValues<InspectionKind>()){p.ColumnStyles.Add(new(SizeType.Percent,25));var card=new InspectionCard(kind,colors[(int)kind],ChooseInspection);cards[kind]=card;p.Controls.Add(card,(int)kind,1);}
+        p.Controls.Add(scopeStats,0,2);p.SetColumnSpan(scopeStats,4);return p;
     }
     Control BuildPreview()
     {
-        var p=new TableLayoutPanel{Dock=DockStyle.Fill,RowCount=5,ColumnCount=1};p.RowStyles.Add(new(SizeType.AutoSize));p.RowStyles.Add(new(SizeType.Percent,60));p.RowStyles.Add(new(SizeType.AutoSize));p.RowStyles.Add(new(SizeType.Percent,40));p.RowStyles.Add(new(SizeType.AutoSize));var filters=AppTheme.Flow();var more=AppTheme.Flow();more.Visible=false;more.Controls.AddRange([valueFilter,reasonFilter]);var toggle=new LinkLabel{Text="更多筛选",AutoSize=true,Margin=new Padding(10,9,4,0)};toggle.LinkClicked+=(_,_)=>more.Visible=!more.Visible;
-        filters.Controls.AddRange([AppTheme.Label("类型"),type,inspection,stateFilter,refFilter,toggle,AppTheme.Button("清空筛选",AppTheme.Muted,(_,_)=>{type.SelectedIndex=0;refFilter.Clear();valueFilter.Clear();reasonFilter.Clear();}),more]);p.Controls.Add(filters,0,0);p.Controls.Add(grid,0,1);p.Controls.Add(AppTheme.Label("本组位号 · 英文句点分隔，可直接粘贴到 Excel",9),0,2);p.Controls.Add(refs,0,3);var actions=AppTheme.Flow();actions.Controls.AddRange([copyOne,copyFour]);p.Controls.Add(actions,0,4);return p;
+        var p=new TableLayoutPanel{Dock=DockStyle.Fill,RowCount=5,ColumnCount=1};p.RowStyles.Add(new(SizeType.AutoSize));p.RowStyles.Add(new(SizeType.Percent,65));p.RowStyles.Add(new(SizeType.AutoSize));p.RowStyles.Add(new(SizeType.Percent,35));p.RowStyles.Add(new(SizeType.AutoSize));var filters=AppTheme.Flow();var more=AppTheme.Flow();more.Visible=false;more.Controls.AddRange([valueFilter,reasonFilter]);var toggle=new LinkLabel{Text="更多筛选",AutoSize=true,Margin=new Padding(10,9,4,0)};toggle.LinkClicked+=(_,_)=>more.Visible=!more.Visible;
+        refFilter.Width=145;
+        filters.Controls.AddRange([AppTheme.Label("类型"),type,inspection,stateFilter,refFilter,toggle,AppTheme.Button("清空筛选",AppTheme.Muted,(_,_)=>{onlyCausePending=false;type.SelectedIndex=0;refFilter.Clear();valueFilter.Clear();reasonFilter.Clear();RefreshResults();}),more]);p.Controls.Add(filters,0,0);p.Controls.Add(grid,0,1);p.Controls.Add(BuildGroupReason(),0,2);p.Controls.Add(refs,0,3);var actions=AppTheme.Flow();actions.Controls.AddRange([copyOne,copyFour]);p.Controls.Add(actions,0,4);previewLayout=p;p.SizeChanged+=(_,_)=>UpdatePreviewLayout();return p;
     }
     Control BuildIssues()
     {
@@ -87,11 +91,11 @@ public sealed partial class MainForm : Form
         panel.Controls.Add(AppTheme.Label("当前执行只按 Coverage 的 X / √ / ∕；历史依据仅供追溯，不要求查看测试程序。",9),0,0);panel.Controls.Add(ruleList,0,1);return panel;
     }
     void AddPage(string name,Control control){control.Dock=DockStyle.Fill;content.Controls.Add(control);pages[name]=control;}
-    void ShowPage(string name){foreach(var p in pages)p.Value.Visible=p.Key==name;pages[name].BringToFront();title.Text=name;foreach(var pair in nav){bool active=pair.Key==name;pair.Value.BackColor=active?AppTheme.Yellow:AppTheme.Navy;pair.Value.ForeColor=active?AppTheme.Ink:Color.White;}}
+    void ShowPage(string name){foreach(var p in pages)p.Value.Visible=p.Key==name;pages[name].BringToFront();title.Text=name;statsPanel.Visible=name is "分类筛选 / 复制" or "异常 / 待确认";foreach(var pair in nav){bool active=pair.Key==name;pair.Value.BackColor=active?AppTheme.Yellow:AppTheme.Navy;pair.Value.ForeColor=active?AppTheme.Ink:Color.White;}UpdatePreviewLayout();}
     sealed record InspectionChoice(InspectionKind Kind){public override string ToString()=>Kind.Name();}
     sealed record StatusChoice(TestState? State,string Label){public override string ToString()=>Label;}
     InspectionKind ActiveKind=>(inspection.SelectedItem as InspectionChoice)?.Kind??InspectionKind.Missing;
-    FilterOptions CurrentFilter()=>new(type.Text,valueFilter.Text.Trim(),reasonFilter.Text.Trim(),refFilter.Text.Trim(),false,(stateFilter.SelectedItem as StatusChoice)?.State);
+    FilterOptions CurrentFilter()=>new(type.Text,valueFilter.Text.Trim(),reasonFilter.Text.Trim(),refFilter.Text.Trim(),false,(stateFilter.SelectedItem as StatusChoice)?.State,onlyCausePending);
     void RefreshChoices()
     {
         refreshing=true;var oldType=type.Text;var oldKind=ActiveKind;int oldStatus=stateFilter.SelectedIndex;
@@ -99,12 +103,13 @@ public sealed partial class MainForm : Form
         inspection.Items.Clear();foreach(var k in Enum.GetValues<InspectionKind>())if(report==null||report.Analyses.ContainsKey(k))inspection.Items.Add(new InspectionChoice(k));
         inspection.SelectedItem=inspection.Items.Cast<InspectionChoice>().FirstOrDefault(c=>c.Kind==oldKind)??inspection.Items.Cast<InspectionChoice>().FirstOrDefault();
         stateFilter.Items.Clear();stateFilter.Items.AddRange(new object[]{new StatusChoice(TestState.Untestable,"Х 不可测"),new StatusChoice(TestState.Testable,"√ 可测"),new StatusChoice(TestState.NotApplicable,"∕ 不适用"),new StatusChoice(null,"全部状态")});stateFilter.SelectedIndex=oldStatus>=0?oldStatus:0;
-        RefreshRules();refreshing=false;
+        RefreshReasonChoices();RefreshRules();refreshing=false;
     }
     void ActivateInspection(){if(report==null)return;analysis=report.Analyses.GetValueOrDefault(ActiveKind);RefreshResults();}
     void ChooseInspection(InspectionKind kind,TestState? state)
     {
         if(report==null||!report.Analyses.ContainsKey(kind))return;
+        onlyCausePending=false;
         refreshing=true;inspection.SelectedItem=inspection.Items.Cast<InspectionChoice>().Single(c=>c.Kind==kind);if(state.HasValue)stateFilter.SelectedItem=stateFilter.Items.Cast<StatusChoice>().Single(s=>s.State==state);refreshing=false;ActivateInspection();
     }
     void RefreshSidebar()
@@ -136,13 +141,13 @@ public sealed partial class MainForm : Form
         if(grid.Columns.Contains("索引"))grid.Columns["索引"].Visible=false;if(grid.Columns.Contains("元件位置"))grid.Columns["元件位置"].FillWeight=240;
         foreach(var col in new[]{"状态","盲点数量"})if(grid.Columns.Contains(col)){grid.Columns[col].AutoSizeMode=DataGridViewAutoSizeColumnMode.None;grid.Columns[col].Width=105;}if(grid.Columns.Contains("盲点数量"))grid.Columns["盲点数量"].HeaderText="数量";
         foreach(var pair in cards)pair.Value.Update(report.Analyses.TryGetValue(pair.Key,out var a)?InspectionStatistics.From(AnalysisEngine.BaseFilter(a,f)):null,pair.Key==ActiveKind);
-        var scope=AnalysisEngine.BaseFilter(analysis,f);scopeStats.Text=$"统计范围：{type.Text} · {scope.Count}个元件；当前{ActiveKind.Name()}结果 {filtered.Count} 条（状态/原因筛选不改变统计分母）";
+        var scope=AnalysisEngine.BaseFilter(analysis,f);RefreshOverview(scope);scopeStats.Text=$"范围：{type.Text} · {scope.Count}个元件；{ActiveKind.Name()}结果 {filtered.Count}个 / {groups.Count}组"+(onlyCausePending?" · 原因待选择":"");
         nav["异常 / 待确认"].Text="异常 / 待确认"+(analysis.Pending>0?$"  {analysis.Pending}":"");
         issues.DataSource=scope.Where(c=>c.Pending).Select(c=>new{源行=c.SourceRow,位号=c.Reference,元件类型=c.Type,标准值=c.Value,建议原因=c.ReasonCode.Length==0?"请选择":cfg.ReasonText(c.ReasonCode),问题=string.Join("；",c.Issues.Where(i=>i.Blocking).Select(i=>i.Message))}).ToList();RefreshLog();RefreshSidebar();if(analysis.Issues.Count>0)status.Text=string.Join("；",analysis.Issues.Select(i=>i.Message));ShowGroup();
     }
     void RefreshLog()=>log.DataSource=report==null?null:ManualResults.Get(report,cfg).Select(c=>new{元件位号=c.Reference,元件类型=c.Type,检测项目=c.Inspection,标准值=c.Value,盲点原因=c.Reason}).ToList();
     BlindGroup? SelectedGroup()=>grid.CurrentRow?.Cells["索引"].Value is int i&&i>=0&&i<groups.Count?groups[i]:null;
-    void ShowGroup(){var g=SelectedGroup();refs.Text=g==null?"":ReferenceFormatter.Format(g.Items.Select(c=>c.Reference),(int)width.Value).Replace("\n","\r\n");copyOne.Enabled=copyFour.Enabled=g!=null&&!g.HasDataIssues&&g.Items.All(c=>c.State==TestState.Untestable);}
+    void ShowGroup(){var g=SelectedGroup();refs.Text=g==null?"":ReferenceFormatter.Format(g.Items.Select(c=>c.Reference),(int)width.Value).Replace("\n","\r\n");copyOne.Enabled=copyFour.Enabled=g!=null&&!g.HasDataIssues&&g.Items.All(c=>c.State==TestState.Untestable);ShowGroupReason(g);}
     void CopyGroup(bool four){try{var g=SelectedGroup();if(g==null)return;ClipboardService.Copy(ClipboardService.GroupCells(g,cfg,(int)width.Value,four));status.Text=$"已复制 {g.Count} 个位号"+(four?"及数量、标准值、原因，粘贴到 Excel B 列即可。":"，粘贴到元件位置单元格即可。");}catch(Exception ex){MessageBox.Show(this,ex.Message);}}
     async void ChooseReason()
     {
@@ -151,7 +156,7 @@ public sealed partial class MainForm : Form
         using var form=new CauseForm(c,cfg,ActiveKind);if(form.ShowDialog(this)!=DialogResult.OK)return;
         try
         {
-            if(form.NewReasonText!=null){cfg=ReasonManagementService.Upsert(cfg,form.ReasonCode,form.NewReasonText,form.Reviewer,form.Justification);RuleManagementService.Save(cfg,RulePath);RefreshReasons();}
+            if(form.NewReasonText!=null){cfg=ReasonManagementService.Upsert(cfg,form.ReasonCode,form.NewReasonText,form.Reviewer,form.Justification);RuleManagementService.Save(cfg,RulePath);RefreshReasons();RefreshReasonChoices();}
             AnalysisEngine.Edit(analysis,c,c.Reference,form.ComponentType,form.StandardValue,c.SourceState,form.ReasonCode,form.Note,form.Justification,cfg,form.Reviewer);SaveSession();RefreshResults();
             if(form.SaveAsRule)
             {

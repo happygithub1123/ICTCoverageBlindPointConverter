@@ -14,7 +14,7 @@ public static class ReportWorkflow
         var scope=AnalysisEngine.BaseFilter(a,filter);var selected=AnalysisEngine.Filter(a,filter,cfg).Where(c=>c.State==TestState.Untestable).ToList();
         if(selected.Count==0)throw new InvalidOperationException("当前筛选结果没有Х不可测记录，不生成空文件");
         var export=new Analysis{Inspection=kind,SourcePath=a.SourcePath,SourceFingerprint=a.SourceFingerprint,BoardNumber=a.BoardNumber,ProductNumber=a.ProductNumber,Profile=a.Profile,RuleVersion=a.RuleVersion,Components=selected};
-        var label=filter.Type+(filter.Reference.Length>0?" / 位号："+filter.Reference:"")+(filter.Value.Length>0?" / 标准值："+filter.Value:"")+(filter.Reason.Length>0?" / 原因："+filter.Reason:"");
+        var label=filter.Type+(filter.Reference.Length>0?" / 位号："+filter.Reference:"")+(filter.Value.Length>0?" / 标准值："+filter.Value:"")+(filter.Reason.Length>0?" / 原因："+filter.Reason:"")+(filter.OnlyPendingCause?" / 原因待选择":"");
         return new(export,a.Total,scope.Count,InspectionStatistics.From(scope).Coverage??0,label);
     }
     public static void Restore(CoverageReport fresh,CoverageReport saved,RuleConfig cfg)

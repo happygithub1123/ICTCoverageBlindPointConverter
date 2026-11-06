@@ -32,6 +32,7 @@ public sealed class UiTests
                         Assert.Single(grid.Rows.Cast<DataGridViewRow>());Assert.Equal(165,grid.Rows[0].Cells["盲点数量"].Value);
                         var button=(Button)typeof(MainForm).GetField("copyFour",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!;Assert.True(button.Enabled);button.PerformClick();Assert.True(Clipboard.ContainsData(DataFormats.Html));Assert.Contains("R103.R104.",Clipboard.GetText());
                         var allControls=Descendants(form).ToList();Assert.DoesNotContain(allControls,c=>c.Text=="选择模板"||c.Text=="核对报告"||c.Text=="复制原始明细"||c.Text=="修改选中明细");Assert.Contains(allControls,c=>c.Text.Contains("WANG KAIXIN"));Assert.NotNull(form.Icon);
+                        var overview=(System.Collections.IList)typeof(MainForm).GetField("overview",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!;Assert.Equal(5,overview.Count);Assert.Equal("188",((Control)overview[0]!).AccessibleDescription);Assert.Equal("165",((Control)overview[1]!).AccessibleDescription);Assert.Contains(allControls,c=>c.Text=="原因待选择");
                         var outDir=Path.Combine(ConverterTests.Root,"outputs","ui-export-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(outDir);
                         await (Task)typeof(MainForm).GetMethod("WriteBlindPointAsync",BindingFlags.NonPublic|BindingFlags.Instance)!.Invoke(form,[Path.Combine(outDir,"盲点表.xlsx"),new ICTCoverage.Core.ExportOptions("","材号")])!;Assert.Single(Directory.GetFiles(outDir));
                         var loaded=(ICTCoverage.Core.Analysis)typeof(MainForm).GetField("analysis",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!;string originalPath=loaded.SourcePath;
@@ -57,7 +58,7 @@ public sealed class UiTests
                         form.Size=new Size(1120,760);Application.DoEvents();using var small=new Bitmap(form.Width,form.Height);form.DrawToBitmap(small,new Rectangle(Point.Empty,small.Size));small.Save(Path.Combine(ConverterTests.Root,"outputs","界面预览-小窗口.png"));
                         typeof(MainForm).GetMethod("ShowPage",BindingFlags.NonPublic|BindingFlags.Instance)!.Invoke(form,["规则设置"]);Application.DoEvents();using var rules=new Bitmap(form.Width,form.Height);form.DrawToBitmap(rules,new Rectangle(Point.Empty,rules.Size));rules.Save(Path.Combine(ConverterTests.Root,"outputs","界面预览-规则设置.png"));
                         typeof(MainForm).GetMethod("ShowPage",BindingFlags.NonPublic|BindingFlags.Instance)!.Invoke(form,["V2规则总览"]);Application.DoEvents();
-                        var overview=(DataGridView)typeof(MainForm).GetField("ruleList",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!;Assert.True(overview.Columns.Contains("当前执行"));Assert.True(overview.Columns.Contains("历史依据"));Assert.False(overview.Columns.Contains("依据"));
+                        var ruleOverview=(DataGridView)typeof(MainForm).GetField("ruleList",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!;Assert.True(ruleOverview.Columns.Contains("当前执行"));Assert.True(ruleOverview.Columns.Contains("历史依据"));Assert.False(ruleOverview.Columns.Contains("依据"));
                         using var historyImage=new Bitmap(form.Width,form.Height);form.DrawToBitmap(historyImage,new Rectangle(Point.Empty,historyImage.Size));historyImage.Save(Path.Combine(ConverterTests.Root,"outputs","界面预览-规则总览.png"));
                         var cfgField=typeof(MainForm).GetField("cfg",BindingFlags.NonPublic|BindingFlags.Instance)!;var apply=typeof(MainForm).GetMethod("ApplyRules",BindingFlags.NonPublic|BindingFlags.Instance)!;
                         typeof(MainForm).GetMethod("ShowPage",BindingFlags.NonPublic|BindingFlags.Instance)!.Invoke(form,["盲点设置"]);Application.DoEvents();
@@ -79,6 +80,13 @@ public sealed class UiTests
                         ((TextBox)editorType.GetField("why",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(editor)!).Text="界面测试新增规则";
                         var scopes=(CheckedListBox)editorType.GetField("inspectionScopes",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(editor)!;scopes.SetItemChecked(0,false);scopes.SetItemChecked(1,true);
                         var save=Descendants(editor).OfType<Button>().Single(b=>b.Text=="保存并应用");save.PerformClick();Assert.Equal(DialogResult.OK,editor.DialogResult);var editedRule=(ICTCoverage.Core.ClassificationRule)editorType.GetProperty("Rule")!.GetValue(editor)!;Assert.Equal("ZZ",Assert.Single(editedRule.Prefixes));Assert.Equal(InspectionKind.Short,Assert.Single(editedRule.Inspections));
+                        typeof(MainForm).GetMethod("ChooseInspection",BindingFlags.NonPublic|BindingFlags.Instance)!.Invoke(form,[InspectionKind.Short,TestState.Untestable]);
+                        typeof(Control).GetMethod("OnClick",BindingFlags.NonPublic|BindingFlags.Instance)!.Invoke(overview[4],[EventArgs.Empty]);Application.DoEvents();
+                        current=(Analysis)typeof(MainForm).GetField("analysis",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!;int pending=current.Components.Count(c=>c.State==TestState.Untestable&&!((RuleConfig)cfgField.GetValue(form)!).IsReasonActive(c.OutputReasonCode));Assert.Equal(pending.ToString(),((Control)overview[4]!).AccessibleDescription);Assert.Equal(pending,grid.Rows.Cast<DataGridViewRow>().Sum(r=>(int)r.Cells["盲点数量"].Value));Assert.True(side.Font.Size>=13);Assert.True(grid.Height>=126);
+                        grid.CurrentCell=grid.Rows[0].Cells["元件位置"];int selectedCount=(int)grid.Rows[0].Cells["盲点数量"].Value;int edits=current.Edits.Count;
+                        using var reasonSelectionImage=new Bitmap(form.Width,form.Height);form.DrawToBitmap(reasonSelectionImage,new Rectangle(Point.Empty,reasonSelectionImage.Size));reasonSelectionImage.Save(Path.Combine(ConverterTests.Root,"outputs","界面预览-原因选择.png"));
+                        var groupReason=(ComboBox)typeof(MainForm).GetField("groupReason",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!;groupReason.SelectedItem=groupReason.Items.Cast<object>().Single(r=>(string)r.GetType().GetProperty("Code")!.GetValue(r)! == "NO_POINT");
+                        ((Button)typeof(MainForm).GetField("confirmGroupReason",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!).PerformClick();Assert.Equal(edits+selectedCount,current.Edits.Count);Assert.Equal((pending-selectedCount).ToString(),((Control)overview[4]!).AccessibleDescription);Assert.Equal(edits+selectedCount,finalLog.Rows.Count);
                     }
                     catch(Exception ex){error=ex;}
                     finally{form.Close();}
@@ -88,3 +96,4 @@ public sealed class UiTests
         });thread.SetApartmentState(ApartmentState.STA);thread.IsBackground=true;thread.Start();Assert.True(thread.Join(TimeSpan.FromSeconds(45)),"界面测试超时");if(error!=null)throw error;
     }
 }
+

@@ -5,7 +5,13 @@ using Xunit;
 namespace ICTCoverage.Tests;
 public sealed class LocalProjectsFactAttribute:FactAttribute
 {
-    public LocalProjectsFactAttribute(){if(!File.Exists(Path.Combine(ConverterTests.Root,"outputs","external-fixtures.json")))Skip="三组用户原始资料仅在本机保存，未随公开源码分发";}
+    public LocalProjectsFactAttribute()
+    {
+        string path=Path.Combine(ConverterTests.Root,"outputs","external-fixtures.json");
+        if(!File.Exists(path)){Skip="三组用户原始资料仅在本机保存，未随公开源码分发";return;}
+        using var fixtures=JsonDocument.Parse(File.ReadAllText(path));
+        if(fixtures.RootElement.EnumerateArray().Any(f=>!File.Exists(f.GetProperty("source").GetString())))Skip="三组历史Coverage原文件已不在配置路径；保留此前逐点验证记录，本次未重跑";
+    }
 }
 public sealed class ExternalProjectTests
 {

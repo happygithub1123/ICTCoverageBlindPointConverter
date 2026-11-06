@@ -154,7 +154,7 @@ public sealed class RuleConfig
     public bool IsReasonActive(string code)=>Reasons.ContainsKey(code)&&!ArchivedReasons.Contains(code);
     public string ReasonText(string code) => IsReasonActive(code)?Reasons[code]:"待确定";
 }
-public record FilterOptions(string Type = "全部", string Value = "", string Reason = "", string Reference = "", bool OnlyUntestable = true, TestState? Status = null);
+public record FilterOptions(string Type = "全部", string Value = "", string Reason = "", string Reference = "", bool OnlyUntestable = true, TestState? Status = null,bool OnlyPendingCause=false);
 public sealed record BlindGroup(string Value, string ReasonCode, List<Component> Items)
 {
     public int Count => Items.Count;

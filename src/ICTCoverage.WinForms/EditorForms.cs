@@ -12,7 +12,7 @@ internal class EditorBase : Form
     int row;
     protected EditorBase(string title,int height=500)
     {
-        Text=title;Width=760;Height=height;MinimumSize=new Size(640,380);StartPosition=FormStartPosition.CenterParent;Font=new Font("Microsoft YaHei UI",10);BackColor=AppTheme.Background;AutoScaleMode=AutoScaleMode.Dpi;
+        Text=title;Width=760;Height=height;MinimumSize=new Size(640,380);StartPosition=FormStartPosition.CenterParent;Font=new Font("Microsoft YaHei UI",11);BackColor=AppTheme.Background;AutoScaleMode=AutoScaleMode.Dpi;
         fields.ColumnStyles.Add(new(SizeType.Absolute,140));fields.ColumnStyles.Add(new(SizeType.Percent,100));var scroll=new Panel{Dock=DockStyle.Fill,AutoScroll=true};scroll.Controls.Add(fields);Controls.Add(scroll);actions.Dock=DockStyle.Bottom;actions.Padding=new Padding(12);Controls.Add(actions);actions.Controls.Add(AppTheme.Button("取消",AppTheme.Muted,(_,_)=>DialogResult=DialogResult.Cancel));
     }
     protected void Add(string label,Control c){fields.RowStyles.Add(new(SizeType.AutoSize));fields.Controls.Add(AppTheme.Label(label,9),0,row);c.Dock=DockStyle.Fill;c.Margin=new Padding(5,7,5,7);fields.Controls.Add(c,1,row++);}
