@@ -1,0 +1,198 @@
+{
+  "prefixTypes": {
+    "R": "电阻",
+    "RA": "电阻",
+    "RB": "电阻",
+    "RC": "电阻",
+    "RD": "电阻",
+    "RG": "电阻",
+    "RH": "电阻",
+    "RJ": "电阻",
+    "RL": "电阻",
+    "RN": "电阻",
+    "RP": "电阻",
+    "B": "电阻",
+    "BA": "电阻",
+    "BD": "电阻",
+    "BH": "电阻",
+    "BJ": "电阻",
+    "C": "电容",
+    "CA": "电容",
+    "CB": "电容",
+    "CC": "电容",
+    "CD": "电容",
+    "CG": "电容",
+    "CH": "电容",
+    "CJ": "电容",
+    "CL": "电容",
+    "CN": "电容",
+    "CP": "电容",
+    "L": "电感",
+    "LA": "电感",
+    "LD": "电感",
+    "LG": "电感",
+    "LP": "电感",
+    "D": "二极管",
+    "DA": "二极管",
+    "DC": "二极管",
+    "DD": "二极管",
+    "DH": "二极管",
+    "DN": "二极管",
+    "DP": "二极管",
+    "Q": "三极管",
+    "QD": "三极管",
+    "QJ": "三极管",
+    "QN": "三极管",
+    "QP": "三极管",
+    "U": "IC",
+    "UA": "IC",
+    "UB": "IC",
+    "UD": "IC",
+    "UJ": "IC",
+    "UN": "IC",
+    "J": "连接器",
+    "P": "连接器",
+    "PA": "连接器",
+    "PD": "连接器",
+    "F": "连接器",
+    "Y": "晶振",
+    "YC": "晶振",
+    "YD": "晶振",
+    "YP": "晶振",
+    "SR": "其他"
+  },
+  "suffixAliases": {
+    "NP": "NP",
+    "C": "C",
+    "PCB": "PCB",
+    "SP": "SP",
+    "R": "R",
+    "C-": "C"
+  },
+  "untestableSymbols": [
+    "X",
+    "Х",
+    "×"
+  ],
+  "testableSymbols": [
+    "√",
+    "✓",
+    "✔"
+  ],
+  "reasons": {
+    "NO_POINT": "无测试点，故不可测",
+    "PARALLEL": "并联大电容，小电容均不可测",
+    "DQ": "无测试点、并联二极管，三极管，IC,故不可测",
+    "CONNECTOR": "元件本身无特性，故不可测",
+    "IC": "无测试点、无保护二极体特征或并联二极体特性元件完全不能侦测",
+    "ACTIVE": "有源元件，元件本身特性，故不可测",
+    "SMALL_PF": "pf容值过小，无测试点，故不可测",
+    "BELOW_STANDARD": "达不到标准，故不可测"
+  },
+  "typeValues": {
+    "电感": "电感",
+    "二极管": "D",
+    "三极管": "Q",
+    "IC": "IC",
+    "连接器": "J/连接器",
+    "晶振": "晶振"
+  },
+  "profileValueOverrides": {
+    "MG10P0B3270350-P25086380101": {
+      "1": "0.Ω",
+      "22": "22Ω"
+    }
+  },
+  "rules": [
+    {
+      "id": "dq",
+      "types": [
+        "二极管",
+        "三极管"
+      ],
+      "reason": "DQ"
+    },
+    {
+      "id": "ic",
+      "types": [
+        "IC"
+      ],
+      "reason": "IC"
+    },
+    {
+      "id": "connector",
+      "types": [
+        "连接器"
+      ],
+      "reason": "CONNECTOR"
+    },
+    {
+      "id": "active",
+      "types": [
+        "晶振"
+      ],
+      "reason": "ACTIVE"
+    },
+    {
+      "id": "inductor",
+      "types": [
+        "电感"
+      ],
+      "reason": "NO_POINT"
+    },
+    {
+      "id": "pcb",
+      "types": [
+        "电阻",
+        "电容"
+      ],
+      "suffix": "PCB",
+      "reason": "BELOW_STANDARD"
+    },
+    {
+      "id": "sample-small-pf",
+      "types": [
+        "电容"
+      ],
+      "exactValue": "10.00pF",
+      "profile": "MG10P0B3270350-P25086380101",
+      "reason": "SMALL_PF"
+    },
+    {
+      "id": "sample-c115",
+      "types": [
+        "电容"
+      ],
+      "reference": "C115",
+      "profile": "MG10P0B3270350-P25086380101",
+      "reason": "PARALLEL"
+    },
+    {
+      "id": "capacitor-np",
+      "types": [
+        "电容"
+      ],
+      "suffix": "NP",
+      "reason": "NO_POINT"
+    },
+    {
+      "id": "capacitor-parallel",
+      "types": [
+        "电容"
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "NP",
+        "PCB"
+      ],
+      "reason": "PARALLEL"
+    },
+    {
+      "id": "resistor",
+      "types": [
+        "电阻"
+      ],
+      "reason": "NO_POINT"
+    }
+  ]
+}

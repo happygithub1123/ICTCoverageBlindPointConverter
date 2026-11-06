@@ -1,0 +1,22 @@
+# Build outputs and local test artifacts
+**/bin/
+**/obj/
+.vs/
+.idea/
+*.user
+*.suo
+/outputs/
+/releases/
+TestResults/
+*.trx
+
+# Local analysis dependencies and caches
+/tools/python/
+**/__pycache__/
+*.pyc
+
+# Local credentials and settings
+.env
+.env.*
+*.session.json
+*.validation.json
