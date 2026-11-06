@@ -15,10 +15,15 @@ public static class RuleManagementService
         if(!string.IsNullOrWhiteSpace(newReasonText))next.Reasons[rule.Reason]=newReasonText.Trim();
         if(rule.Types.Length==1)foreach(var prefix in rule.Prefixes)
         {
+            if(rule.Profile!=null){if(!next.ProjectPrefixTypes.TryGetValue(rule.Profile,out var projectMap))next.ProjectPrefixTypes[rule.Profile]=projectMap=[];projectMap[prefix]=rule.Types[0];continue;}
             if(next.PrefixTypes.TryGetValue(prefix,out var existing)&&existing!=rule.Types[0])throw new InvalidDataException($"前缀{prefix}已属于{existing}");
             next.PrefixTypes[prefix]=rule.Types[0];
         }
-        if(rule.Suffix!=null&&!next.SuffixAliases.ContainsKey(rule.Suffix))next.SuffixAliases[rule.Suffix]=rule.Suffix;
+        if(rule.Suffix!=null&&!next.SuffixAliases.ContainsKey(rule.Suffix))
+        {
+            if(rule.Profile==null)next.SuffixAliases[rule.Suffix]=rule.Suffix;
+            else{if(!next.ProjectSuffixAliases.TryGetValue(rule.Profile,out var aliases))next.ProjectSuffixAliases[rule.Profile]=aliases=[];aliases.TryAdd(rule.Suffix,rule.Suffix);}
+        }
         string before="";
         if(create){if(next.Rules.Any(r=>r.RuleId==rule.RuleId))throw new InvalidDataException("规则编号重复");next.Rules.Add(rule);}
         else
@@ -42,6 +47,15 @@ public static class RuleManagementService
         next.RuleChanges.Add(new(DateTimeOffset.Now,archived?"删除（可恢复）":"恢复",id,reviewer,justification,before,JsonSerializer.Serialize(rule,RuleConfig.JsonOptions)));next.Validate();return next;
     }
     public static RuleConfig Clone(RuleConfig cfg)=>JsonSerializer.Deserialize<RuleConfig>(JsonSerializer.Serialize(cfg,RuleConfig.JsonOptions),RuleConfig.JsonOptions)!;
+    public static RuleConfig Upgrade(RuleConfig existing,RuleConfig defaults)
+    {
+        var next=Clone(existing);var fresh=Clone(defaults);
+        foreach(var pair in fresh.Reasons)next.Reasons.TryAdd(pair.Key,pair.Value);
+        foreach(var rule in fresh.Rules)if(rule.RuleId.StartsWith("LEARN-",StringComparison.Ordinal)&&!next.Rules.Any(r=>r.RuleId==rule.RuleId))next.Rules.Add(rule);
+        foreach(var pair in fresh.ProjectPrefixTypes){if(!next.ProjectPrefixTypes.TryGetValue(pair.Key,out var map))next.ProjectPrefixTypes[pair.Key]=map=[];foreach(var item in pair.Value)map.TryAdd(item.Key,item.Value);}
+        foreach(var pair in fresh.ProjectSuffixAliases){if(!next.ProjectSuffixAliases.TryGetValue(pair.Key,out var map))next.ProjectSuffixAliases[pair.Key]=map=[];foreach(var item in pair.Value)map.TryAdd(item.Key,item.Value);}
+        next.Version=fresh.Version;next.Validate();return next;
+    }
     public static void Save(RuleConfig cfg,string path)
     {
         cfg.Validate();Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);

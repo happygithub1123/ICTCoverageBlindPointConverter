@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 namespace ICTCoverage.Core;
 
 public enum TestState { Unknown, Testable, Untestable, Conflict, NotApplicable }
+public enum InspectionKind { Missing, Short, Wrong, OpenSolder }
 public record Issue(string Code, string Message, bool Blocking = true);
 public record RuleMatch(string RuleId, int Priority, string ReasonCode, string Reliability, string Source);
 public sealed class Component
@@ -32,11 +33,13 @@ public sealed class Component
 }
 public record FieldMap(string Sheet, int HeaderRow, int ReferenceColumn, int ValueColumn, int StatusColumn)
 {
-    public override string ToString() => $"{Sheet}：数据从 {HeaderRow + 2} 行，位号列 {ReferenceColumn + 1}，标准值列 {ValueColumn + 1}，ICT缺件列 {StatusColumn + 1}";
+    public Dictionary<InspectionKind,int> InspectionColumns { get; init; } = [];
+    public override string ToString() => $"{Sheet}：数据从 {HeaderRow + 2} 行，位号列 {ReferenceColumn + 1}，标准值列 {ValueColumn + 1}，ICT检测列：{(InspectionColumns.Count==0?(StatusColumn+1).ToString():string.Join("、",InspectionColumns.Select(p=>p.Key.Name()+" "+(p.Value+1))))}";
 }
-public record EditLog(DateTimeOffset Time, int SourceRow, string Before, string After, string Reason, string Reviewer = "", string RuleVersion = "");
+public record EditLog(DateTimeOffset Time, int SourceRow, string Before, string After, string Reason, string Reviewer = "", string RuleVersion = "", InspectionKind Inspection = InspectionKind.Missing);
 public sealed class Analysis
 {
+    public InspectionKind Inspection { get; set; } = InspectionKind.Missing;
     public string SourcePath { get; set; } = "";
     public string SourceFingerprint { get; set; } = "";
     public string Profile { get; set; } = "";
@@ -44,6 +47,7 @@ public sealed class Analysis
     public string ProductNumber { get; set; } = "";
     public List<Component> Components { get; set; } = [];
     public List<EditLog> Edits { get; set; } = [];
+    public Dictionary<int,ManualCorrection> Corrections { get; set; } = [];
     public int Total => Components.Count;
     public int Testable => Components.Count(c => c.SourceState == TestState.Testable);
     public int SourceUntestable => Components.Count(c => c.SourceState == TestState.Untestable);
@@ -60,6 +64,7 @@ public sealed class Analysis
 }
 public sealed class ClassificationRule
 {
+    public InspectionKind[] Inspections { get; set; } = [InspectionKind.Missing];
     public string Id { get; set; } = "";
     public string RuleId { get; set; } = "";
     public string Stage { get; set; } = "";
@@ -83,6 +88,8 @@ public sealed class ClassificationRule
     public string[] ExcludeSuffixes { get; set; } = [];
     public string? ExactValue { get; set; }
     public string? Reference { get; set; }
+    public string[] References { get; set; } = [];
+    public string? DisplayValue { get; set; }
     public string? Profile { get; set; }
     [JsonPropertyName("reasonCode")] public string Reason { get; set; } = "";
     [JsonExtensionData] public Dictionary<string,JsonElement> Metadata { get; set; } = [];
@@ -95,6 +102,9 @@ public sealed class RuleConfig
     public string CoverageDisplay { get; set; } = "truncate";
     [JsonExtensionData] public Dictionary<string,JsonElement> Metadata { get; set; } = [];
     public Dictionary<string,string> PrefixTypes { get; set; } = [];
+    public Dictionary<string,Dictionary<string,string>> ProjectPrefixTypes { get; set; } = [];
+    public Dictionary<string,Dictionary<string,string>> ProjectSuffixAliases { get; set; } = [];
+    [JsonIgnore] public IEnumerable<string> KnownTypes=>PrefixTypes.Values.Concat(ProjectPrefixTypes.Values.SelectMany(m=>m.Values)).Distinct();
     public Dictionary<string,string> SuffixAliases { get; set; } = [];
     public string[] UntestableSymbols { get; set; } = ["X", "Х", "×"];
     public string[] TestableSymbols { get; set; } = ["√", "✓", "✔"];
@@ -121,6 +131,7 @@ public sealed class RuleConfig
         if(UntestableSymbols.Intersect(TestableSymbols,StringComparer.OrdinalIgnoreCase).Any())throw new InvalidDataException("可测和不可测符号重叠");
         if(NotApplicableSymbols.Intersect(UntestableSymbols.Concat(TestableSymbols),StringComparer.OrdinalIgnoreCase).Any())throw new InvalidDataException("不适用符号与检测状态重叠");
         if(Rules.Any(r=>r.Archived&&r.Enabled))throw new InvalidDataException("已删除规则不能同时启用");
+        if(Rules.Any(r=>r.Inspections.Length==0||r.Inspections.Any(k=>!Enum.IsDefined(k))))throw new InvalidDataException("请选择有效的适用检测项目");
         if(Rules.Any(r=>r.Stage is not ("筛选" or "位号解析" or "标准值" or "原因分类" or "可测性扩展" or "异常审核" or "分组" or "导出" or "统计" or "回归测试")))throw new InvalidDataException("未知规则阶段");
         if(Rules.Any(r=>(r.Stage is "原因分类" or "可测性扩展")&&(r.Types.Length==0||r.Priority<0||r.Scope=="project"&&string.IsNullOrWhiteSpace(r.Profile))))throw new InvalidDataException("分类规则缺类型、有效优先级或项目范围");
         if(Rules.Any(r=>r.Stage=="原因分类"&&!r.ReviewOnly&&string.IsNullOrWhiteSpace(r.Reason)))throw new InvalidDataException("自动分类规则缺少reasonCode");
@@ -132,7 +143,7 @@ public sealed class RuleConfig
     public string FormatCoverage(double ratio) => ((CoverageDisplay=="round"?Math.Round(ratio*100,2,MidpointRounding.AwayFromZero):Math.Floor(ratio*10000)/100)).ToString("F2",System.Globalization.CultureInfo.InvariantCulture)+"%";
     public string ReasonText(string code) => Reasons.GetValueOrDefault(code, "待确认");
 }
-public record FilterOptions(string Type = "全部", string Value = "", string Reason = "", string Reference = "", bool OnlyUntestable = true);
+public record FilterOptions(string Type = "全部", string Value = "", string Reason = "", string Reference = "", bool OnlyUntestable = true, TestState? Status = null);
 public sealed record BlindGroup(string Value, string ReasonCode, List<Component> Items)
 {
     public int Count => Items.Count;

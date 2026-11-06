@@ -3,6 +3,7 @@ using ICTCoverage.WinForms;
 using System.Reflection;
 using System.Windows.Forms;
 using System.Drawing;
+using ICTCoverage.Core;
 
 namespace ICTCoverage.Tests;
 
@@ -37,6 +38,21 @@ public sealed class UiTests
                         string lockedFile=Path.Combine(outDir,"editor-open.xls");File.Copy(originalPath,lockedFile);loaded.SourcePath=lockedFile;
                         try{using var editorLock=new FileStream(lockedFile,FileMode.Open,FileAccess.ReadWrite,FileShare.None);var session=(string)typeof(MainForm).GetMethod("SessionPath",BindingFlags.NonPublic|BindingFlags.Instance)!.Invoke(form,null)!;Assert.Contains(loaded.SourceFingerprint,session);}
                         finally{loaded.SourcePath=originalPath;File.Delete(lockedFile);}Assert.Single(Directory.GetFiles(outDir));
+                        filter.Clear();type.SelectedItem="全部";
+                        var cards=(System.Collections.IDictionary)typeof(MainForm).GetField("cards",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!;Assert.Equal(4,cards.Count);
+                        var shortCard=(Control)cards[InspectionKind.Short]!;var yes=(LinkLabel)shortCard.GetType().GetField("yes",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(shortCard)!;
+                        typeof(LinkLabel).GetMethod("OnLinkClicked",BindingFlags.NonPublic|BindingFlags.Instance)!.Invoke(yes,[new LinkLabelLinkClickedEventArgs(yes.Links[0])]);
+                        var current=(Analysis)typeof(MainForm).GetField("analysis",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!;Assert.Equal(InspectionKind.Short,current.Inspection);
+                        Assert.Equal(381,grid.Rows.Cast<DataGridViewRow>().Sum(r=>(int)r.Cells["盲点数量"].Value));Assert.False(button.Enabled);
+                        type.SelectedItem="电阻";Assert.Equal(67,grid.Rows.Cast<DataGridViewRow>().Sum(r=>(int)r.Cells["盲点数量"].Value));
+                        Assert.Equal("12%",((Label)shortCard.GetType().GetField("percent",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(shortCard)!).Text);
+                        var side=(Label)typeof(MainForm).GetField("sidebarStats",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!;Assert.Contains("821",side.Text);Assert.Contains("31.69%",side.Text);
+                        var item=current.Components.First(c=>c.State==TestState.Untestable);var testCfg=RuleConfig.Load(Path.Combine(ConverterTests.Root,"config","rules.json"));
+                        AnalysisEngine.Edit(current,item,item.Reference,item.Type,item.Value,item.SourceState,"NO_POINT","","界面原因选择",testCfg);
+                        typeof(MainForm).GetMethod("RefreshLog",BindingFlags.NonPublic|BindingFlags.Instance)!.Invoke(form,null);
+                        var finalLog=(DataGridView)typeof(MainForm).GetField("log",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(form)!;Assert.Single(finalLog.Rows.Cast<DataGridViewRow>());Assert.Equal(5,finalLog.Columns.Count);Assert.Equal("短路",finalLog.Rows[0].Cells["检测项目"].Value);
+                        type.SelectedItem="全部";typeof(MainForm).GetMethod("ChooseInspection",BindingFlags.NonPublic|BindingFlags.Instance)!.Invoke(form,[InspectionKind.Missing,TestState.Untestable]);
+                        Assert.DoesNotContain(allControls.OfType<ComboBox>(),c=>c.Items.Cast<object>().Any(x=>x.ToString()=="通用模式"));
                         using var bitmap=new Bitmap(form.Width,form.Height);form.DrawToBitmap(bitmap,new Rectangle(Point.Empty,bitmap.Size));bitmap.Save(Path.Combine(ConverterTests.Root,"outputs","界面预览.png"));
                         form.Size=new Size(1120,760);Application.DoEvents();using var small=new Bitmap(form.Width,form.Height);form.DrawToBitmap(small,new Rectangle(Point.Empty,small.Size));small.Save(Path.Combine(ConverterTests.Root,"outputs","界面预览-小窗口.png"));
                         typeof(MainForm).GetMethod("ShowPage",BindingFlags.NonPublic|BindingFlags.Instance)!.Invoke(form,["规则设置"]);Application.DoEvents();using var rules=new Bitmap(form.Width,form.Height);form.DrawToBitmap(rules,new Rectangle(Point.Empty,rules.Size));rules.Save(Path.Combine(ConverterTests.Root,"outputs","界面预览-规则设置.png"));
@@ -48,7 +64,8 @@ public sealed class UiTests
                         ((ComboBox)editorType.GetField("reason",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(editor)!).Text="无测试点，故不可测";
                         ((TextBox)editorType.GetField("prefixes",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(editor)!).Text="ZZ";
                         ((TextBox)editorType.GetField("why",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(editor)!).Text="界面测试新增规则";
-                        var save=Descendants(editor).OfType<Button>().Single(b=>b.Text=="保存并应用");save.PerformClick();Assert.Equal(DialogResult.OK,editor.DialogResult);var editedRule=(ICTCoverage.Core.ClassificationRule)editorType.GetProperty("Rule")!.GetValue(editor)!;Assert.Equal("ZZ",Assert.Single(editedRule.Prefixes));
+                        var scopes=(CheckedListBox)editorType.GetField("inspectionScopes",BindingFlags.NonPublic|BindingFlags.Instance)!.GetValue(editor)!;scopes.SetItemChecked(0,false);scopes.SetItemChecked(1,true);
+                        var save=Descendants(editor).OfType<Button>().Single(b=>b.Text=="保存并应用");save.PerformClick();Assert.Equal(DialogResult.OK,editor.DialogResult);var editedRule=(ICTCoverage.Core.ClassificationRule)editorType.GetProperty("Rule")!.GetValue(editor)!;Assert.Equal("ZZ",Assert.Single(editedRule.Prefixes));Assert.Equal(InspectionKind.Short,Assert.Single(editedRule.Inspections));
                     }
                     catch(Exception ex){error=ex;}
                     finally{form.Close();}

@@ -91,7 +91,28 @@
     "ACTIVE": "有源元件，元件本身特性，故不可测",
     "SMALL_PF": "pf容值过小，无测试点，故不可测",
     "BELOW_STANDARD": "达不到标准，故不可测",
-    "SHORT_GROUP": "同在短路群，故不测"
+    "SHORT_GROUP": "同在短路群，故不测",
+    "PROJECT_DC113448CB": "并联二极管，三极管，IC,故不可测",
+    "PROJECT_0D19423459": "瞬态抑制器，元件本身特性，故不可测",
+    "PROJECT_A965BD41E5": "部分IC引脚悬空、无测试点、无保护二极体特征或并联二极体特性元件完全不能侦测",
+    "PROJECT_808CF496BB": "同在短路群，故不可测",
+    "PROJECT_E4F67C78EB": "实际值无法达到标准值，故不可测",
+    "PROJECT_6C60F52F56": "CD3/47uf并联多电容总共容值135uf，故不可测",
+    "PROJECT_E6DB533289": "pF电容容值过小,故不可测",
+    "PROJECT_01E01D661B": "并联多电容总共容值135uf，故不可测",
+    "PROJECT_39503854EC": "并联大电容CD1/330uf，小电容均不可测",
+    "PROJECT_8C6A8D16E3": "实际测试值无法达到标准值，故不可测",
+    "PROJECT_0DC6125B88": "pF电容值过小,无测试点，故不可测",
+    "PROJECT_AAE64E326E": "并联tvs管达不到范围标准值，故不可测",
+    "PROJECT_18B7A7906E": "47k电阻并联1k，47k电阻故不可测",
+    "PROJECT_570A19976F": "并连多电容 CD3/47uf，小电容均不可测",
+    "PROJECT_DC2B354DDC": "并联大电容CD1/330uf电容，小电容均不可测",
+    "PROJECT_1509BCE3CC": "并联大电容，小电容不可测",
+    "PROJECT_22D565F2FF": "二极管并联二极管，三极管或者ic，故不可测",
+    "PROJECT_BED1907087": "瞬态抑制器，元件本身特性，故均不可测",
+    "PROJECT_50DF9D77E8": "pF电容容量过小，故均不可测",
+    "PROJECT_BA750420DA": "实际测试值达不到标准值，故均不可测",
+    "PROJECT_2ABA8B984A": "并联多电容，小电容不可测"
   },
   "typeValues": {
     "电感": "电感",
@@ -108,7 +129,7 @@
     }
   },
   "schemaVersion": 2,
-  "version": "2.1.1",
+  "version": "2.2.0",
   "coverageDisplay": "truncate",
   "sampleProfile": "MG10P0B3270350-P25086380101",
   "referenceParameters": [
@@ -167,6 +188,11 @@
       "date": "2026-11-06",
       "version": "2.1.1",
       "action": "清理历史程序判定提示；旧字段兼容读取但不校验，保持原因文案、条件、优先级及自定义规则。"
+    },
+    {
+      "date": "2026-11-06",
+      "version": "2.2.0",
+      "action": "用户授权三组人工样表对照校准，新增项目限定原因、类型与显示值规则，保留Coverage源位号及原始值。"
     }
   ],
   "rules": [
@@ -1751,6 +1777,3973 @@
       "reasonCode": "",
       "prefixes": [],
       "prefixesSourceText": "样例"
+    },
+    {
+      "ruleId": "LEARN-01-01",
+      "id": "LEARN-01-01",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "100.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B9:E9",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C196",
+        "C590",
+        "C592",
+        "C266",
+        "C316",
+        "C267",
+        "C124",
+        "C425",
+        "C271",
+        "C272",
+        "C330",
+        "C192",
+        "C274",
+        "C223",
+        "C224",
+        "C193",
+        "C169",
+        "C277",
+        "C230",
+        "C278",
+        "C649",
+        "C653",
+        "C655",
+        "C198",
+        "C658",
+        "C659",
+        "C231",
+        "C210",
+        "C523",
+        "C668",
+        "C669",
+        "C452",
+        "C248",
+        "C393",
+        "C460",
+        "C139",
+        "C194",
+        "C285",
+        "C253",
+        "C108",
+        "C254",
+        "C289",
+        "C151",
+        "C195",
+        "C215",
+        "C239",
+        "C292",
+        "C319",
+        "C382",
+        "C197",
+        "C225",
+        "C294",
+        "C226",
+        "C383",
+        "C774",
+        "C488",
+        "C206",
+        "C298",
+        "C321",
+        "C162",
+        "C534",
+        "C496",
+        "C497",
+        "C209",
+        "C357",
+        "C302",
+        "C243",
+        "C812",
+        "C818",
+        "C824",
+        "C205",
+        "C509",
+        "C217",
+        "C93",
+        "C219",
+        "C314",
+        "C531",
+        "C249"
+      ],
+      "exactValue": "100.00nF"
+    },
+    {
+      "ruleId": "LEARN-01-02",
+      "id": "LEARN-01-02",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "二极管"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_DC113448CB",
+      "displayValue": "D",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B10:E10",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
+    },
+    {
+      "ruleId": "LEARN-01-03",
+      "id": "LEARN-01-03",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "瞬态抑制器"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_0D19423459",
+      "displayValue": "TVS",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B11:E11",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
+    },
+    {
+      "ruleId": "LEARN-01-04",
+      "id": "LEARN-01-04",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "IC"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_A965BD41E5",
+      "displayValue": "IC",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B12:E12",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
+    },
+    {
+      "ruleId": "LEARN-01-05",
+      "id": "LEARN-01-05",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "10.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B13:E13",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "10.00nF"
+    },
+    {
+      "ruleId": "LEARN-01-06",
+      "id": "LEARN-01-06",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "1.000nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B14:E14",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "1.000nF"
+    },
+    {
+      "ruleId": "LEARN-01-07",
+      "id": "LEARN-01-07",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_808CF496BB",
+      "displayValue": "1.000nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B15:E15",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "SG",
+      "exactValue": "1.000nF"
+    },
+    {
+      "ruleId": "LEARN-01-08",
+      "id": "LEARN-01-08",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "4.700uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B16:E16",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "references": [
+        "C654",
+        "C199",
+        "C276",
+        "C809",
+        "C233",
+        "C427",
+        "C522",
+        "C216",
+        "C201",
+        "C288",
+        "C218",
+        "C295",
+        "C244",
+        "C245",
+        "C293",
+        "C246",
+        "C262",
+        "C238",
+        "C275",
+        "C214",
+        "C315",
+        "C280",
+        "C594",
+        "C247",
+        "C281",
+        "C320"
+      ]
+    },
+    {
+      "ruleId": "LEARN-01-09",
+      "id": "LEARN-01-09",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "1.000uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B17:E17",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "1.000uF"
+    },
+    {
+      "ruleId": "LEARN-01-10",
+      "id": "LEARN-01-10",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "2.200uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B18:E18",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "2.200uF"
+    },
+    {
+      "ruleId": "LEARN-01-11",
+      "id": "LEARN-01-11",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "22.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B19:E19",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C591",
+        "C445",
+        "C446",
+        "C481",
+        "C482",
+        "C514",
+        "C515",
+        "C516",
+        "C517"
+      ],
+      "exactValue": "22.00nF"
+    },
+    {
+      "ruleId": "LEARN-01-12",
+      "id": "LEARN-01-12",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "10.00uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B20:E20",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "10.00uF"
+    },
+    {
+      "ruleId": "LEARN-01-13",
+      "id": "LEARN-01-13",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_E4F67C78EB",
+      "displayValue": "4.700K",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B21:E21",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "PCB",
+      "exactValue": "4.700K"
+    },
+    {
+      "ruleId": "LEARN-01-14",
+      "id": "LEARN-01-14",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_6C60F52F56",
+      "displayValue": "47.00uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B22:E22",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "CD3"
+      ],
+      "exactValue": "47.00uF"
+    },
+    {
+      "ruleId": "LEARN-01-15",
+      "id": "LEARN-01-15",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_E6DB533289",
+      "displayValue": "8.20pF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B23:E23",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C306",
+        "C308"
+      ],
+      "exactValue": "8.20pF"
+    },
+    {
+      "ruleId": "LEARN-01-16",
+      "id": "LEARN-01-16",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_E4F67C78EB",
+      "displayValue": "300.00K",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B24:E24",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "PCB",
+      "exactValue": "300.00K"
+    },
+    {
+      "ruleId": "LEARN-01-17",
+      "id": "LEARN-01-17",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_E4F67C78EB",
+      "displayValue": "470.00K",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B25:E25",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "PCB",
+      "exactValue": "470.00K"
+    },
+    {
+      "ruleId": "LEARN-01-18",
+      "id": "LEARN-01-18",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_E4F67C78EB",
+      "displayValue": "1.000M",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B26:E26",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "PCB",
+      "exactValue": "1.000M"
+    },
+    {
+      "ruleId": "LEARN-01-19",
+      "id": "LEARN-01-19",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "47.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B27:E27",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "47.00nF"
+    },
+    {
+      "ruleId": "LEARN-01-20",
+      "id": "LEARN-01-20",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "220.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B28:E28",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "220.00nF"
+    },
+    {
+      "ruleId": "LEARN-01-21",
+      "id": "LEARN-01-21",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "2.20uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B29:E29",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "2.20uF"
+    },
+    {
+      "ruleId": "LEARN-01-22",
+      "id": "LEARN-01-22",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_01E01D661B",
+      "displayValue": "22.00uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B30:E30",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C211"
+      ],
+      "exactValue": "22.00uF"
+    },
+    {
+      "ruleId": "LEARN-01-23",
+      "id": "LEARN-01-23",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_39503854EC",
+      "displayValue": "100.00uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B31:E31",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "CD2"
+      ],
+      "exactValue": "100.00uF"
+    },
+    {
+      "ruleId": "LEARN-01-24",
+      "id": "LEARN-01-24",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020991V08-25023764_V11",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "晶振"
+      ],
+      "prefixes": [],
+      "reasonCode": "ACTIVE",
+      "displayValue": "晶振",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020991V08-25023764_V11-盲点表.xls!盲点表!B32:E32",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
+    },
+    {
+      "ruleId": "LEARN-02-01",
+      "id": "LEARN-02-01",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "100.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B9:E9",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C129",
+        "C144",
+        "C160",
+        "C175",
+        "C187",
+        "C193",
+        "C198",
+        "C208",
+        "C214",
+        "C217",
+        "C222",
+        "C227",
+        "C233",
+        "C234",
+        "C235",
+        "C236",
+        "C237",
+        "C238",
+        "C239",
+        "C249",
+        "C250",
+        "C253",
+        "C256",
+        "C258",
+        "C264",
+        "C265",
+        "C267",
+        "C269",
+        "C272",
+        "C279",
+        "C280",
+        "C286",
+        "C290",
+        "C291",
+        "C292",
+        "C293",
+        "C296",
+        "C301",
+        "C304",
+        "C305",
+        "C306",
+        "C310",
+        "C314",
+        "C328",
+        "C335",
+        "C336",
+        "C338",
+        "C339",
+        "C342",
+        "C346",
+        "C369",
+        "C394",
+        "C440",
+        "C454",
+        "C457",
+        "C476",
+        "C477",
+        "C479",
+        "C493",
+        "C499",
+        "C501",
+        "C502",
+        "C504",
+        "C506",
+        "C516",
+        "C522",
+        "C529",
+        "C532",
+        "C548",
+        "C550",
+        "C551",
+        "C562",
+        "C590",
+        "C595",
+        "C596",
+        "C679",
+        "C680",
+        "C696",
+        "C699",
+        "C701",
+        "C706",
+        "C707",
+        "C708",
+        "C709",
+        "C710",
+        "C308"
+      ]
+    },
+    {
+      "ruleId": "LEARN-02-02",
+      "id": "LEARN-02-02",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "二极管"
+      ],
+      "prefixes": [],
+      "reasonCode": "NO_POINT",
+      "displayValue": "D",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B10:E10",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
+    },
+    {
+      "ruleId": "LEARN-02-03",
+      "id": "LEARN-02-03",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "瞬态抑制器"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_0D19423459",
+      "displayValue": "TVS",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B11:E11",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
+    },
+    {
+      "ruleId": "LEARN-02-04",
+      "id": "LEARN-02-04",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "IC"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_A965BD41E5",
+      "displayValue": "IC",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B12:E12",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
+    },
+    {
+      "ruleId": "LEARN-02-05",
+      "id": "LEARN-02-05",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "10.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B13:E13",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "10.00nF"
+    },
+    {
+      "ruleId": "LEARN-02-06",
+      "id": "LEARN-02-06",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "1.000nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B14:E14",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "1.000nF"
+    },
+    {
+      "ruleId": "LEARN-02-07",
+      "id": "LEARN-02-07",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_808CF496BB",
+      "displayValue": "1.000nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B15:E15",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "SG",
+      "exactValue": "1.000nF"
+    },
+    {
+      "ruleId": "LEARN-02-08",
+      "id": "LEARN-02-08",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "NO_POINT",
+      "displayValue": "22",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B16:E16",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "R356",
+        "R357",
+        "R358",
+        "R362",
+        "R375",
+        "R376",
+        "R388",
+        "R393",
+        "R408",
+        "R413",
+        "R414",
+        "R417",
+        "R418",
+        "R422"
+      ],
+      "exactValue": "22"
+    },
+    {
+      "ruleId": "LEARN-02-09",
+      "id": "LEARN-02-09",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "1.000uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B17:E17",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "1.000uF"
+    },
+    {
+      "ruleId": "LEARN-02-10",
+      "id": "LEARN-02-10",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "NO_POINT",
+      "displayValue": "4.700K",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B18:E18",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "R501",
+        "R571",
+        "R577",
+        "R587",
+        "R591",
+        "R467",
+        "R469",
+        "R440",
+        "R441"
+      ],
+      "exactValue": "4.700K"
+    },
+    {
+      "ruleId": "LEARN-02-11",
+      "id": "LEARN-02-11",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_8C6A8D16E3",
+      "displayValue": "4.700K",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B19:E19",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "PCB",
+      "exactValue": "4.700K"
+    },
+    {
+      "ruleId": "LEARN-02-12",
+      "id": "LEARN-02-12",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "2.200uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B20:E20",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "2.200uF"
+    },
+    {
+      "ruleId": "LEARN-02-13",
+      "id": "LEARN-02-13",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "10.00uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B21:E21",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C252",
+        "C270",
+        "C273",
+        "C274",
+        "C275",
+        "C295",
+        "C313",
+        "C337",
+        "C594"
+      ],
+      "exactValue": "10.00uF"
+    },
+    {
+      "ruleId": "LEARN-02-14",
+      "id": "LEARN-02-14",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "22.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B22:E22",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C520",
+        "C528",
+        "C623",
+        "C643",
+        "C644",
+        "C645",
+        "C646",
+        "C676"
+      ],
+      "exactValue": "22.00nF"
+    },
+    {
+      "ruleId": "LEARN-02-15",
+      "id": "LEARN-02-15",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "4.700uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B23:E23",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "4.700uF"
+    },
+    {
+      "ruleId": "LEARN-02-16",
+      "id": "LEARN-02-16",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_0DC6125B88",
+      "displayValue": "18.00pF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B24:E24",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C344",
+        "C347",
+        "C677",
+        "C678"
+      ],
+      "exactValue": "18.00pF"
+    },
+    {
+      "ruleId": "LEARN-02-17",
+      "id": "LEARN-02-17",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "晶振"
+      ],
+      "prefixes": [],
+      "reasonCode": "ACTIVE",
+      "displayValue": "晶振",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B25:E25",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
+    },
+    {
+      "ruleId": "LEARN-02-18",
+      "id": "LEARN-02-18",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_8C6A8D16E3",
+      "displayValue": "10.00K",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B26:E26",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "PCB",
+      "exactValue": "10.000K"
+    },
+    {
+      "ruleId": "LEARN-02-19",
+      "id": "LEARN-02-19",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_AAE64E326E",
+      "displayValue": "100.00pF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B27:E27",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C132",
+        "C138"
+      ],
+      "exactValue": "100.00pF"
+    },
+    {
+      "ruleId": "LEARN-02-20",
+      "id": "LEARN-02-20",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_E4F67C78EB",
+      "displayValue": "6.800K",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B28:E28",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "6.800K"
+    },
+    {
+      "ruleId": "LEARN-02-21",
+      "id": "LEARN-02-21",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_18B7A7906E",
+      "displayValue": "47.000K",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B29:E29",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "R484"
+      ],
+      "exactValue": "47.000K"
+    },
+    {
+      "ruleId": "LEARN-02-22",
+      "id": "LEARN-02-22",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_570A19976F",
+      "displayValue": "22.00uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B30:E30",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C251"
+      ],
+      "exactValue": "22.00uF"
+    },
+    {
+      "ruleId": "LEARN-02-23",
+      "id": "LEARN-02-23",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "4.700uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B31:E31",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "4.700mF"
+    },
+    {
+      "ruleId": "LEARN-02-24",
+      "id": "LEARN-02-24",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "100.000nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B32:E32",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "100.000nF"
+    },
+    {
+      "ruleId": "LEARN-02-25",
+      "id": "LEARN-02-25",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "4.70uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B33:E33",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "4.70uF"
+    },
+    {
+      "ruleId": "LEARN-02-26",
+      "id": "LEARN-02-26",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PARALLEL",
+      "displayValue": "2.20uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B34:E34",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "2.20uF"
+    },
+    {
+      "ruleId": "LEARN-02-27",
+      "id": "LEARN-02-27",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020990V06-25023763_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_DC2B354DDC",
+      "displayValue": "100.00uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020990V06-25023763_V08-ICT盲点表.xls!盲点表!B35:E35",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "CD2"
+      ],
+      "exactValue": "100.00uF"
+    },
+    {
+      "ruleId": "LEARN-03-01",
+      "id": "LEARN-03-01",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_1509BCE3CC",
+      "displayValue": "100.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B9:E9",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C110",
+        "C116",
+        "C118",
+        "C127",
+        "C135",
+        "C17",
+        "C19",
+        "C2",
+        "C312",
+        "C325",
+        "C336",
+        "C349",
+        "C360",
+        "C373",
+        "C40",
+        "C400",
+        "C401",
+        "C402",
+        "C408",
+        "C414",
+        "C415",
+        "C416",
+        "C417",
+        "C42",
+        "C423",
+        "C425",
+        "C427",
+        "C431",
+        "C436",
+        "C443",
+        "C444",
+        "C448",
+        "C449",
+        "C452",
+        "C453",
+        "C455",
+        "C456",
+        "C457",
+        "C463",
+        "C465",
+        "C467",
+        "C471",
+        "C472",
+        "C473",
+        "C479",
+        "C480",
+        "C481",
+        "C485",
+        "C486",
+        "C487",
+        "C489",
+        "C495",
+        "C500",
+        "C51",
+        "C527",
+        "C552",
+        "C577",
+        "C6",
+        "C601",
+        "C609",
+        "C610",
+        "C612",
+        "C615",
+        "C616",
+        "C626",
+        "C628",
+        "C710",
+        "C721",
+        "C743",
+        "C746",
+        "C762",
+        "C772",
+        "C788",
+        "C789",
+        "C79",
+        "C790",
+        "C791",
+        "C792",
+        "C793",
+        "C8",
+        "C81",
+        "C89"
+      ],
+      "exactValue": "100.00nF"
+    },
+    {
+      "ruleId": "LEARN-03-02",
+      "id": "LEARN-03-02",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "二极管"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_22D565F2FF",
+      "displayValue": "D",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B10:E10",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
+    },
+    {
+      "ruleId": "LEARN-03-03",
+      "id": "LEARN-03-03",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "瞬态抑制器"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_BED1907087",
+      "displayValue": "TVS",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B11:E11",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
+    },
+    {
+      "ruleId": "LEARN-03-04",
+      "id": "LEARN-03-04",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "IC"
+      ],
+      "prefixes": [],
+      "reasonCode": "IC",
+      "displayValue": "IC",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B12:E12",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
+    },
+    {
+      "ruleId": "LEARN-03-05",
+      "id": "LEARN-03-05",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_808CF496BB",
+      "displayValue": "1.000nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B13:E13",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "SG",
+      "exactValue": "1.000nF"
+    },
+    {
+      "ruleId": "LEARN-03-06",
+      "id": "LEARN-03-06",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_1509BCE3CC",
+      "displayValue": "1.000nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B14:E14",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "1.000nF"
+    },
+    {
+      "ruleId": "LEARN-03-07",
+      "id": "LEARN-03-07",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_1509BCE3CC",
+      "displayValue": "10.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B15:E15",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "10.00nF"
+    },
+    {
+      "ruleId": "LEARN-03-08",
+      "id": "LEARN-03-08",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_1509BCE3CC",
+      "displayValue": "1.000uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B16:E16",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "1.000uF"
+    },
+    {
+      "ruleId": "LEARN-03-09",
+      "id": "LEARN-03-09",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_1509BCE3CC",
+      "displayValue": "4.700uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B17:E17",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "references": [
+        "C115",
+        "C39",
+        "C403",
+        "C411",
+        "C422",
+        "C424",
+        "C426",
+        "C447",
+        "C454",
+        "C458",
+        "C5",
+        "C611",
+        "C78",
+        "C435",
+        "C630",
+        "C787"
+      ]
+    },
+    {
+      "ruleId": "LEARN-03-10",
+      "id": "LEARN-03-10",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_50DF9D77E8",
+      "displayValue": "20.00pF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B18:E18",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C313",
+        "C317",
+        "C326",
+        "C328",
+        "C337",
+        "C341",
+        "C361",
+        "C365",
+        "C374",
+        "C376"
+      ],
+      "exactValue": "20.00pF"
+    },
+    {
+      "ruleId": "LEARN-03-11",
+      "id": "LEARN-03-11",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_1509BCE3CC",
+      "displayValue": "2.200uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B19:E19",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "references": [
+        "C126",
+        "C16",
+        "C459",
+        "C468",
+        "C50",
+        "C88",
+        "C462",
+        "C466"
+      ]
+    },
+    {
+      "ruleId": "LEARN-03-12",
+      "id": "LEARN-03-12",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_1509BCE3CC",
+      "displayValue": "10.00uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B20:E20",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "10.00uF"
+    },
+    {
+      "ruleId": "LEARN-03-13",
+      "id": "LEARN-03-13",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_1509BCE3CC",
+      "displayValue": "47.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B21:E21",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "47.00nF"
+    },
+    {
+      "ruleId": "LEARN-03-14",
+      "id": "LEARN-03-14",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_1509BCE3CC",
+      "displayValue": "22.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B22:E22",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "22.00nF"
+    },
+    {
+      "ruleId": "LEARN-03-15",
+      "id": "LEARN-03-15",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_BA750420DA",
+      "displayValue": "4.700K",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B23:E23",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "PCB",
+      "exactValue": "4.700K"
+    },
+    {
+      "ruleId": "LEARN-03-16",
+      "id": "LEARN-03-16",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_50DF9D77E8",
+      "displayValue": "8.00pF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B24:E24",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "references": [
+        "C413",
+        "C418"
+      ],
+      "exactValue": "8.00pF"
+    },
+    {
+      "ruleId": "LEARN-03-17",
+      "id": "LEARN-03-17",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电阻"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_BA750420DA",
+      "displayValue": "1.000M",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B25:E25",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "1.000M"
+    },
+    {
+      "ruleId": "LEARN-03-18",
+      "id": "LEARN-03-18",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_2ABA8B984A",
+      "displayValue": "22.00uF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B26:E26",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "22.00uF"
+    },
+    {
+      "ruleId": "LEARN-03-19",
+      "id": "LEARN-03-19",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "电容"
+      ],
+      "prefixes": [],
+      "reasonCode": "PROJECT_1509BCE3CC",
+      "displayValue": "220.00nF",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B27:E27",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ],
+      "suffix": "C",
+      "excludeSuffixes": [
+        "SG",
+        "PCB"
+      ],
+      "exactValue": "220.00nF"
+    },
+    {
+      "ruleId": "LEARN-03-20",
+      "id": "LEARN-03-20",
+      "stage": "原因分类",
+      "priority": 40,
+      "enabled": true,
+      "status": "用户已完成样表校准",
+      "scope": "project",
+      "profile": "65020997V06-25023799_V08",
+      "inspections": [
+        "Missing"
+      ],
+      "types": [
+        "晶振"
+      ],
+      "prefixes": [],
+      "reasonCode": "ACTIVE",
+      "displayValue": "晶振",
+      "supersedes": [
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "C-01",
+        "C-02",
+        "C-03",
+        "C-04",
+        "C-05",
+        "C-06",
+        "D-01",
+        "Q-01",
+        "U-01",
+        "L-01",
+        "J-01",
+        "Y-01"
+      ],
+      "source": "65020997V06-25023799_V08-盲点表.xlsx!盲点表!B28:E28",
+      "notes": [
+        "以Coverage的X为唯一筛选依据；类型、原因和显示标准值由用户已完成样表核对。"
+      ],
+      "history": [
+        {
+          "date": "2026-11-06",
+          "action": "用户要求根据三组已完成盲点表校准，限定本项目缺件检测。"
+        }
+      ]
     }
   ],
   "notApplicableSymbols": [
@@ -1966,5 +5959,39 @@
     "calculatePercentThresholds": false,
     "manualAction": "仅选择未匹配或矛盾的盲点原因",
     "export": "只生成一个盲点表.xlsx"
+  },
+  "projectPrefixTypes": {
+    "65020991V08-25023764_V11": {
+      "Z": "二极管",
+      "ZD": "二极管",
+      "TVS": "瞬态抑制器",
+      "M": "IC"
+    },
+    "65020990V06-25023763_V08": {
+      "Z": "二极管",
+      "ZD": "二极管",
+      "TVS": "瞬态抑制器",
+      "M": "IC"
+    },
+    "65020997V06-25023799_V08": {
+      "Z": "二极管",
+      "ZD": "二极管",
+      "TVS": "瞬态抑制器",
+      "M": "IC"
+    }
+  },
+  "projectSuffixAliases": {
+    "65020991V08-25023764_V11": {
+      "TVS": "TVS",
+      "U": "U"
+    },
+    "65020990V06-25023763_V08": {
+      "TVS": "TVS",
+      "U": "U"
+    },
+    "65020997V06-25023799_V08": {
+      "TVS": "TVS",
+      "U": "U"
+    }
   }
 }

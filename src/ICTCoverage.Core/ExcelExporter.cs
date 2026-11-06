@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace ICTCoverage.Core;
 
-public record ExportOptions(string BoardNumber,string ProductNumber,string NeedleRate="",string DefaultNote="",int WrapWidth=48,bool Draft=false);
+public record ExportOptions(string BoardNumber,string ProductNumber,string NeedleRate="",string DefaultNote="",int WrapWidth=48,bool Draft=false,int? BoardTotal=null,string? ScopeLabel=null,int? ScopeTotal=null,double? ScopeCoverage=null);
 public record AuditDifference(string Kind,string Reference,string Detail);
 public sealed class ExcelExporter(RuleConfig cfg)
 {
@@ -75,8 +75,9 @@ public sealed class ExcelExporter(RuleConfig cfg)
             string value=cell.GetString();
             if(value.Contains("光板编号"))cell.Value="光板编号:"+options.BoardNumber;
             else if(value.Contains("成品编号"))cell.Value="成品编号:"+options.ProductNumber;
-            else if(value.Contains("PCBA总点数"))cell.Value=$"PCBA总点数: {a.Total} 不可测点数: {a.Untestable} 源测试覆盖率:{cfg.FormatCoverage(a.Coverage)}   值针率：{(string.IsNullOrWhiteSpace(options.NeedleRate)?"未提供":options.NeedleRate)}";
+            else if(value.Contains("PCBA总点数"))cell.Value=$"PCBA总点数: {options.BoardTotal??a.Total}{(options.ScopeLabel!=null?$" 筛选总数: {options.ScopeTotal??a.Total}":"")} 不可测点数: {a.Untestable} 测试覆盖率:{cfg.FormatCoverage(options.ScopeCoverage??a.Coverage)}   值针率：{(string.IsNullOrWhiteSpace(options.NeedleRate)?"未提供":options.NeedleRate)}";
         }
+        if(options.ScopeLabel!=null&&start>=9)s.Cell(start-2,1).Value=$"检测项目：{a.Inspection.Name()}   筛选范围：{options.ScopeLabel}";
         if(options.Draft)s.Cell(1,1).Value=s.Cell(1,1).GetString()+"（待审核）";
         s.PageSetup.PrintAreas.Clear(); s.PageSetup.PrintAreas.Add(1,1,oldLast+delta,6);
         styles.Delete(); SaveAtomic(wb,target);

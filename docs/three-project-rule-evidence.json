@@ -1,0 +1,55 @@
+[
+  {
+    "project": "65020991V08-25023764_V11",
+    "sourceFile": "65020991V08-25023764_V11-Coverage报告.xls",
+    "sourceSha256": "5eef924e7cadbbe4506287f8310613d7d0aa69e38dcb0fc01e2682ce36e8bb57",
+    "manualFile": "65020991V08-25023764_V11-盲点表.xls",
+    "manualSha256": "be9c9847b83b2623a5c32124f79eb809e9624dc87176af7e647ed49d4b788a00",
+    "sourceX": 275,
+    "manualGroups": 24,
+    "manualTotal": 275,
+    "manualListedReferences": 275,
+    "manualMissing": [],
+    "manualExtra": [],
+    "quantityMismatches": [],
+    "rulesAdded": 24
+  },
+  {
+    "project": "65020990V06-25023763_V08",
+    "sourceFile": "65020990V06-25023763_V08-Coverage报告.xls",
+    "sourceSha256": "f9d7319e52d20470de79fe165016362c72b7a77551daa779a54352045d5f00b3",
+    "manualFile": "65020990V06-25023763_V08-ICT盲点表.xls",
+    "manualSha256": "806f782a5ee1678b9dd660f42a557b554e5b34c18918be63d781534bce70d02e",
+    "sourceX": 286,
+    "manualGroups": 27,
+    "manualTotal": 286,
+    "manualListedReferences": 286,
+    "manualMissing": [],
+    "manualExtra": [],
+    "quantityMismatches": [],
+    "rulesAdded": 27
+  },
+  {
+    "project": "65020997V06-25023799_V08",
+    "sourceFile": "65020997V06-25023799_V08-Coverage报告.xls",
+    "sourceSha256": "a4a000853111e69fcadf949f2e9ae7e2717727c338b1489f3c883d3fcb16d974",
+    "manualFile": "65020997V06-25023799_V08-盲点表.xlsx",
+    "manualSha256": "8d1ca6e23902b933b3a5c8f2018cd11b80c9b9bb20f2e1a62cad46b26ec2a907",
+    "sourceX": 250,
+    "manualGroups": 20,
+    "manualTotal": 250,
+    "manualListedReferences": 249,
+    "manualMissing": [
+      "C101"
+    ],
+    "manualExtra": [],
+    "quantityMismatches": [
+      {
+        "row": 13,
+        "listed": 13,
+        "quantity": 14
+      }
+    ],
+    "rulesAdded": 20
+  }
+]

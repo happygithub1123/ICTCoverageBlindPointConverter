@@ -15,11 +15,13 @@ public sealed class AnalysisEngine(RuleConfig config)
             var match=Regex.Match(c.RawReference.Trim(),@"^(?<ref>(?<prefix>[A-Za-z]+)\d+)(?<pins>(?:_[A-Za-z0-9]+)*)(?<suffix>(?:/.*)?)$");
             if(!match.Success) { c.Reference=c.RawReference; c.Type="待确认"; c.Issues.Add(new("reference","无法识别位号")); }
             else { c.Reference=match.Groups["ref"].Value.ToUpperInvariant(); c.Type=config.PrefixTypes.GetValueOrDefault(match.Groups["prefix"].Value.ToUpperInvariant(),"待确认"); }
+            if(match.Success&&config.ProjectPrefixTypes.TryGetValue(profile,out var prefixMap)&&prefixMap.TryGetValue(match.Groups["prefix"].Value.ToUpperInvariant(),out var mapped))c.Type=mapped;
             if(match.Success&&match.Groups["pins"].Length>0&&!Regex.IsMatch(match.Groups["pins"].Value,@"^(?:_\d+)+$|^_[A-Za-z]_\d+$"))c.Issues.Add(new("pins","未知管脚/门电路后缀"));
             var suffix=c.RawReference.Split('/').Skip(1).Where(x=>x.Length>0).Select(x=>x.ToUpperInvariant()).ToArray();
             var normalized=new HashSet<string>();
             foreach(var s in suffix)
-                if(config.SuffixAliases.TryGetValue(s,out var alias)) normalized.Add(alias);
+                if(config.ProjectSuffixAliases.TryGetValue(profile,out var suffixMap)&&suffixMap.TryGetValue(s,out var projectAlias))normalized.Add(projectAlias);
+                else if(config.SuffixAliases.TryGetValue(s,out var alias)) normalized.Add(alias);
                 else c.Issues.Add(new("suffix",$"未知后缀 /{s}"));
             bool no=config.UntestableSymbols.Contains(c.StatusSymbol.Trim(),StringComparer.OrdinalIgnoreCase), yes=config.TestableSymbols.Contains(c.StatusSymbol.Trim(),StringComparer.OrdinalIgnoreCase), na=config.NotApplicableSymbols.Contains(c.StatusSymbol.Trim());
             c.SourceState=no?TestState.Untestable:yes?TestState.Testable:na?TestState.NotApplicable:TestState.Unknown;c.State=c.SourceState;
@@ -32,10 +34,10 @@ public sealed class AnalysisEngine(RuleConfig config)
             {
                 if(c.Type=="待确认") c.Issues.Add(new("type","未知元件前缀"));
                 if(string.IsNullOrWhiteSpace(c.RawValue)) c.Issues.Add(new("value","标准值为空"));
-                var matches=config.Rules.Where(r=>r.Enabled && !r.Archived && (r.Stage is "原因分类" or "可测性扩展") && (r.Profile==null||r.Profile==profile) && r.Types.Contains(c.Type) &&
+                var matches=config.Rules.Where(r=>r.Enabled && !r.Archived && r.Inspections.Contains(a.Inspection) && (r.Stage is "原因分类" or "可测性扩展") && (r.Profile==null||r.Profile==profile) && r.Types.Contains(c.Type) &&
                     (r.Prefixes.Length==0||r.Prefixes.Contains(match.Groups["prefix"].Value.ToUpperInvariant())) &&
                     (r.Suffix==null||normalized.Contains(r.Suffix)) && !r.ExcludeSuffixes.Any(normalized.Contains) && (!r.NoOtherSuffixes||normalized.Count==0) &&
-                    (r.ExactValue==null||r.ExactValue==c.RawValue) && (r.Reference==null||r.Reference==c.Reference)).OrderBy(r=>r.Priority).ThenBy(r=>r.RuleId,StringComparer.Ordinal).ToList();
+                    (r.ExactValue==null||r.ExactValue==c.RawValue) && (r.Reference==null||r.Reference==c.Reference)&&(r.References.Length==0||r.References.Contains(c.Reference))).OrderBy(r=>r.Priority).ThenBy(r=>r.RuleId,StringComparer.Ordinal).ToList();
                 c.MatchedRules=matches.Select(r=>new RuleMatch(r.RuleId,r.Priority,r.Reason,r.Status,r.Source)).ToList();
                 c.AppliedRuleIds.AddRange(matches.Select(r=>r.RuleId));
                 // 测试结果已由Coverage确认。参考参数不触发重新确认可测性。
@@ -45,6 +47,7 @@ public sealed class AnalysisEngine(RuleConfig config)
                 else
                 {
                     c.ReasonCode=rule.Reason;c.RuleId=rule.RuleId;
+                    if(rule.DisplayValue!=null)c.Value=rule.DisplayValue;
                     if(candidates.Any(r=>r.Reason!=rule.Reason&&!rule.Supersedes.Contains(r.RuleId)))c.Issues.Add(new("rule_conflict","多个规则原因不同且没有已声明的优先关系"));
                 }
             }
@@ -60,24 +63,25 @@ public sealed class AnalysisEngine(RuleConfig config)
         foreach(var group in a.Components.Where(c=>c.State==TestState.Untestable&&!string.IsNullOrWhiteSpace(c.Reference)).GroupBy(c=>c.Reference).Where(g=>g.Count()>1))
             foreach(var c in group) c.Issues.Add(new("duplicate",$"重复位号 {group.Key}，来源行 {string.Join(",",group.Select(x=>x.SourceRow))}"));
     }
-    public static List<Component> Filter(Analysis a,FilterOptions f,RuleConfig cfg) => a.Components.Where(c=>
-        (f.Type=="待确认"?c.Pending:(!f.OnlyUntestable||c.State==TestState.Untestable) && (f.Type=="全部"||f.Type==c.Type)) &&
-        c.Value.Contains(f.Value,StringComparison.OrdinalIgnoreCase) && cfg.ReasonText(c.ReasonCode).Contains(f.Reason,StringComparison.OrdinalIgnoreCase) &&
-        (c.Reference.Contains(f.Reference,StringComparison.OrdinalIgnoreCase)||c.RawReference.Contains(f.Reference,StringComparison.OrdinalIgnoreCase))).ToList();
-    public static List<BlindGroup> Group(IEnumerable<Component> items) => items.GroupBy(c=>(c.Value,c.ReasonCode)).Select(g=>new BlindGroup(g.Key.Value,g.Key.ReasonCode,g.OrderBy(c=>c.SourceRow).ToList())).ToList();
+    public static List<Component> BaseFilter(Analysis a,FilterOptions f)=>a.Components.Where(c=>(f.Type is "全部" or "待确认"||f.Type==c.Type)&&c.Value.Contains(f.Value,StringComparison.OrdinalIgnoreCase)&&(c.Reference.Contains(f.Reference,StringComparison.OrdinalIgnoreCase)||c.RawReference.Contains(f.Reference,StringComparison.OrdinalIgnoreCase))).ToList();
+    public static List<Component> Filter(Analysis a,FilterOptions f,RuleConfig cfg)=>BaseFilter(a,f).Where(c=>(f.Type!="待确认"||c.Pending)&&(f.Status.HasValue?c.State==f.Status:!f.OnlyUntestable||c.State==TestState.Untestable)&&cfg.ReasonText(c.ReasonCode).Contains(f.Reason,StringComparison.OrdinalIgnoreCase)).ToList();
+    public static List<BlindGroup> Group(IEnumerable<Component> items)=>items.GroupBy(c=>(c.State,c.Value,c.ReasonCode)).Select(g=>new BlindGroup(g.Key.Value,g.Key.ReasonCode,g.OrderBy(c=>c.SourceRow).ToList())).ToList();
     public static void Edit(Analysis a, Component c, string reference,string type,string value,TestState state,string reasonCode,string note,string justification,RuleConfig cfg,string? reviewer=null,string? programEvidence=null)
     {
         if(string.IsNullOrWhiteSpace(justification))throw new InvalidDataException("请填写修改理由");
         if(!Regex.IsMatch(reference,@"^[A-Za-z]+\d+$"))throw new InvalidDataException("规范位号必须为字母前缀加数字，例如 R103");
         if(state is TestState.Unknown or TestState.Conflict)throw new InvalidDataException("请选择明确的可测或不可测状态");
         if(c.SourceState!=TestState.Untestable||state!=c.SourceState)throw new InvalidDataException("检测结果以Coverage为准，仅能为打X的元件选择原因");
-        if(!cfg.PrefixTypes.Values.Contains(type))throw new InvalidDataException("请选择已有元件类型");
+        if(!cfg.KnownTypes.Contains(type))throw new InvalidDataException("请选择已有元件类型");
         if(state==TestState.Untestable && (string.IsNullOrWhiteSpace(value)||!cfg.Reasons.ContainsKey(reasonCode)||type=="待确认"))throw new InvalidDataException("不可测记录必须填写类型、标准值和原因");
         string before=JsonSerializer.Serialize(c,RuleConfig.JsonOptions);
+        if(!c.Pending&&c.Reference==reference.ToUpperInvariant()&&c.Type==type&&c.Value==value&&c.ReasonCode==reasonCode&&c.Note==note)return;
         reviewer=string.IsNullOrWhiteSpace(reviewer)?Environment.UserName:reviewer.Trim();
         c.Reference=reference.ToUpperInvariant(); c.Type=type; c.Value=value; c.State=state; c.ReasonCode=state==TestState.Testable?"":reasonCode; c.Note=note;c.ManuallyReviewed=true;c.ProgramEvidence=programEvidence??c.ProgramEvidence;
         c.Issues.RemoveAll(i=>i.Blocking); CheckDuplicates(a);
-        a.Edits.Add(new(DateTimeOffset.Now,c.SourceRow,before,JsonSerializer.Serialize(c,RuleConfig.JsonOptions),justification,reviewer,cfg.Version));
+        var time=DateTimeOffset.Now;
+        a.Edits.Add(new(time,c.SourceRow,before,JsonSerializer.Serialize(c,RuleConfig.JsonOptions),justification,reviewer,cfg.Version,a.Inspection));
+        a.Corrections[c.SourceRow]=new(time,c.SourceRow,c.Reference,c.Type,c.Value,c.ReasonCode,c.Note);
     }
 }
 

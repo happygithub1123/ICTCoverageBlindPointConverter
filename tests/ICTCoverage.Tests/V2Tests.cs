@@ -14,7 +14,7 @@ public sealed class V2Tests
     }
     [Fact]public void Catalog_All34RulesAndLegacyIdsArePreserved()
     {
-        var cfg=Config();Assert.Equal(34,cfg.Rules.Count);Assert.Equal(34,cfg.Rules.Select(r=>r.RuleId).Distinct().Count());Assert.All(cfg.Rules,r=>Assert.NotEmpty(r.Source));
+        var cfg=Config();Assert.Equal(34,cfg.Rules.Count(r=>!r.RuleId.StartsWith("LEARN-")));Assert.Equal(cfg.Rules.Count,cfg.Rules.Select(r=>r.RuleId).Distinct().Count());Assert.All(cfg.Rules,r=>Assert.NotEmpty(r.Source));
         Assert.Equal(2,cfg.SchemaVersion);Assert.Equal(105,cfg.Rules.Single(r=>r.RuleId=="C-02").Priority);
         var path=Path.Combine(Path.GetTempPath(),Guid.NewGuid()+".json");try{File.WriteAllText(path,JsonSerializer.Serialize(cfg,RuleConfig.JsonOptions));var reload=RuleConfig.Load(path);Assert.Equal(cfg.Rules[0].Metadata.Count,reload.Rules[0].Metadata.Count);Assert.Equal(cfg.Metadata.Count,reload.Metadata.Count);}finally{File.Delete(path);}
     }
