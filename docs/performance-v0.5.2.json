@@ -1,0 +1,51 @@
+{
+  "environment": "Windows x64 / .NET 8; same machine; active STA WinForms message loop; off-screen DrawToBitmap for complete viewport painting",
+  "baselineCommit": "e35d6ad14f7cd3825408afe6131cd754149ae861",
+  "before": {
+    "burstMs": 499.4241,
+    "layouts": 0,
+    "extraReportRows": [],
+    "frames": 90,
+    "maxFrameMs": 97.0647,
+    "p95FrameMs": 26.0687,
+    "maxHeartbeatGapMs": 530.9201,
+    "heartbeatTicks": 114,
+    "valueCalls": 5130,
+    "formats": 5130
+  },
+  "after": {
+    "burstMs": 1.6656,
+    "layouts": 0,
+    "extraReportRows": [
+      221,
+      704,
+      1740,
+      1415
+    ],
+    "frames": 130,
+    "maxFrameMs": 49.201,
+    "p95FrameMs": 33.0534,
+    "maxHeartbeatGapMs": 300.1556,
+    "heartbeatTicks": 188,
+    "valueCalls": 7387,
+    "formats": 7387
+  },
+  "importAndView": {
+    "importMs": 1654.6117,
+    "maxImportHeartbeatGapMs": 211.6756,
+    "heartbeatTicks": 49,
+    "RefreshResultsMs": 4.5721,
+    "RefreshCopyMs": 16.0099,
+    "RefreshLogMs": 0.9183,
+    "tenThousandRowViewMs": 173.3471,
+    "tenThousandIssuesMs": 190.4882,
+    "rows": 1202
+  },
+  "limits": [
+    "Local measurements are not guarantees on another device.",
+    "Burst timing measures synchronous input processing; deferred scrolling continues on 16ms UI ticks.",
+    "Before uses public 1202-row sample; after additionally paints four private report datasets. Frame percentile is not a direct like-for-like comparison.",
+    "A test-only synchronous thread join was replaced by asynchronous completion in both comparison harnesses. An earlier long scheduling interval is excluded.",
+    "Desktop capture failed with window capture timed out; visual inspection uses rendered test screenshots."
+  ]
+}

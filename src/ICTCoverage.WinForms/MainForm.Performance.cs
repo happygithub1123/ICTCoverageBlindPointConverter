@@ -9,6 +9,25 @@ public sealed partial class MainForm
     string currentPage="分类筛选";
     object?[][] mainRows=[];
     readonly HashSet<int> checkedIssues=[];
+    readonly ToolTip reasonTip=new(){InitialDelay=450,ReshowDelay=250,AutoPopDelay=12000};
+    CoverageReport? cachedReport;RuleConfig? cachedRules;
+    readonly Dictionary<int,List<DisplayRow>> viewCache=[];
+    sealed record DisplayRow(string Type,string Reference,string RawReference,string Value,string Reason,TestState State,bool Pending,bool PendingCause,object?[] Cells);
+
+    List<DisplayRow> CurrentView()
+    {
+        if(!ReferenceEquals(cachedReport,report)||!ReferenceEquals(cachedRules,cfg)){viewCache.Clear();cachedReport=report;cachedRules=cfg;}
+        int key=selectedKind.HasValue?(int)selectedKind.Value+1:0;
+        if(!viewCache.TryGetValue(key,out var result))
+        {
+            result=ReportView.Scope(report!,selectedKind,new(OnlyUntestable:false)).Select(r=>
+            {
+                string reason=r.Reasons(cfg);var a=r.Anchor;
+                return new DisplayRow(a.Type,a.Reference,a.RawReference,a.Value,reason,r.State,r.Pending,r.PendingCause(cfg),[a.GroupCategory,a.Reference,a.Value,r.Symbol(InspectionKind.Missing),r.Symbol(InspectionKind.Short),r.Symbol(InspectionKind.Wrong),r.Symbol(InspectionKind.OpenSolder),reason]);
+            }).ToList();viewCache[key]=result;
+        }
+        return result;
+    }
 
     void ConfigureIssueGrid()
     {
@@ -35,27 +54,30 @@ public sealed partial class MainForm
 
     void ConfigureMainGrid()
     {
-        grid.AutoGenerateColumns=false;grid.VirtualMode=true;grid.RowTemplate.Height=58;
+        grid.AutoGenerateColumns=false;grid.VirtualMode=true;grid.RowTemplate.Height=62;grid.ShowCellToolTips=false;
         foreach(string name in new[]{"元件类型","元件位置","标准值","缺件","短路","错件","空焊","盲点原因"})
         {
             var column=new DataGridViewTextBoxColumn{Name=name,HeaderText=name,SortMode=DataGridViewColumnSortMode.NotSortable};
-            if(name is "缺件" or "短路" or "错件" or "空焊"){column.AutoSizeMode=DataGridViewAutoSizeColumnMode.None;column.Width=56;}
+            if(name is "缺件" or "短路" or "错件" or "空焊"){column.AutoSizeMode=DataGridViewAutoSizeColumnMode.None;column.Width=56;column.DefaultCellStyle.Font=AppTheme.StatusFont;}
             else{column.MinimumWidth=name=="盲点原因"?180:95;column.FillWeight=name=="盲点原因"?300:name=="元件位置"?110:85;}
             if(name=="盲点原因")column.DefaultCellStyle.WrapMode=DataGridViewTriState.True;
             grid.Columns.Add(column);
         }
         grid.CellValueNeeded+=(_,e)=>{if(e.RowIndex>=0&&e.RowIndex<mainRows.Length)e.Value=mainRows[e.RowIndex][e.ColumnIndex];};
-        grid.CellToolTipTextNeeded+=(_,e)=>{if(e.RowIndex>=0&&e.RowIndex<mainRows.Length&&e.ColumnIndex==7)e.ToolTipText=mainRows[e.RowIndex][7]?.ToString();};
+        grid.CellMouseEnter+=(_,e)=>reasonTip.SetToolTip(grid,e.RowIndex>=0&&e.RowIndex<mainRows.Length&&e.ColumnIndex==7?mainRows[e.RowIndex][7]?.ToString():null);
+        grid.CellMouseLeave+=(_,_)=>reasonTip.SetToolTip(grid,null);
+        grid.Scroll+=(_,_)=>reasonTip.SetToolTip(grid,null);
         filterDelay.Tick+=(_,_)=>{filterDelay.Stop();RefreshResults();};
-        FormClosed+=(_,_)=>filterDelay.Dispose();
+        FormClosed+=(_,_)=>{filterDelay.Dispose();reasonTip.Dispose();};
     }
 
     void ScheduleFilter(){filterDelay.Stop();filterDelay.Start();}
 
-    void DisplayMainRows(List<ReportRow> rows)
+    void DisplayMainRows(List<DisplayRow> rows)
     {
-        mainRows=rows.Select(r=>new object?[]{r.Anchor.GroupCategory,r.Anchor.Reference,r.Anchor.Value,r.Symbol(InspectionKind.Missing),r.Symbol(InspectionKind.Short),r.Symbol(InspectionKind.Wrong),r.Symbol(InspectionKind.OpenSolder),r.Reasons(cfg)}).ToArray();
-        grid.RowCount=mainRows.Length;grid.Invalidate();
+        ((ResponsiveGrid)grid).CancelPendingScroll();
+        mainRows=rows.Select(r=>r.Cells).ToArray();
+        if(grid.RowCount!=mainRows.Length)grid.RowCount=mainRows.Length;grid.Invalidate();
     }
 
     void InvalidateDetailPages()
@@ -77,7 +99,7 @@ public sealed partial class MainForm
             case "复制":RefreshCopy();break;
             case "异常待确认":RefreshIssues([]);break;
             case "人工修改日志":RefreshLog();break;
-            case "规则设置":case "V2规则总览":RefreshRules();break;
+            case "规则设置":case "规则总览":RefreshRules();break;
             case "盲点设置":RefreshReasons();break;
         }
     }

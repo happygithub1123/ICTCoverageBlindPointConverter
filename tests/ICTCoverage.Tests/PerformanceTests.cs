@@ -14,9 +14,9 @@ public sealed class PerformanceTests
     const BindingFlags Private=BindingFlags.Instance|BindingFlags.NonPublic;
     static T Field<T>(object o,string n)=>(T)o.GetType().GetField(n,Private)!.GetValue(o)!;
     static object? Call(object o,string n,params object?[] args)=>o.GetType().GetMethod(n,Private)!.Invoke(o,args);
-    [Fact]public void ImportResponsivenessAndRefreshProbe()
+    [Fact]public async Task ImportResponsivenessAndRefreshProbe()
     {
-        Exception? failure=null;var thread=new Thread(()=>
+        Exception? failure=null;var completion=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);var thread=new Thread(()=>
         {
             try
             {
@@ -45,7 +45,7 @@ public sealed class PerformanceTests
                         results["rows"]=Field<DataGridView>(form,"grid").Rows.Count;string label=Environment.GetEnvironmentVariable("ICT_PERF_LABEL")??"latest";File.WriteAllText(Path.Combine(ConverterTests.Root,"outputs","performance-"+label+".json"),JsonSerializer.Serialize(results,new JsonSerializerOptions{WriteIndented=true}));Assert.Equal(1202,results["rows"]);Assert.True(beats>5,"导入时界面消息循环应持续运行");Assert.True(maxGap<1500,$"导入期间主线程停顿 {maxGap:F0}ms，超过1500ms回归上限");Assert.True(results["tenThousandRowViewMs"]<1500,"万行主表刷新不应逐行创建控件");Assert.True(results["tenThousandIssuesMs"]<1500,"万行异常页不应逐行创建控件");
                     }catch(Exception ex){failure=ex;}finally{form.Close();}
                 };Application.Run(form);
-            }catch(Exception ex){failure=ex;}
-        });thread.SetApartmentState(ApartmentState.STA);thread.IsBackground=true;thread.Start();Assert.True(thread.Join(TimeSpan.FromSeconds(120)),"导入性能测试超时");if(failure!=null)System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
+            }catch(Exception ex){failure=ex;}finally{completion.TrySetResult();}
+        });thread.SetApartmentState(ApartmentState.STA);thread.IsBackground=true;thread.Start();await completion.Task.WaitAsync(TimeSpan.FromSeconds(120));if(failure!=null)System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(failure).Throw();
     }
 }
