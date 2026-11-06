@@ -27,7 +27,7 @@ public sealed class ConverterTests
     [Fact] public void RealSample_ReconcilesEveryComponentAndReason()
     {
         var a=ReadSample();Assert.Equal(1202,a.Total);Assert.Equal(1000,a.Untestable);Assert.Equal(202,a.Testable);Assert.Equal(1000,a.SourceUntestable);
-        Assert.True(a.Pending>1);Assert.True(a.Components.Single(c=>c.Reference=="Q7").Pending);Assert.Equal(TestState.Testable,a.Components.Single(c=>c.Reference=="Q7").SourceState);
+        Assert.Equal(0,a.Pending);Assert.False(a.Components.Single(c=>c.Reference=="Q7").Pending);Assert.Equal(TestState.Testable,a.Components.Single(c=>c.Reference=="Q7").SourceState);
         var all=a.Components.Where(c=>c.State==TestState.Untestable).ToList();Assert.Equal(1000,all.Select(c=>c.Reference).Distinct().Count());Assert.Equal(99,AnalysisEngine.Group(all).Count);
         var expected=new Dictionary<string,int>{{"NO_POINT",744},{"PARALLEL",156},{"DQ",53},{"CONNECTOR",21},{"IC",13},{"ACTIVE",5},{"SMALL_PF",4},{"BELOW_STANDARD",4}};
         foreach(var pair in expected)Assert.Equal(pair.Value,all.Count(c=>c.ReasonCode==pair.Key));

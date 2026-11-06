@@ -21,36 +21,32 @@ public sealed class AnalysisEngine(RuleConfig config)
             foreach(var s in suffix)
                 if(config.SuffixAliases.TryGetValue(s,out var alias)) normalized.Add(alias);
                 else c.Issues.Add(new("suffix",$"未知后缀 /{s}"));
-            bool np=normalized.Contains("NP"), no=config.UntestableSymbols.Contains(c.StatusSymbol.Trim(),StringComparer.OrdinalIgnoreCase), yes=config.TestableSymbols.Contains(c.StatusSymbol.Trim(),StringComparer.OrdinalIgnoreCase);
-            c.SourceState=no?TestState.Untestable:yes?TestState.Testable:TestState.Unknown;c.State=c.SourceState;
-            c.AppliedRuleIds.Add(no?"F-02":yes?"F-03":"F-04");
-            if(np&&yes)c.Issues.Add(new("status","NP与源缺件列可测标记冲突；源统计不变，请人工确认"));
+            bool no=config.UntestableSymbols.Contains(c.StatusSymbol.Trim(),StringComparer.OrdinalIgnoreCase), yes=config.TestableSymbols.Contains(c.StatusSymbol.Trim(),StringComparer.OrdinalIgnoreCase), na=config.NotApplicableSymbols.Contains(c.StatusSymbol.Trim());
+            c.SourceState=no?TestState.Untestable:yes?TestState.Testable:na?TestState.NotApplicable:TestState.Unknown;c.State=c.SourceState;
+            c.AppliedRuleIds.Add(no?"F-02":yes||na?"F-03":"F-04");
             if(c.State==TestState.Unknown) c.Issues.Add(new("status","空白或未知检测状态"));
-            if(c.Yellow && c.State!=TestState.Untestable) c.Issues.Add(new("yellow","黄色底纹与不可测判定不一致",false));
             c.Value=config.TypeValues.GetValueOrDefault(c.Type,c.RawValue);
             if(c.Type=="电阻" && config.Rules.Any(r=>r.RuleId=="V-01"&&r.Enabled) && config.ProfileValueOverrides.TryGetValue(profile,out var overrides)){c.Value=overrides.GetValueOrDefault(c.RawValue,c.RawValue);c.AppliedRuleIds.Add("V-01");}
-            if(c.State!=TestState.Testable)
+            if(yes||na){c.Issues.Clear();continue;}
+            if(c.State==TestState.Untestable)
             {
                 if(c.Type=="待确认") c.Issues.Add(new("type","未知元件前缀"));
                 if(string.IsNullOrWhiteSpace(c.RawValue)) c.Issues.Add(new("value","标准值为空"));
-                var matches=config.Rules.Where(r=>r.Enabled && (r.Stage is "原因分类" or "可测性扩展") && (r.Profile==null||r.Profile==profile) && r.Types.Contains(c.Type) &&
+                var matches=config.Rules.Where(r=>r.Enabled && !r.Archived && (r.Stage is "原因分类" or "可测性扩展") && (r.Profile==null||r.Profile==profile) && r.Types.Contains(c.Type) &&
                     (r.Prefixes.Length==0||r.Prefixes.Contains(match.Groups["prefix"].Value.ToUpperInvariant())) &&
                     (r.Suffix==null||normalized.Contains(r.Suffix)) && !r.ExcludeSuffixes.Any(normalized.Contains) && (!r.NoOtherSuffixes||normalized.Count==0) &&
                     (r.ExactValue==null||r.ExactValue==c.RawValue) && (r.Reference==null||r.Reference==c.Reference)).OrderBy(r=>r.Priority).ThenBy(r=>r.RuleId,StringComparer.Ordinal).ToList();
                 c.MatchedRules=matches.Select(r=>new RuleMatch(r.RuleId,r.Priority,r.Reason,r.Status,r.Source)).ToList();
                 c.AppliedRuleIds.AddRange(matches.Select(r=>r.RuleId));
-                foreach(var review in matches.Where(r=>r.ReviewOnly))c.Issues.Add(new(review.RuleId,$"{review.RuleId}：{(review.RuleId=="R-03"?"/R的10%口径及测值未确认":review.RuleId=="C-07"?"/C的30%定义待确认，仅作参考，不计算可测性":"SG来源/短路群定义待确认，不自动判定")}",review.BlockingReview));
+                // 测试结果已由Coverage确认。参考参数不触发重新确认可测性。
                 var candidates=matches.Where(r=>!r.ReviewOnly&&r.Reason.Length>0).ToList();
                 var rule=candidates.FirstOrDefault();
                 if(rule==null) c.Issues.Add(new("classification","未匹配盲点原因"));
                 else
                 {
                     c.ReasonCode=rule.Reason;c.RuleId=rule.RuleId;
-                    if(rule.RequiresProgram&&string.IsNullOrWhiteSpace(c.ProgramEvidence))c.Issues.Add(new("program",$"{rule.RuleId}：原因仅为样例建议，缺测试程序证据，需人工复核"));
-                    if(rule.ReviewOutsideSample)c.Issues.Add(new("reliability",$"{rule.RuleId}：{rule.Status}，请核对实际元件特性",profile!=config.SampleProfile||c.Reference.StartsWith('X')));
                     if(candidates.Any(r=>r.Reason!=rule.Reason&&!rule.Supersedes.Contains(r.RuleId)))c.Issues.Add(new("rule_conflict","多个规则原因不同且没有已声明的优先关系"));
                 }
-                if(normalized.Contains("PCB")&&normalized.Any(s=>s is "NP" or "C"))c.Issues.Add(new("suffix_conflict","PCB与其他分类后缀共存，保留候选原因并人工审核"));
             }
         }
         CheckDuplicates(a);
@@ -61,7 +57,7 @@ public sealed class AnalysisEngine(RuleConfig config)
     public static void CheckDuplicates(Analysis a)
     {
         foreach(var c in a.Components)c.Issues.RemoveAll(i=>i.Code=="duplicate");
-        foreach(var group in a.Components.Where(c=>!string.IsNullOrWhiteSpace(c.Reference)).GroupBy(c=>c.Reference).Where(g=>g.Count()>1))
+        foreach(var group in a.Components.Where(c=>c.State==TestState.Untestable&&!string.IsNullOrWhiteSpace(c.Reference)).GroupBy(c=>c.Reference).Where(g=>g.Count()>1))
             foreach(var c in group) c.Issues.Add(new("duplicate",$"重复位号 {group.Key}，来源行 {string.Join(",",group.Select(x=>x.SourceRow))}"));
     }
     public static List<Component> Filter(Analysis a,FilterOptions f,RuleConfig cfg) => a.Components.Where(c=>
@@ -74,6 +70,8 @@ public sealed class AnalysisEngine(RuleConfig config)
         if(string.IsNullOrWhiteSpace(justification))throw new InvalidDataException("请填写修改理由");
         if(!Regex.IsMatch(reference,@"^[A-Za-z]+\d+$"))throw new InvalidDataException("规范位号必须为字母前缀加数字，例如 R103");
         if(state is TestState.Unknown or TestState.Conflict)throw new InvalidDataException("请选择明确的可测或不可测状态");
+        if(c.SourceState!=TestState.Untestable||state!=c.SourceState)throw new InvalidDataException("检测结果以Coverage为准，仅能为打X的元件选择原因");
+        if(!cfg.PrefixTypes.Values.Contains(type))throw new InvalidDataException("请选择已有元件类型");
         if(state==TestState.Untestable && (string.IsNullOrWhiteSpace(value)||!cfg.Reasons.ContainsKey(reasonCode)||type=="待确认"))throw new InvalidDataException("不可测记录必须填写类型、标准值和原因");
         string before=JsonSerializer.Serialize(c,RuleConfig.JsonOptions);
         reviewer=string.IsNullOrWhiteSpace(reviewer)?Environment.UserName:reviewer.Trim();

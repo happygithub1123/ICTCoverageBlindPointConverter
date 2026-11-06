@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup><OutputType>WinExe</OutputType><TargetFramework>net8.0-windows</TargetFramework><UseWindowsForms>true</UseWindowsForms><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><AssemblyName>ICT盲点表工具</AssemblyName><ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode></PropertyGroup>
-  <ItemGroup><ProjectReference Include="../ICTCoverage.Core/ICTCoverage.Core.csproj"/><Content Include="../../config/*.json" Link="config/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/><Content Include="../../samples/*" Link="samples/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/></ItemGroup>
+  <PropertyGroup><OutputType>WinExe</OutputType><TargetFramework>net8.0-windows</TargetFramework><UseWindowsForms>true</UseWindowsForms><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><AssemblyName>ICT盲点表工具</AssemblyName><ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode><ApplicationIcon>Assets/whappy.ico</ApplicationIcon><Authors>WHAPPY · 王开心 · WANG KAIXIN</Authors></PropertyGroup>
+  <ItemGroup><EmbeddedResource Include="Assets/whappy.ico" LogicalName="ICTCoverage.whappy.ico"/><EmbeddedResource Include="Assets/whappy.png" LogicalName="ICTCoverage.whappy.png"/></ItemGroup>
+  <ItemGroup><ProjectReference Include="../ICTCoverage.Core/ICTCoverage.Core.csproj"/><Content Include="../../config/*.json" Link="config/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/></ItemGroup>
 </Project>

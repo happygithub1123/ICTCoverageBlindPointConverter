@@ -20,23 +20,22 @@ public sealed class V2Tests
     }
     [Theory][InlineData("R1/NP","",TestState.Unknown)][InlineData("R1/NP","√",TestState.Testable)][InlineData("R1","✕",TestState.Untestable)][InlineData("R1"," x ",TestState.Untestable)]
     public void SourceColumnIsAuthoritative(string reference,string symbol,TestState state)
-    {var a=Analyze(reference,status:symbol);Assert.Equal(state,a.Components[0].SourceState);Assert.Equal(state,a.Components[0].State);if(reference.Contains("NP")&&symbol=="√")Assert.True(a.Components[0].Pending);}
-    [Fact]public void ManualDecisionDoesNotRewriteSourceStatistics()
+    {var a=Analyze(reference,status:symbol);Assert.Equal(state,a.Components[0].SourceState);Assert.Equal(state,a.Components[0].State);if(reference.Contains("NP")&&symbol=="√")Assert.False(a.Components[0].Pending);}
+    [Fact]public void SourceDecisionsAreReadOnlyAndManualEditsOnlyChooseReasons()
     {
-        var a=Analyze("Q7_2_3/NP",status:"√");var c=a.Components[0];Assert.Equal(1,a.Testable);Assert.Equal(0,a.SourceUntestable);Assert.True(c.Pending);
-        AnalysisEngine.Edit(a,c,"Q7","三极管","Q",TestState.Untestable,"DQ","","工程师核对后改判",Config(),"测试工程师","程序版本A：Q7测试项");
-        Assert.Equal(1,a.Testable);Assert.Equal(0,a.SourceUntestable);Assert.Equal(1,a.Untestable);Assert.Equal("√",c.StatusSymbol);Assert.False(c.Pending);Assert.True(c.ManuallyReviewed);
-        Assert.Equal("测试工程师",a.Edits.Single().Reviewer);Assert.Equal("2.0.0",a.Edits.Single().RuleVersion);
+        var a=Analyze("Q7_2_3/NP",status:"√");var c=a.Components[0];Assert.Equal(1,a.Testable);Assert.False(c.Pending);
+        Assert.Throws<InvalidDataException>(()=>AnalysisEngine.Edit(a,c,"Q7","三极管","Q",TestState.Untestable,"DQ","","不能改判",Config()));
+        a=Analyze("C1/SG","1uF");c=a.Components[0];Assert.True(c.Pending);AnalysisEngine.Edit(a,c,"C1","电容","1uF",TestState.Untestable,"SHORT_GROUP","","手工选择原因",Config(),"王开心");Assert.False(c.Pending);Assert.Equal("王开心",a.Edits.Single().Reviewer);Assert.Equal(1,a.SourceUntestable);
     }
     [Theory][InlineData("D1/NP","D-01")][InlineData("Q1/NP","Q-01")][InlineData("U1/NP","U-01")]
     public void ProgramReasonsRequireReview(string reference,string rule)
-    {var a=Analyze(reference);var c=a.Components[0];Assert.True(c.Pending);Assert.Equal(rule,c.RuleId);Assert.Contains(c.Issues,i=>i.Code=="program");Assert.Equal(rule,c.MatchedRules.Single().RuleId);}
+    {var a=Analyze(reference);var c=a.Components[0];Assert.False(c.Pending);Assert.Equal(rule,c.RuleId);Assert.DoesNotContain(c.Issues,i=>i.Code=="program");Assert.Equal(rule,c.MatchedRules.Single().RuleId);}
     [Fact]public void ProgramEvidenceIsTraceableButDoesNotChangeSourceState()
     {
-        var a=new Analysis{Components=[new(){RawReference="Q1/NP",RawValue="Q",StatusSymbol="√",ProgramEvidence="程序有Q1测试项"}]};new AnalysisEngine(Config()).Analyze(a,"");Assert.Equal(1,a.Testable);Assert.True(a.Components[0].Pending);
+        var a=new Analysis{Components=[new(){RawReference="Q1/NP",RawValue="Q",StatusSymbol="√",ProgramEvidence="程序有Q1测试项"}]};new AnalysisEngine(Config()).Analyze(a,"");Assert.Equal(1,a.Testable);Assert.False(a.Components[0].Pending);
     }
     [Fact]public void ParallelResistorKeepsNPClassificationAndReviewEvidence()
-    {var c=Analyze("R382/NP/R","22.00K").Components[0];Assert.Equal("R-02",c.RuleId);Assert.Equal("NO_POINT",c.ReasonCode);Assert.True(c.Pending);Assert.Contains(c.MatchedRules,r=>r.RuleId=="R-03");}
+    {var c=Analyze("R382/NP/R","22.00K").Components[0];Assert.Equal("R-02",c.RuleId);Assert.Equal("NO_POINT",c.ReasonCode);Assert.False(c.Pending);Assert.Contains(c.MatchedRules,r=>r.RuleId=="R-03");}
     [Fact]public void ShortGroupDoesNotInventEvidenceOrFormula()
     {
         var c=Analyze("C1/SG","1uF").Components[0];Assert.True(c.Pending);Assert.Equal("",c.ReasonCode);Assert.Contains(c.MatchedRules,r=>r.RuleId=="C-04");
@@ -44,8 +43,8 @@ public sealed class V2Tests
     }
     [Fact]public void CapacitorThirtyPercentIsReferenceOnlyAndPrecedenceIsExplicit()
     {
-        var c=Analyze("C1/NP/C","1uF").Components[0];Assert.Equal("C-05",c.RuleId);Assert.Equal("NO_POINT",c.ReasonCode);Assert.False(c.Pending);Assert.Contains(c.Issues,i=>i.Code=="C-07"&&!i.Blocking);
-        c=Analyze("C199/C/PCB","0.100uF").Components[0];Assert.Equal("C-01",c.RuleId);Assert.True(c.Pending);Assert.Contains(c.Issues,i=>i.Code=="suffix_conflict");
+        var c=Analyze("C1/NP/C","1uF").Components[0];Assert.Equal("C-05",c.RuleId);Assert.Equal("NO_POINT",c.ReasonCode);Assert.False(c.Pending);Assert.Contains(c.MatchedRules,i=>i.RuleId=="C-07");
+        c=Analyze("C199/C/PCB","0.100uF").Components[0];Assert.Equal("C-01",c.RuleId);Assert.False(c.Pending);
     }
     [Fact]public void ExplicitPriorityWinsIndependentOfArrayOrderAndUnknownConflictsBlock()
     {
@@ -56,7 +55,7 @@ public sealed class V2Tests
     {
         var c=Analyze("R1").Components[0];Assert.True(c.Pending);Assert.Equal("",c.ReasonCode);
         c=Analyze("R1",profile:Config().SampleProfile).Components[0];Assert.Equal("R-04",c.RuleId);
-        c=Analyze("X1").Components[0];Assert.Equal("晶振",c.Type);Assert.Equal("晶振",c.Value);Assert.True(c.Pending);
+        c=Analyze("X1").Components[0];Assert.Equal("晶振",c.Type);Assert.Equal("晶振",c.Value);Assert.False(c.Pending);
     }
     [Fact]public void SourceSummaryMismatchBlocksFormalExport()
     {
@@ -76,9 +75,9 @@ public sealed class V2Tests
     [Fact]public void FullReviewFlow_EnablesFormalExportWithoutLosingSourceOrRules()
     {
         var cfg=Config();var reader=new CoverageReader();var source=Directory.GetFiles(Path.Combine(ConverterTests.Root,"samples"),"*.xls").Single();var a=reader.Read(source,reader.Locate(source).Single());new AnalysisEngine(cfg).Analyze(a,cfg.SampleProfile);
-        Assert.Equal(72,a.Pending);Assert.Equal(1000,a.Untestable);Assert.Equal(99,AnalysisEngine.Group(a.Components.Where(c=>c.State==TestState.Untestable)).Count);
+        Assert.Equal(0,a.Pending);Assert.Equal(1000,a.Untestable);Assert.Equal(99,AnalysisEngine.Group(a.Components.Where(c=>c.State==TestState.Untestable)).Count);
         foreach(var c in a.Components.Where(c=>c.Pending).ToArray())AnalysisEngine.Edit(a,c,c.Reference,c.Type,c.Value,c.State,c.ReasonCode,c.Note,"自动化测试专用确认，不代表真实审核",cfg,"测试夹具");
-        Assert.Equal(0,a.Pending);Assert.Equal(202,a.Testable);Assert.Equal(1000,a.SourceUntestable);Assert.Equal(72,a.Edits.Count);Assert.NotEmpty(a.Components.Single(c=>c.Reference=="R382").MatchedRules);
+        Assert.Equal(0,a.Pending);Assert.Equal(202,a.Testable);Assert.Equal(1000,a.SourceUntestable);Assert.Empty(a.Edits);Assert.NotEmpty(a.Components.Single(c=>c.Reference=="R382").MatchedRules);
         var path=Path.Combine(Path.GetTempPath(),Guid.NewGuid()+".xlsx");try{var template=Directory.GetFiles(Path.Combine(ConverterTests.Root,"samples"),"*.xlsx").Single();new ExcelExporter(cfg).Export(a,template,path,new(a.BoardNumber,a.ProductNumber));ExcelExporter.Verify(path,a);using var wb=new XLWorkbook(path);Assert.Contains("16.80%",wb.Worksheets.First().Cell(6,1).GetString());Assert.Contains("未提供",wb.Worksheets.First().Cell(6,1).GetString());}finally{File.Delete(path);}
     }
     [Fact]public void LegacyConfigIsNotSilentlyLoadedAsV2()

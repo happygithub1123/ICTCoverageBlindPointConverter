@@ -108,7 +108,7 @@
     }
   },
   "schemaVersion": 2,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "coverageDisplay": "truncate",
   "sampleProfile": "MG10P0B3270350-P25086380101",
   "referenceParameters": [
@@ -342,6 +342,11 @@
       "version": "2.0.0",
       "action": "用户授权V2接入；保留全部34条规则及旧规则快照",
       "legacySnapshot": "docs/baseline/legacy-runtime-rules.json"
+    },
+    {
+      "date": "2026-11-06",
+      "version": "2.1.0",
+      "action": "用户确认Coverage检测结果可信：仅X纳入，√和∕排除；只处理盲点原因，不以NP/底纹/程序证据重新确认可测性。"
     }
   ],
   "rules": [
@@ -1891,5 +1896,10 @@
       "prefixes": [],
       "prefixesSourceText": "样例"
     }
+  ],
+  "notApplicableSymbols": [
+    "∕",
+    "/",
+    "／"
   ]
 }

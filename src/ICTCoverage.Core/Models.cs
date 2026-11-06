@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ICTCoverage.Core;
 
-public enum TestState { Unknown, Testable, Untestable, Conflict }
+public enum TestState { Unknown, Testable, Untestable, Conflict, NotApplicable }
 public record Issue(string Code, string Message, bool Blocking = true);
 public record RuleMatch(string RuleId, int Priority, string ReasonCode, string Reliability, string Source);
 public sealed class Component
@@ -73,6 +73,7 @@ public sealed class ClassificationRule
     public bool RequiresProgram { get; set; }
     public bool ReviewOutsideSample { get; set; }
     public bool NoOtherSuffixes { get; set; }
+    public bool Archived { get; set; }
     public string[] Types { get; set; } = [];
     public string[] Prefixes { get; set; } = [];
     public string? Suffix { get; set; }
@@ -94,10 +95,12 @@ public sealed class RuleConfig
     public Dictionary<string,string> SuffixAliases { get; set; } = [];
     public string[] UntestableSymbols { get; set; } = ["X", "Х", "×"];
     public string[] TestableSymbols { get; set; } = ["√", "✓", "✔"];
+    public string[] NotApplicableSymbols { get; set; } = ["∕", "/", "／", "—"];
     public Dictionary<string,string> Reasons { get; set; } = [];
     public Dictionary<string,string> TypeValues { get; set; } = [];
     public Dictionary<string,Dictionary<string,string>> ProfileValueOverrides { get; set; } = [];
     public List<ClassificationRule> Rules { get; set; } = [];
+    public List<RuleChange> RuleChanges { get; set; } = [];
     public static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true, PropertyNameCaseInsensitive = true, Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping, Converters = { new JsonStringEnumConverter() } };
     public static RuleConfig Load(string path)
     {
@@ -114,6 +117,8 @@ public sealed class RuleConfig
         if(Rules.Any(r=>r.RequiresProgram&&r.Status=="样例已验证"))throw new InvalidDataException("程序判定原因不能标为已验证");
         if(CoverageDisplay is not ("truncate" or "round"))throw new InvalidDataException("覆盖率显示只支持truncate或round");
         if(UntestableSymbols.Intersect(TestableSymbols,StringComparer.OrdinalIgnoreCase).Any())throw new InvalidDataException("可测和不可测符号重叠");
+        if(NotApplicableSymbols.Intersect(UntestableSymbols.Concat(TestableSymbols),StringComparer.OrdinalIgnoreCase).Any())throw new InvalidDataException("不适用符号与检测状态重叠");
+        if(Rules.Any(r=>r.Archived&&r.Enabled))throw new InvalidDataException("已删除规则不能同时启用");
         if(Rules.Any(r=>r.Stage is not ("筛选" or "位号解析" or "标准值" or "原因分类" or "可测性扩展" or "异常审核" or "分组" or "导出" or "统计" or "回归测试")))throw new InvalidDataException("未知规则阶段");
         if(Rules.Any(r=>(r.Stage is "原因分类" or "可测性扩展")&&(r.Types.Length==0||r.Priority<0||r.Scope=="project"&&string.IsNullOrWhiteSpace(r.Profile))))throw new InvalidDataException("分类规则缺类型、有效优先级或项目范围");
         if(Rules.Any(r=>r.Stage=="原因分类"&&!r.ReviewOnly&&string.IsNullOrWhiteSpace(r.Reason)))throw new InvalidDataException("自动分类规则缺少reasonCode");

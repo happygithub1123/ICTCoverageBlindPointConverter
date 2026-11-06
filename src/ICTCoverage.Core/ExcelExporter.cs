@@ -24,8 +24,21 @@ public sealed class ExcelExporter(RuleConfig cfg)
     {
         if(a.Pending>0&&!options.Draft)throw new InvalidOperationException($"还有 {a.Pending} 条待确认记录，不能正式导出");
         if(Path.GetFullPath(target)==Path.GetFullPath(template)||Path.GetFullPath(target)==a.SourcePath)throw new InvalidOperationException("不能覆盖源文件或模板");
+        using var stream=File.OpenRead(template);
+        Export(a,stream,target,options);
+    }
+    public void ExportFixed(Analysis a,string target,ExportOptions options)
+    {
+        using var stream=typeof(ExcelExporter).Assembly.GetManifestResourceStream("ICTCoverage.BlindPointTemplate.xlsx")??throw new InvalidDataException("内置通用模板缺失");
+        Export(a,stream,target,options);
+    }
+    public void Export(Analysis a,Stream template,string target,ExportOptions options)
+    {
+        if(a.Pending>0&&!options.Draft)throw new InvalidOperationException($"还有 {a.Pending} 条原因或数据待处理");
+        if(Path.GetFullPath(target)==a.SourcePath)throw new InvalidOperationException("不能覆盖源文件");
         using var wb=new XLWorkbook(template);
         var (s,start,oldCount)=LocateTemplate(wb);
+        foreach(var sheet in wb.Worksheets.Where(other=>other.Name!=s.Name).ToList())sheet.Delete();
         if(oldCount==0)throw new InvalidDataException("模板至少需要一条示范明细行，以便继承格式");
         var groups=AnalysisEngine.Group(a.Components.Where(c=>c.State==TestState.Untestable));
         var order=Enumerable.Range(start,oldCount).Select((r,i)=>new {Key=(s.Cell(r,4).GetFormattedString(),NormalizeReason(s.Cell(r,5).GetString())),Index=i,Row=r}).ToList();

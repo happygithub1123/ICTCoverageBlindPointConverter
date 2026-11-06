@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable></PropertyGroup>
   <ItemGroup><PackageReference Include="NPOI" Version="2.7.2"/><PackageReference Include="ClosedXML" Version="0.104.2"/></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="Assets/BlindPointTemplate.xlsx" LogicalName="ICTCoverage.BlindPointTemplate.xlsx"/></ItemGroup>
 </Project>
