@@ -28,13 +28,13 @@ public sealed class V2Tests
         a=Analyze("C1/SG","1uF");c=a.Components[0];Assert.True(c.Pending);AnalysisEngine.Edit(a,c,"C1","电容","1uF",TestState.Untestable,"SHORT_GROUP","","手工选择原因",Config(),"王开心");Assert.False(c.Pending);Assert.Equal("王开心",a.Edits.Single().Reviewer);Assert.Equal(1,a.SourceUntestable);
     }
     [Theory][InlineData("D1/NP","D-01")][InlineData("Q1/NP","Q-01")][InlineData("U1/NP","U-01")]
-    public void ProgramReasonsRequireReview(string reference,string rule)
+    public void DqIcReasonsDoNotRequireProgramReview(string reference,string rule)
     {var a=Analyze(reference);var c=a.Components[0];Assert.False(c.Pending);Assert.Equal(rule,c.RuleId);Assert.DoesNotContain(c.Issues,i=>i.Code=="program");Assert.Equal(rule,c.MatchedRules.Single().RuleId);}
     [Fact]public void ProgramEvidenceIsTraceableButDoesNotChangeSourceState()
     {
         var a=new Analysis{Components=[new(){RawReference="Q1/NP",RawValue="Q",StatusSymbol="√",ProgramEvidence="程序有Q1测试项"}]};new AnalysisEngine(Config()).Analyze(a,"");Assert.Equal(1,a.Testable);Assert.False(a.Components[0].Pending);
     }
-    [Fact]public void ParallelResistorKeepsNPClassificationAndReviewEvidence()
+    [Fact]public void ParallelResistorKeepsNPClassificationAndReferenceHistory()
     {var c=Analyze("R382/NP/R","22.00K").Components[0];Assert.Equal("R-02",c.RuleId);Assert.Equal("NO_POINT",c.ReasonCode);Assert.False(c.Pending);Assert.Contains(c.MatchedRules,r=>r.RuleId=="R-03");}
     [Fact]public void ShortGroupDoesNotInventEvidenceOrFormula()
     {

@@ -108,7 +108,7 @@
     }
   },
   "schemaVersion": 2,
-  "version": "2.1.0",
+  "version": "2.1.1",
   "coverageDisplay": "truncate",
   "sampleProfile": "MG10P0B3270350-P25086380101",
   "referenceParameters": [
@@ -151,191 +151,6 @@
       "sha256": "2615356f21388dcab4c70c43d075d16d5e336b6e7df0090fce0ee9a444cfeb34"
     }
   ],
-  "pendingDefinitions": [
-    {
-      "issueId": "ISSUE-Q-01",
-      "sourceId": "Q-01",
-      "question": "电容/C新规则原文‘并联电阻 %30范围内可测’",
-      "needsDefinition": "原文可能笔误：究竟是‘并联电容’还是‘并联电阻’？",
-      "safeBehavior": "保留原文；30%不得直接改变盲点分类",
-      "priority": "高",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A5:E5"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q-02",
-      "sourceId": "Q-02",
-      "question": "/R 并联电阻10%",
-      "needsDefinition": "10%的计算口径、测试值与测试上下限来自哪里？",
-      "safeBehavior": "仅登记参考参数和待审核原因",
-      "priority": "高",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A6:E6"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q-03",
-      "sourceId": "Q-03",
-      "question": "/C 并联30%",
-      "needsDefinition": "30%是误差容限、合成比例还是其它定义？",
-      "safeBehavior": "仅登记参考参数，不做自动可测性判定",
-      "priority": "高",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A7:E7"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q-04",
-      "sourceId": "Q-04",
-      "question": "SG短路群",
-      "needsDefinition": "SG在Coverage哪一列，还是在测试程序/网络表里？",
-      "safeBehavior": "若无信号，记录规则但不自动命中",
-      "priority": "高",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A8:E8"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q-05",
-      "sourceId": "Q-05",
-      "question": "D/Q/U需看测试程序",
-      "needsDefinition": "测试程序是否可以另行导入？可否提供测试项/limit？",
-      "safeBehavior": "N列只判可测与否；具体原因待确认",
-      "priority": "高",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A9:E9"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q-06",
-      "sourceId": "Q-06",
-      "question": "/NP、/C、/PCB的业务含义",
-      "needsDefinition": "跨项目是否一直一致？",
-      "safeBehavior": "做报告格式版本/项目规则配置",
-      "priority": "中",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A10:E10"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q-07",
-      "sourceId": "Q-07",
-      "question": "项目特例10.00pF",
-      "needsDefinition": "是项目名称相关特例还是仅这份样表的分类？",
-      "safeBehavior": "仅本样例启用，不设通用容值阈值",
-      "priority": "中",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A11:E11"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q-08",
-      "sourceId": "Q-08",
-      "question": "项目特例C115",
-      "needsDefinition": "为什么C115/被归并联电容？",
-      "safeBehavior": "仅本样例启用，需有规则来源",
-      "priority": "中",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A12:E12"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q-09",
-      "sourceId": "Q-09",
-      "question": "晶振X/Y",
-      "needsDefinition": "原文‘有源元件’是否适用于所有X/Y晶振？",
-      "safeBehavior": "原因文本可配置，未验证时提醒",
-      "priority": "中",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A13:E13"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q-10",
-      "sourceId": "Q-10",
-      "question": "值针率30.8%",
-      "needsDefinition": "无法在当前Coverage定位可靠计算来源",
-      "safeBehavior": "软件做手工输入，不自动计算",
-      "priority": "中",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A14:E14"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q-11",
-      "sourceId": "Q-11",
-      "question": "示例差异C246/RA4/P21001",
-      "needsDefinition": "用户已完成表存在位号替换与遗漏",
-      "safeBehavior": "从源报告重新生成并提供差异报告",
-      "priority": "高",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A15:E15"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q-12",
-      "sourceId": "Q-12",
-      "question": "输出备注‘少件AOI可测’",
-      "needsDefinition": "是否所有盲点均经过AOI实际确认？",
-      "safeBehavior": "默认模板文本，可逐组修改",
-      "priority": "中",
-      "source": {
-        "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
-        "sheet": "04_待确认项",
-        "range": "A16:E16"
-      },
-      "status": "pending"
-    },
-    {
-      "issueId": "ISSUE-Q7-STATUS",
-      "sourceId": null,
-      "question": "Q7_2_3/NP 第1127行缺件列√与NP冲突",
-      "needsDefinition": "软件逐项人工确认状态和原因，保留源√及审核历史",
-      "safeBehavior": "不自动把该条改为不可测，不自行视为已确认可测；原始列统计仍保留202可测。",
-      "priority": "高",
-      "status": "pending",
-      "source": {
-        "file": "Coverage样例",
-        "sheet": "模板",
-        "cell": "C1127/N1127",
-        "userInstruction": "用户说明：Q7_2_3/NP 三极管这些不确定的人工确认的，通过软件。"
-      }
-    }
-  ],
   "history": [
     {
       "date": "2026-11-06",
@@ -347,6 +162,11 @@
       "date": "2026-11-06",
       "version": "2.1.0",
       "action": "用户确认Coverage检测结果可信：仅X纳入，√和∕排除；只处理盲点原因，不以NP/底纹/程序证据重新确认可测性。"
+    },
+    {
+      "date": "2026-11-06",
+      "version": "2.1.1",
+      "action": "清理历史程序判定提示；旧字段兼容读取但不校验，保持原因文案、条件、优先级及自定义规则。"
     }
   ],
   "rules": [
@@ -1318,18 +1138,18 @@
       "stage": "原因分类",
       "priority": 140,
       "enabled": true,
-      "status": "样例原因/需复核",
+      "status": "按报告结果归类",
       "scope": "report_profile",
       "source": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx!01_规则总表!A25:K25",
       "conditions": {
         "sourceText": "已从Coverage判为不可测"
       },
       "action": {
-        "sourceText": "样例原因可做默认项，建议核对测试程序"
+        "sourceText": "仅对ICT缺件列打X的元件填写既有盲点原因；√和∕排除，不读取程序。"
       },
       "reasonText": "无测试点、并联二极管，三极管，IC,故不可测",
       "notes": [
-        "新规则明确：是否可测需看测试程序，不能仅凭D前缀判定"
+        "Coverage检测结果已确认，当前仅整理原因；原文保存在historicalEvidence。"
       ],
       "history": [
         {
@@ -1347,7 +1167,6 @@
       "types": [
         "二极管"
       ],
-      "requiresProgram": true,
       "legacyIds": [
         "dq"
       ],
@@ -1361,7 +1180,18 @@
         "DN",
         "DP"
       ],
-      "prefixesSourceText": "D"
+      "prefixesSourceText": "D",
+      "historicalEvidence": {
+        "usage": "历史依据，不参与检测或拦截",
+        "requiresProgram": true,
+        "originalStatus": "样例原因/需复核",
+        "originalAction": {
+          "sourceText": "样例原因可做默认项，建议核对测试程序"
+        },
+        "originalNotes": [
+          "新规则明确：是否可测需看测试程序，不能仅凭D前缀判定"
+        ]
+      }
     },
     {
       "ruleId": "Q-01",
@@ -1369,18 +1199,18 @@
       "stage": "原因分类",
       "priority": 141,
       "enabled": true,
-      "status": "样例原因/需复核",
+      "status": "按报告结果归类",
       "scope": "report_profile",
       "source": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx!01_规则总表!A26:K26",
       "conditions": {
         "sourceText": "已从Coverage判为不可测"
       },
       "action": {
-        "sourceText": "样例原因可做默认项，建议核对测试程序"
+        "sourceText": "仅对ICT缺件列打X的元件填写既有盲点原因；√和∕排除，不读取程序。"
       },
       "reasonText": "无测试点、并联二极管，三极管，IC,故不可测",
       "notes": [
-        "不能仅凭Q前缀断定可测/不可测"
+        "Coverage检测结果已确认，当前仅整理原因；原文保存在historicalEvidence。"
       ],
       "history": [
         {
@@ -1398,7 +1228,6 @@
       "types": [
         "三极管"
       ],
-      "requiresProgram": true,
       "legacyIds": [
         "dq"
       ],
@@ -1410,7 +1239,18 @@
         "QN",
         "QP"
       ],
-      "prefixesSourceText": "Q"
+      "prefixesSourceText": "Q",
+      "historicalEvidence": {
+        "usage": "历史依据，不参与检测或拦截",
+        "requiresProgram": true,
+        "originalStatus": "样例原因/需复核",
+        "originalAction": {
+          "sourceText": "样例原因可做默认项，建议核对测试程序"
+        },
+        "originalNotes": [
+          "不能仅凭Q前缀断定可测/不可测"
+        ]
+      }
     },
     {
       "ruleId": "U-01",
@@ -1418,18 +1258,18 @@
       "stage": "原因分类",
       "priority": 142,
       "enabled": true,
-      "status": "样例原因/需复核",
+      "status": "按报告结果归类",
       "scope": "report_profile",
       "source": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx!01_规则总表!A27:K27",
       "conditions": {
         "sourceText": "已从Coverage判为不可测"
       },
       "action": {
-        "sourceText": "样例原因可做默认项，建议核对测试程序"
+        "sourceText": "仅对ICT缺件列打X的元件填写既有盲点原因；√和∕排除，不读取程序。"
       },
       "reasonText": "无测试点、无保护二极体特征或并联二极体特性元件完全不能侦测",
       "notes": [
-        "测试程序信息缺失时不得声称根因已验证"
+        "Coverage检测结果已确认，当前仅整理原因；原文保存在historicalEvidence。"
       ],
       "history": [
         {
@@ -1447,7 +1287,6 @@
       "types": [
         "IC"
       ],
-      "requiresProgram": true,
       "legacyIds": [
         "ic"
       ],
@@ -1460,7 +1299,18 @@
         "UJ",
         "UN"
       ],
-      "prefixesSourceText": "U/IC"
+      "prefixesSourceText": "U/IC",
+      "historicalEvidence": {
+        "usage": "历史依据，不参与检测或拦截",
+        "requiresProgram": true,
+        "originalStatus": "样例原因/需复核",
+        "originalAction": {
+          "sourceText": "样例原因可做默认项，建议核对测试程序"
+        },
+        "originalNotes": [
+          "测试程序信息缺失时不得声称根因已验证"
+        ]
+      }
     },
     {
       "ruleId": "L-01",
@@ -1497,7 +1347,6 @@
       "types": [
         "电感"
       ],
-      "reviewOutsideSample": true,
       "legacyIds": [
         "inductor"
       ],
@@ -1509,7 +1358,11 @@
         "LG",
         "LP"
       ],
-      "prefixesSourceText": "L"
+      "prefixesSourceText": "L",
+      "historicalEvidence": {
+        "usage": "历史依据，不参与检测或拦截",
+        "reviewOutsideSample": true
+      }
     },
     {
       "ruleId": "J-01",
@@ -1594,7 +1447,6 @@
       "types": [
         "晶振"
       ],
-      "reviewOutsideSample": true,
       "legacyIds": [
         "active"
       ],
@@ -1606,7 +1458,11 @@
         "YP",
         "X"
       ],
-      "prefixesSourceText": "X/Y"
+      "prefixesSourceText": "X/Y",
+      "historicalEvidence": {
+        "usage": "历史依据，不参与检测或拦截",
+        "reviewOutsideSample": true
+      }
     },
     {
       "ruleId": "E-01",
@@ -1901,5 +1757,214 @@
     "∕",
     "/",
     "／"
-  ]
+  ],
+  "historicalPendingDefinitions": {
+    "usage": "仅保留基线原文，不是当前操作要求",
+    "items": [
+      {
+        "issueId": "ISSUE-Q-01",
+        "sourceId": "Q-01",
+        "question": "电容/C新规则原文‘并联电阻 %30范围内可测’",
+        "needsDefinition": "原文可能笔误：究竟是‘并联电容’还是‘并联电阻’？",
+        "safeBehavior": "保留原文；30%不得直接改变盲点分类",
+        "priority": "高",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A5:E5"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q-02",
+        "sourceId": "Q-02",
+        "question": "/R 并联电阻10%",
+        "needsDefinition": "10%的计算口径、测试值与测试上下限来自哪里？",
+        "safeBehavior": "仅登记参考参数和待审核原因",
+        "priority": "高",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A6:E6"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q-03",
+        "sourceId": "Q-03",
+        "question": "/C 并联30%",
+        "needsDefinition": "30%是误差容限、合成比例还是其它定义？",
+        "safeBehavior": "仅登记参考参数，不做自动可测性判定",
+        "priority": "高",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A7:E7"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q-04",
+        "sourceId": "Q-04",
+        "question": "SG短路群",
+        "needsDefinition": "SG在Coverage哪一列，还是在测试程序/网络表里？",
+        "safeBehavior": "若无信号，记录规则但不自动命中",
+        "priority": "高",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A8:E8"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q-05",
+        "sourceId": "Q-05",
+        "question": "D/Q/U需看测试程序",
+        "needsDefinition": "测试程序是否可以另行导入？可否提供测试项/limit？",
+        "safeBehavior": "N列只判可测与否；具体原因待确认",
+        "priority": "高",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A9:E9"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q-06",
+        "sourceId": "Q-06",
+        "question": "/NP、/C、/PCB的业务含义",
+        "needsDefinition": "跨项目是否一直一致？",
+        "safeBehavior": "做报告格式版本/项目规则配置",
+        "priority": "中",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A10:E10"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q-07",
+        "sourceId": "Q-07",
+        "question": "项目特例10.00pF",
+        "needsDefinition": "是项目名称相关特例还是仅这份样表的分类？",
+        "safeBehavior": "仅本样例启用，不设通用容值阈值",
+        "priority": "中",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A11:E11"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q-08",
+        "sourceId": "Q-08",
+        "question": "项目特例C115",
+        "needsDefinition": "为什么C115/被归并联电容？",
+        "safeBehavior": "仅本样例启用，需有规则来源",
+        "priority": "中",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A12:E12"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q-09",
+        "sourceId": "Q-09",
+        "question": "晶振X/Y",
+        "needsDefinition": "原文‘有源元件’是否适用于所有X/Y晶振？",
+        "safeBehavior": "原因文本可配置，未验证时提醒",
+        "priority": "中",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A13:E13"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q-10",
+        "sourceId": "Q-10",
+        "question": "值针率30.8%",
+        "needsDefinition": "无法在当前Coverage定位可靠计算来源",
+        "safeBehavior": "软件做手工输入，不自动计算",
+        "priority": "中",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A14:E14"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q-11",
+        "sourceId": "Q-11",
+        "question": "示例差异C246/RA4/P21001",
+        "needsDefinition": "用户已完成表存在位号替换与遗漏",
+        "safeBehavior": "从源报告重新生成并提供差异报告",
+        "priority": "高",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A15:E15"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q-12",
+        "sourceId": "Q-12",
+        "question": "输出备注‘少件AOI可测’",
+        "needsDefinition": "是否所有盲点均经过AOI实际确认？",
+        "safeBehavior": "默认模板文本，可逐组修改",
+        "priority": "中",
+        "source": {
+          "file": "ICT_Coverage转盲点表_规则总表_Codex版.xlsx",
+          "sheet": "04_待确认项",
+          "range": "A16:E16"
+        },
+        "status": "pending"
+      },
+      {
+        "issueId": "ISSUE-Q7-STATUS",
+        "sourceId": null,
+        "question": "Q7_2_3/NP 第1127行缺件列√与NP冲突",
+        "needsDefinition": "软件逐项人工确认状态和原因，保留源√及审核历史",
+        "safeBehavior": "不自动把该条改为不可测，不自行视为已确认可测；原始列统计仍保留202可测。",
+        "priority": "高",
+        "status": "pending",
+        "source": {
+          "file": "Coverage样例",
+          "sheet": "模板",
+          "cell": "C1127/N1127",
+          "userInstruction": "用户说明：Q7_2_3/NP 三极管这些不确定的人工确认的，通过软件。"
+        }
+      }
+    ]
+  },
+  "currentWorkflow": {
+    "detectionSource": "ICT缺件列",
+    "include": [
+      "X",
+      "Х",
+      "×",
+      "✕"
+    ],
+    "exclude": [
+      "√",
+      "✓",
+      "✔",
+      "∕",
+      "/",
+      "／"
+    ],
+    "requiresTestProgram": false,
+    "calculatePercentThresholds": false,
+    "manualAction": "仅选择未匹配或矛盾的盲点原因",
+    "export": "只生成一个盲点表.xlsx"
+  }
 }

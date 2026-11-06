@@ -26,7 +26,7 @@ public sealed class MainForm : Form
         userDir=dataDirectory??Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"ICTCoverageBlindPointConverter");Directory.CreateDirectory(userDir);
         if(!File.Exists(RulePath)){
             string old=Path.Combine(userDir,"rules-v2.json");
-            try{var c=RuleConfig.Load(File.Exists(old)?old:defaults);c.Version="2.1.0";c.NotApplicableSymbols=["∕","/","／"];RuleManagementService.Save(c,RulePath);}catch{File.Copy(defaults,RulePath);}
+            try{var c=RuleConfig.Load(File.Exists(old)?old:defaults);c.NotApplicableSymbols=["∕","/","／"];RuleManagementService.Save(c,RulePath);}catch{File.Copy(defaults,RulePath);}
         }
         try{cfg=RuleConfig.Load(RulePath);}catch{File.Copy(RulePath,RulePath+".invalid-"+DateTime.Now.ToString("yyyyMMddHHmmss"),true);cfg=RuleConfig.Load(defaults);RuleManagementService.Save(cfg,RulePath);}
         Text="ICT 盲点表工具 · WHAPPY";Font=new Font("Microsoft YaHei UI",10);BackColor=AppTheme.Background;ForeColor=AppTheme.Ink;Width=1440;Height=960;MinimumSize=new Size(1120,760);AutoScaleMode=AutoScaleMode.Dpi;StartPosition=FormStartPosition.CenterScreen;
@@ -35,7 +35,7 @@ public sealed class MainForm : Form
         var root=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,RowCount=1};root.ColumnStyles.Add(new(SizeType.Absolute,220));root.ColumnStyles.Add(new(SizeType.Percent,100));Controls.Add(root);root.Controls.Add(BuildNav(),0,0);
         var work=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=5,Padding=new Padding(18,8,18,8)};for(int i=0;i<3;i++)work.RowStyles.Add(new(SizeType.AutoSize));work.RowStyles.Add(new(SizeType.Percent,100));work.RowStyles.Add(new(SizeType.AutoSize));root.Controls.Add(work,1,0);
         work.Controls.Add(title,0,0);work.Controls.Add(BuildImport(),0,1);work.Controls.Add(BuildStats(),0,2);work.Controls.Add(content,0,3);work.Controls.Add(status,0,4);
-        AddPage("分类筛选 / 复制",BuildPreview());AddPage("异常 / 待确认",BuildIssues());AddPage("规则设置",BuildRules());AddPage("V2规则总览",ruleList);AddPage("人工修改日志",log);RefreshChoices();ShowPage("分类筛选 / 复制");
+        AddPage("分类筛选 / 复制",BuildPreview());AddPage("异常 / 待确认",BuildIssues());AddPage("规则设置",BuildRules());AddPage("V2规则总览",BuildRuleOverview());AddPage("人工修改日志",log);RefreshChoices();ShowPage("分类筛选 / 复制");
         grid.SelectionChanged+=(_,_)=>ShowGroup();type.SelectedIndexChanged+=(_,_)=>RefreshResults();foreach(var f in new[]{refFilter,valueFilter,reasonFilter})f.TextChanged+=(_,_)=>RefreshResults();width.ValueChanged+=(_,_)=>ShowGroup();archived.CheckedChanged+=(_,_)=>RefreshRules();profile.SelectedIndexChanged+=async(_,_)=>{if(!refreshing&&analysis!=null)await ReadAsync();};
         AllowDrop=true;DragEnter+=(_,e)=>{if(e.Data?.GetDataPresent(DataFormats.FileDrop)==true)e.Effect=DragDropEffects.Copy;};DragDrop+=async(_,e)=>{if(!busy&&e.Data?.GetData(DataFormats.FileDrop) is string[] p&&p.Length>0){input.Text=p[0];await ReadAsync();}};
         FormClosing+=(_,e)=>{if(busy){e.Cancel=true;return;}SaveSession();};
@@ -47,7 +47,7 @@ public sealed class MainForm : Form
         brand.Controls.Add(new Label{Text="ICT 盲点表工具",AutoSize=true,ForeColor=Color.White,Font=new Font("Microsoft YaHei UI",16,FontStyle.Bold)});brand.Controls.Add(new Label{Text="Coverage → Blind Points",AutoSize=true,ForeColor=Color.FromArgb(174,190,216),Margin=new Padding(4,8,0,0)});p.Controls.Add(brand,0,0);
         string[] names=["分类筛选 / 复制","异常 / 待确认","规则设置","V2规则总览","人工修改日志"];
         for(int i=0;i<names.Length;i++){string name=names[i];var b=AppTheme.Button(name,AppTheme.Navy,(_,_)=>ShowPage(name));b.Dock=DockStyle.Fill;b.TextAlign=ContentAlignment.MiddleLeft;b.Font=new Font(Font,i<2?FontStyle.Bold:FontStyle.Regular);nav[name]=b;p.Controls.Add(b,0,i+1);}
-        p.Controls.Add(new Label{Dock=DockStyle.Fill,Text="Designed by WHAPPY\n设计人员：王开心\nWANG KAIXIN  ·  v0.3.0",ForeColor=Color.FromArgb(208,218,235),Font=new Font("Microsoft YaHei UI",9),TextAlign=ContentAlignment.BottomLeft},0,7);return p;
+        p.Controls.Add(new Label{Dock=DockStyle.Fill,Text="Designed by WHAPPY\n设计人员：王开心\nWANG KAIXIN  ·  v0.3.1",ForeColor=Color.FromArgb(208,218,235),Font=new Font("Microsoft YaHei UI",9),TextAlign=ContentAlignment.BottomLeft},0,7);return p;
     }
     Control BuildImport()
     {
@@ -74,6 +74,11 @@ public sealed class MainForm : Form
         var p=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=4};p.RowStyles.Add(new(SizeType.AutoSize));p.RowStyles.Add(new(SizeType.AutoSize));p.RowStyles.Add(new(SizeType.Percent,100));p.RowStyles.Add(new(SizeType.AutoSize));var scope=AppTheme.Flow();scope.Controls.AddRange([AppTheme.Label("项目规则"),profile,AppTheme.Label("自动识别或选择通用模式，关闭项目特例",9)]);p.Controls.Add(scope,0,0);
         var actions=AppTheme.Flow();actions.Controls.AddRange([AppTheme.Button("新增规则",AppTheme.Green,async(_,_)=>await EditRule(true)),AppTheme.Button("编辑规则",AppTheme.Blue,async(_,_)=>await EditRule(false)),AppTheme.Button("删除规则",AppTheme.Orange,async(_,_)=>await ArchiveRule(true)),AppTheme.Button("恢复规则",AppTheme.Muted,async(_,_)=>await ArchiveRule(false)),archived]);p.Controls.Add(actions,0,1);p.Controls.Add(rulesGrid,0,2);p.Controls.Add(AppTheme.Label("删除可恢复，原编号及来源保留。核心规则请在 V2规则总览查看。",9),0,3);return p;
     }
+    Control BuildRuleOverview()
+    {
+        var panel=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=2};panel.RowStyles.Add(new(SizeType.AutoSize));panel.RowStyles.Add(new(SizeType.Percent,100));
+        panel.Controls.Add(AppTheme.Label("当前执行只按 Coverage 的 X / √ / ∕；历史依据仅供追溯，不要求查看测试程序。",9),0,0);panel.Controls.Add(ruleList,0,1);return panel;
+    }
     void AddPage(string name,Control control){control.Dock=DockStyle.Fill;content.Controls.Add(control);pages[name]=control;}
     void ShowPage(string name){foreach(var p in pages)p.Value.Visible=p.Key==name;pages[name].BringToFront();title.Text=name;foreach(var pair in nav){bool active=pair.Key==name;pair.Value.BackColor=active?AppTheme.Yellow:AppTheme.Navy;pair.Value.ForeColor=active?AppTheme.Ink:Color.White;}}
     void RefreshChoices()
@@ -82,7 +87,7 @@ public sealed class MainForm : Form
     }
     void RefreshRules()
     {
-        rulesGrid.DataSource=cfg.Rules.Where(RuleManagementService.CanEdit).Where(r=>archived.Checked||!r.Archived).OrderBy(r=>r.Priority).Select(r=>new{编号=r.RuleId,类型=string.Join("/",r.Types),后缀=r.Suffix??"不限",标准值=r.ExactValue??"不限",优先级=r.Priority,状态=r.Archived?"已删除":r.Enabled?"已启用":"停用",原因=r.Reason.Length==0?"仅参考":cfg.ReasonText(r.Reason),项目=r.Profile??"通用"}).ToList();ruleList.DataSource=cfg.Rules.OrderBy(r=>r.Priority).Select(r=>new{编号=r.RuleId,阶段=r.Stage,优先级=r.Priority,状态=r.Archived?"已删除":r.Enabled?"启用":"停用",依据=r.Status,项目=r.Profile??"通用",来源=r.Source}).ToList();RefreshLog();
+        rulesGrid.DataSource=cfg.Rules.Where(RuleManagementService.CanEdit).Where(r=>archived.Checked||!r.Archived).OrderBy(r=>r.Priority).Select(r=>new{编号=r.RuleId,类型=string.Join("/",r.Types),后缀=r.Suffix??"不限",标准值=r.ExactValue??"不限",优先级=r.Priority,状态=r.Archived?"已删除":r.Enabled?"已启用":"停用",原因=r.Reason.Length==0?"仅参考":cfg.ReasonText(r.Reason),项目=r.Profile??"通用"}).ToList();ruleList.DataSource=cfg.Rules.OrderBy(r=>r.Priority).Select(r=>new{编号=r.RuleId,阶段=r.Stage,优先级=r.Priority,当前执行=RulePresentation.CurrentExecution(r),项目=r.Profile??"通用",历史依据=RulePresentation.HistoricalBasis(r),历史来源=r.Source}).ToList();RefreshLog();
     }
     async Task RunBusy(Func<Task> action)
     {

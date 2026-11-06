@@ -20,6 +20,7 @@ public sealed class Component
     public TestState State { get; set; }
     public TestState SourceState { get; set; }
     public bool ManuallyReviewed { get; set; }
+    // 仅兼容读取旧会话，不参与检测、归因或校验。
     public string ProgramEvidence { get; set; } = "";
     public List<RuleMatch> MatchedRules { get; set; } = [];
     public List<string> AppliedRuleIds { get; set; } = [];
@@ -70,6 +71,7 @@ public sealed class ClassificationRule
     public string[] Supersedes { get; set; } = [];
     public bool ReviewOnly { get; set; }
     public bool BlockingReview { get; set; } = true;
+    // 旧配置字段保留供来源追溯，当前流程只依据Coverage符号，不执行这些标记。
     public bool RequiresProgram { get; set; }
     public bool ReviewOutsideSample { get; set; }
     public bool NoOtherSuffixes { get; set; }
@@ -114,7 +116,6 @@ public sealed class RuleConfig
         if(PrefixTypes.Count==0||Reasons.Count==0||Rules.Count==0)throw new InvalidDataException("规则缺少前缀、原因或分类规则");
         if(Rules.Any(r=>string.IsNullOrWhiteSpace(r.RuleId)||string.IsNullOrWhiteSpace(r.Source))||Rules.Select(r=>r.RuleId).Distinct().Count()!=Rules.Count)throw new InvalidDataException("规则编号/来源为空或编号重复");
         if(Rules.Any(r=>r.Reason.Length>0&&!Reasons.ContainsKey(r.Reason)))throw new InvalidDataException("规则原因代码不存在");
-        if(Rules.Any(r=>r.RequiresProgram&&r.Status=="样例已验证"))throw new InvalidDataException("程序判定原因不能标为已验证");
         if(CoverageDisplay is not ("truncate" or "round"))throw new InvalidDataException("覆盖率显示只支持truncate或round");
         if(UntestableSymbols.Intersect(TestableSymbols,StringComparer.OrdinalIgnoreCase).Any())throw new InvalidDataException("可测和不可测符号重叠");
         if(NotApplicableSymbols.Intersect(UntestableSymbols.Concat(TestableSymbols),StringComparer.OrdinalIgnoreCase).Any())throw new InvalidDataException("不适用符号与检测状态重叠");
