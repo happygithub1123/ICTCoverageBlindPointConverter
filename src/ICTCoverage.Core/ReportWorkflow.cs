@@ -27,6 +27,7 @@ public static class ReportWorkflow
             {
                 var c=current.Components.FirstOrDefault(c=>c.SourceRow==correction.SourceRow);
                 if(c==null||c.SourceState!=TestState.Untestable||!cfg.Reasons.ContainsKey(correction.ReasonCode))continue;
+                if(!cfg.IsReasonActive(correction.ReasonCode)){current.Corrections[c.SourceRow]=correction;continue;}
                 int count=current.Edits.Count;
                 AnalysisEngine.Edit(current,c,correction.Reference,correction.Type,correction.Value,c.SourceState,correction.ReasonCode,correction.Note,"恢复已保存的原因选择",cfg);
                 if(current.Edits.Count>count)current.Edits[^1]=current.Edits[^1] with{Time=correction.Time};

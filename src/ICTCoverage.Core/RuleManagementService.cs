@@ -12,7 +12,8 @@ public static class RuleManagementService
         if(!CanEdit(input))throw new InvalidDataException("核心管线规则只读，请新增或编辑分类规则");
         var next=Clone(original);var rule=JsonSerializer.Deserialize<ClassificationRule>(JsonSerializer.Serialize(input,RuleConfig.JsonOptions),RuleConfig.JsonOptions)!;
         if(string.IsNullOrWhiteSpace(reviewer)||string.IsNullOrWhiteSpace(justification))throw new InvalidDataException("请填写修改人和修改理由");
-        if(!string.IsNullOrWhiteSpace(newReasonText))next.Reasons[rule.Reason]=newReasonText.Trim();
+        if(!string.IsNullOrWhiteSpace(newReasonText))next=ReasonManagementService.Upsert(next,rule.Reason,newReasonText,reviewer,justification);
+        if(rule.Reason.Length>0&&!next.IsReasonActive(rule.Reason))throw new InvalidDataException("该盲点原因已删除，请选择其他原因或先恢复");
         if(rule.Types.Length==1)foreach(var prefix in rule.Prefixes)
         {
             if(rule.Profile!=null){if(!next.ProjectPrefixTypes.TryGetValue(rule.Profile,out var projectMap))next.ProjectPrefixTypes[rule.Profile]=projectMap=[];projectMap[prefix]=rule.Types[0];continue;}
@@ -51,6 +52,9 @@ public static class RuleManagementService
     {
         var next=Clone(existing);var fresh=Clone(defaults);
         foreach(var pair in fresh.Reasons)next.Reasons.TryAdd(pair.Key,pair.Value);
+        foreach(var prefix in new[]{"Z","ZD","TVS","M"})if(fresh.PrefixTypes.TryGetValue(prefix,out var type))next.PrefixTypes.TryAdd(prefix,type);
+        if(fresh.TypeValues.TryGetValue("瞬态抑制器",out var tvs))next.TypeValues.TryAdd("瞬态抑制器",tvs);
+        if(fresh.SuffixAliases.TryGetValue("TVS",out var alias))next.SuffixAliases.TryAdd("TVS",alias);
         foreach(var rule in fresh.Rules)if(rule.RuleId.StartsWith("LEARN-",StringComparison.Ordinal)&&!next.Rules.Any(r=>r.RuleId==rule.RuleId))next.Rules.Add(rule);
         foreach(var pair in fresh.ProjectPrefixTypes){if(!next.ProjectPrefixTypes.TryGetValue(pair.Key,out var map))next.ProjectPrefixTypes[pair.Key]=map=[];foreach(var item in pair.Value)map.TryAdd(item.Key,item.Value);}
         foreach(var pair in fresh.ProjectSuffixAliases){if(!next.ProjectSuffixAliases.TryGetValue(pair.Key,out var map))next.ProjectSuffixAliases[pair.Key]=map=[];foreach(var item in pair.Value)map.TryAdd(item.Key,item.Value);}

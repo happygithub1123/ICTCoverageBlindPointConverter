@@ -22,7 +22,7 @@ public sealed class ExcelExporter(RuleConfig cfg)
     }
     public void Export(Analysis a,string template,string target,ExportOptions options)
     {
-        if(a.Pending>0&&!options.Draft)throw new InvalidOperationException($"还有 {a.Pending} 条待确认记录，不能正式导出");
+        if(a.DataIssues>0&&!options.Draft)throw new InvalidOperationException($"还有 {a.DataIssues} 条文件数据问题，不能正式导出");
         if(Path.GetFullPath(target)==Path.GetFullPath(template)||Path.GetFullPath(target)==a.SourcePath)throw new InvalidOperationException("不能覆盖源文件或模板");
         using var stream=File.OpenRead(template);
         Export(a,stream,target,options);
@@ -34,7 +34,7 @@ public sealed class ExcelExporter(RuleConfig cfg)
     }
     public void Export(Analysis a,Stream template,string target,ExportOptions options)
     {
-        if(a.Pending>0&&!options.Draft)throw new InvalidOperationException($"还有 {a.Pending} 条原因或数据待处理");
+        if(a.DataIssues>0&&!options.Draft)throw new InvalidOperationException($"还有 {a.DataIssues} 条文件数据问题待处理");
         if(Path.GetFullPath(target)==a.SourcePath)throw new InvalidOperationException("不能覆盖源文件");
         using var wb=new XLWorkbook(template);
         var (s,start,oldCount)=LocateTemplate(wb);

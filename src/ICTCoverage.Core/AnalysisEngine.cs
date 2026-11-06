@@ -43,7 +43,7 @@ public sealed class AnalysisEngine(RuleConfig config)
                 // 测试结果已由Coverage确认。参考参数不触发重新确认可测性。
                 var candidates=matches.Where(r=>!r.ReviewOnly&&r.Reason.Length>0).ToList();
                 var rule=candidates.FirstOrDefault();
-                if(rule==null) c.Issues.Add(new("classification","未匹配盲点原因"));
+                if(rule==null||!config.IsReasonActive(rule.Reason)) c.Issues.Add(new("classification","原因待确定，可直接导出或自行选择原因"));
                 else
                 {
                     c.ReasonCode=rule.Reason;c.RuleId=rule.RuleId;
@@ -64,8 +64,8 @@ public sealed class AnalysisEngine(RuleConfig config)
             foreach(var c in group) c.Issues.Add(new("duplicate",$"重复位号 {group.Key}，来源行 {string.Join(",",group.Select(x=>x.SourceRow))}"));
     }
     public static List<Component> BaseFilter(Analysis a,FilterOptions f)=>a.Components.Where(c=>(f.Type is "全部" or "待确认"||f.Type==c.Type)&&c.Value.Contains(f.Value,StringComparison.OrdinalIgnoreCase)&&(c.Reference.Contains(f.Reference,StringComparison.OrdinalIgnoreCase)||c.RawReference.Contains(f.Reference,StringComparison.OrdinalIgnoreCase))).ToList();
-    public static List<Component> Filter(Analysis a,FilterOptions f,RuleConfig cfg)=>BaseFilter(a,f).Where(c=>(f.Type!="待确认"||c.Pending)&&(f.Status.HasValue?c.State==f.Status:!f.OnlyUntestable||c.State==TestState.Untestable)&&cfg.ReasonText(c.ReasonCode).Contains(f.Reason,StringComparison.OrdinalIgnoreCase)).ToList();
-    public static List<BlindGroup> Group(IEnumerable<Component> items)=>items.GroupBy(c=>(c.State,c.Value,c.ReasonCode)).Select(g=>new BlindGroup(g.Key.Value,g.Key.ReasonCode,g.OrderBy(c=>c.SourceRow).ToList())).ToList();
+    public static List<Component> Filter(Analysis a,FilterOptions f,RuleConfig cfg)=>BaseFilter(a,f).Where(c=>(f.Type!="待确认"||c.Pending)&&(f.Status.HasValue?c.State==f.Status:!f.OnlyUntestable||c.State==TestState.Untestable)&&cfg.ReasonText(c.OutputReasonCode).Contains(f.Reason,StringComparison.OrdinalIgnoreCase)).ToList();
+    public static List<BlindGroup> Group(IEnumerable<Component> items)=>items.GroupBy(c=>(c.State,c.GroupCategory,c.Value,ReasonCode:c.OutputReasonCode)).Select(g=>new BlindGroup(g.Key.Value,g.Key.ReasonCode,g.OrderBy(c=>c.SourceRow).ToList())).ToList();
     public static void Edit(Analysis a, Component c, string reference,string type,string value,TestState state,string reasonCode,string note,string justification,RuleConfig cfg,string? reviewer=null,string? programEvidence=null)
     {
         if(string.IsNullOrWhiteSpace(justification))throw new InvalidDataException("请填写修改理由");
@@ -73,7 +73,7 @@ public sealed class AnalysisEngine(RuleConfig config)
         if(state is TestState.Unknown or TestState.Conflict)throw new InvalidDataException("请选择明确的可测或不可测状态");
         if(c.SourceState!=TestState.Untestable||state!=c.SourceState)throw new InvalidDataException("检测结果以Coverage为准，仅能为打X的元件选择原因");
         if(!cfg.KnownTypes.Contains(type))throw new InvalidDataException("请选择已有元件类型");
-        if(state==TestState.Untestable && (string.IsNullOrWhiteSpace(value)||!cfg.Reasons.ContainsKey(reasonCode)||type=="待确认"))throw new InvalidDataException("不可测记录必须填写类型、标准值和原因");
+        if(state==TestState.Untestable && (string.IsNullOrWhiteSpace(value)||!cfg.IsReasonActive(reasonCode)||type=="待确认"))throw new InvalidDataException("不可测记录必须填写类型、标准值和有效原因");
         string before=JsonSerializer.Serialize(c,RuleConfig.JsonOptions);
         if(!c.Pending&&c.Reference==reference.ToUpperInvariant()&&c.Type==type&&c.Value==value&&c.ReasonCode==reasonCode&&c.Note==note)return;
         reviewer=string.IsNullOrWhiteSpace(reviewer)?Environment.UserName:reviewer.Trim();

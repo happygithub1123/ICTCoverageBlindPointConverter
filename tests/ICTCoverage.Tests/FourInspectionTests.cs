@@ -70,7 +70,7 @@ public sealed class FourInspectionTests
     {
         var cfg=Config();var report=Sample();report.SourcePath="另一个报告.xls";foreach(var a in report.Analyses.Values){a.BoardNumber="OTHER";a.ProductNumber="OTHER";}Assert.Equal("",ProjectIdentification.Detect(report,cfg));
         report.SourcePath=cfg.SampleProfile+"-Coverage报告.xls";Assert.Equal("",ProjectIdentification.Detect(report,cfg));
-        var unrelated=new Analysis{Components=[new(){RawReference="TVS1/TVS",RawValue="0.750V",StatusSymbol="X"}]};new AnalysisEngine(cfg).Analyze(unrelated,"");Assert.Equal("待确认",unrelated.Components[0].Type);Assert.True(unrelated.Pending>0);
+        var unrelated=new Analysis{Components=[new(){RawReference="TVS1/TVS",RawValue="0.750V",StatusSymbol="X"}]};new AnalysisEngine(cfg).Analyze(unrelated,"");Assert.Equal("瞬态抑制器",unrelated.Components[0].Type);Assert.Equal("",unrelated.Components[0].ReasonCode);Assert.True(unrelated.Pending>0);Assert.Equal(0,unrelated.DataIssues);
         var older=RuleManagementService.Clone(cfg);older.Rules.RemoveAll(r=>r.RuleId.StartsWith("LEARN-"));older.ProjectPrefixTypes.Clear();var custom=new ClassificationRule{RuleId="USER",Stage="原因分类",Types=["电阻"],Reason="NO_POINT",Source="原用户规则",Priority=77};older.Rules.Add(custom);var upgraded=RuleManagementService.Upgrade(older,cfg);Assert.Contains(upgraded.Rules,r=>r.RuleId=="USER"&&r.Priority==77);Assert.Contains(upgraded.Rules,r=>r.RuleId.StartsWith("LEARN-"));
     }
 }

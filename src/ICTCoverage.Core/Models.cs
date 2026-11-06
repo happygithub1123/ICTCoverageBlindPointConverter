@@ -30,6 +30,12 @@ public sealed class Component
     public string Note { get; set; } = "";
     public List<Issue> Issues { get; set; } = [];
     public bool Pending => Issues.Any(i => i.Blocking) || State is TestState.Unknown or TestState.Conflict;
+    public bool HasDataIssues => State is TestState.Unknown or TestState.Conflict || Issues.Any(i=>i.Blocking&&i.Code is not ("classification" or "rule_conflict"));
+    public string GroupCategory
+    {
+        get{string prefix=System.Text.RegularExpressions.Regex.Match(Reference,"^[A-Za-z]+").Value.ToUpperInvariant();return prefix=="TVS"?"TVS":Type=="待确认"?"待确认/"+prefix:Type;}
+    }
+    public string OutputReasonCode => Issues.Any(i=>i.Code=="rule_conflict")?"":ReasonCode;
 }
 public record FieldMap(string Sheet, int HeaderRow, int ReferenceColumn, int ValueColumn, int StatusColumn)
 {
@@ -54,6 +60,7 @@ public sealed class Analysis
     public int OutputTestable => Components.Count(c => c.State == TestState.Testable);
     public int Untestable => Components.Count(c => c.State == TestState.Untestable);
     public int Pending => Components.Count(c => c.Pending)+Issues.Count(i=>i.Blocking);
+    public int DataIssues => Components.Count(c=>c.HasDataIssues)+Issues.Count(i=>i.Blocking);
     public double Coverage => Total == 0 ? 0 : (double)Testable / Total;
     public double OutputCoverage => Total == 0 ? 0 : (double)OutputTestable / Total;
     public double? ReportCoverage { get; set; }
@@ -110,6 +117,9 @@ public sealed class RuleConfig
     public string[] TestableSymbols { get; set; } = ["√", "✓", "✔"];
     public string[] NotApplicableSymbols { get; set; } = ["∕", "/", "／", "—"];
     public Dictionary<string,string> Reasons { get; set; } = [];
+    public HashSet<string> ArchivedReasons { get; set; } = [];
+    public List<ReasonChange> ReasonChanges { get; set; } = [];
+    [JsonIgnore] public IEnumerable<KeyValuePair<string,string>> ActiveReasons=>Reasons.Where(p=>!ArchivedReasons.Contains(p.Key));
     public Dictionary<string,string> TypeValues { get; set; } = [];
     public Dictionary<string,Dictionary<string,string>> ProfileValueOverrides { get; set; } = [];
     public List<ClassificationRule> Rules { get; set; } = [];
@@ -141,11 +151,13 @@ public sealed class RuleConfig
             if(!Rules.Any(r=>r.RuleId==id&&r.Enabled))throw new InvalidDataException($"管线规则 {id} 必须启用；未知/损坏数据不能通过关闭审核绕过");
     }
     public string FormatCoverage(double ratio) => ((CoverageDisplay=="round"?Math.Round(ratio*100,2,MidpointRounding.AwayFromZero):Math.Floor(ratio*10000)/100)).ToString("F2",System.Globalization.CultureInfo.InvariantCulture)+"%";
-    public string ReasonText(string code) => Reasons.GetValueOrDefault(code, "待确认");
+    public bool IsReasonActive(string code)=>Reasons.ContainsKey(code)&&!ArchivedReasons.Contains(code);
+    public string ReasonText(string code) => IsReasonActive(code)?Reasons[code]:"待确定";
 }
 public record FilterOptions(string Type = "全部", string Value = "", string Reason = "", string Reference = "", bool OnlyUntestable = true, TestState? Status = null);
 public sealed record BlindGroup(string Value, string ReasonCode, List<Component> Items)
 {
     public int Count => Items.Count;
     public bool Pending => Items.Any(c=>c.Pending);
+    public bool HasDataIssues => Items.Any(c=>c.HasDataIssues);
 }

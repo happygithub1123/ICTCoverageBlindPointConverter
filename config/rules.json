@@ -60,7 +60,11 @@
     "YD": "晶振",
     "YP": "晶振",
     "SR": "其他",
-    "X": "晶振"
+    "X": "晶振",
+    "Z": "二极管",
+    "ZD": "二极管",
+    "TVS": "瞬态抑制器",
+    "M": "IC"
   },
   "suffixAliases": {
     "NP": "NP",
@@ -69,7 +73,8 @@
     "SP": "SP",
     "R": "R",
     "C-": "C",
-    "SG": "SG"
+    "SG": "SG",
+    "TVS": "TVS"
   },
   "untestableSymbols": [
     "X",
@@ -120,7 +125,8 @@
     "三极管": "Q",
     "IC": "IC",
     "连接器": "J/连接器",
-    "晶振": "晶振"
+    "晶振": "晶振",
+    "瞬态抑制器": "TVS"
   },
   "profileValueOverrides": {
     "MG10P0B3270350-P25086380101": {
@@ -129,7 +135,7 @@
     }
   },
   "schemaVersion": 2,
-  "version": "2.2.0",
+  "version": "2.2.1",
   "coverageDisplay": "truncate",
   "sampleProfile": "MG10P0B3270350-P25086380101",
   "referenceParameters": [

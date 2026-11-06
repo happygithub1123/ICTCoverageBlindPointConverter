@@ -26,7 +26,7 @@ public static class ClipboardService
     }
     public static string[] GroupCells(BlindGroup group,RuleConfig cfg,int width,bool fourColumns)
     {
-        if(group.Pending)throw new InvalidOperationException("本组存在待确认记录，请先处理后再复制填表");
+        if(group.HasDataIssues)throw new InvalidOperationException("本组存在位号或文件数据问题，请先处理后再复制填表");
         string refs=ReferenceFormatter.Format(group.Items.Select(c=>c.Reference),width);
         return fourColumns?[refs,group.Count.ToString(),group.Value,cfg.ReasonText(group.ReasonCode)]:[refs];
     }
