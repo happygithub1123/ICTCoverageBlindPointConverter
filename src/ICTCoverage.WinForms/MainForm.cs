@@ -26,7 +26,7 @@ public sealed partial class MainForm : Form
         if(!File.Exists(RulePath)){string old=Path.Combine(userDir,"rules-v4.json");if(!File.Exists(old))old=Path.Combine(userDir,"rules-v3.json");if(!File.Exists(old))old=Path.Combine(userDir,"rules-v2.json");try{RuleManagementService.Save(RuleManagementService.Upgrade(RuleConfig.Load(File.Exists(old)?old:defaults),RuleConfig.Load(defaults)),RulePath);}catch{File.Copy(defaults,RulePath);}}
         try{cfg=RuleConfig.Load(RulePath);}catch{File.Copy(RulePath,RulePath+".invalid-"+DateTime.Now.ToString("yyyyMMddHHmmss"),true);cfg=RuleConfig.Load(defaults);RuleManagementService.Save(cfg,RulePath);}
         var bundled=RuleConfig.Load(defaults);if(Version.TryParse(cfg.Version,out var oldVersion)&&Version.TryParse(bundled.Version,out var newVersion)&&oldVersion<newVersion){File.Copy(RulePath,RulePath+".before-v0.5.0",true);cfg=RuleManagementService.Upgrade(cfg,bundled);RuleManagementService.Save(cfg,RulePath);}
-        Text="ICT盲点表工具 · WHAPPY v0.5.0";Font=new Font("Microsoft YaHei UI",11);Width=1440;Height=960;MinimumSize=new Size(1120,760);AutoScaleMode=AutoScaleMode.Dpi;BackColor=AppTheme.Background;StartPosition=FormStartPosition.CenterScreen;
+        Text="ICT盲点表工具 · WHAPPY v0.5.1";Font=new Font("Microsoft YaHei UI",11);Width=1440;Height=960;MinimumSize=new Size(1120,760);AutoScaleMode=AutoScaleMode.Dpi;BackColor=AppTheme.Background;StartPosition=FormStartPosition.CenterScreen;
         using(var stream=GetType().Assembly.GetManifestResourceStream("ICTCoverage.whappy.ico"))if(stream!=null)Icon=new Icon(stream);
         copyOne=AppTheme.Button("复制本组位号",AppTheme.Blue,(_,_)=>CopyGroup(false));copyFour=AppTheme.Button("复制本组四列",AppTheme.Green,(_,_)=>CopyGroup(true));
         var root=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=2};root.ColumnStyles.Add(new(SizeType.Percent,100));root.RowStyles.Add(new(SizeType.Absolute,94));root.RowStyles.Add(new(SizeType.Percent,100));Controls.Add(root);root.Controls.Add(BuildBrand(),0,0);
@@ -34,15 +34,15 @@ public sealed partial class MainForm : Form
         var work=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=6,Padding=new Padding(12,4,12,4)};work.ColumnStyles.Add(new(SizeType.Percent,100));for(int i=0;i<4;i++)work.RowStyles.Add(new(SizeType.AutoSize));work.RowStyles.Add(new(SizeType.Percent,100));work.RowStyles.Add(new(SizeType.AutoSize));body.Controls.Add(work,1,0);
         title.Margin=new Padding(5,2,5,2);statsPanel=BuildStats();filterPanel=BuildFilters();work.Controls.Add(title,0,0);work.Controls.Add(BuildImport(),0,1);work.Controls.Add(statsPanel,0,2);work.Controls.Add(filterPanel,0,3);work.Controls.Add(content,0,4);work.Controls.Add(status,0,5);
         AddPage("分类筛选",grid);AddPage("复制",BuildCopy());AddPage("异常待确认",BuildIssues());AddPage("盲点设置",BuildReasons());AddPage("规则设置",BuildRules());AddPage("V2规则总览",BuildRuleOverview());AddPage("人工修改日志",log);
-        RefreshChoices();ShowPage("分类筛选");copyGrid.SelectionChanged+=(_,_)=>ShowGroup();type.SelectedIndexChanged+=(_,_)=>{if(!refreshing)RefreshResults();};stateFilter.SelectedIndexChanged+=(_,_)=>{if(!refreshing){onlyCausePending=false;RefreshResults();}};foreach(var f in new[]{refFilter,valueFilter,reasonFilter})f.TextChanged+=(_,_)=>{if(!refreshing)RefreshResults();};width.ValueChanged+=(_,_)=>ShowGroup();archived.CheckedChanged+=(_,_)=>RefreshRules();needle.TextChanged+=(_,_)=>RefreshSidebar();
+        ConfigureMainGrid();ConfigureIssueGrid();RefreshChoices();ShowPage("分类筛选");copyGrid.SelectionChanged+=(_,_)=>ShowGroup();type.SelectedIndexChanged+=(_,_)=>{if(!refreshing)RefreshResults();};stateFilter.SelectedIndexChanged+=(_,_)=>{if(!refreshing){onlyCausePending=false;RefreshResults();}};foreach(var f in new[]{refFilter,valueFilter,reasonFilter})f.TextChanged+=(_,_)=>{if(!refreshing)ScheduleFilter();};width.ValueChanged+=(_,_)=>ShowGroup();archived.CheckedChanged+=(_,_)=>RefreshRules();needle.TextChanged+=(_,_)=>RefreshSidebar();
         grid.CellFormatting+=ColorStatus;grid.CellDoubleClick+=(_,e)=>{if(e.RowIndex>=0&&grid.Columns[e.ColumnIndex].Name=="盲点原因")ShowPage("异常待确认");};issues.CurrentCellDirtyStateChanged+=(_,_)=>{if(issues.IsCurrentCellDirty)issues.CommitEdit(DataGridViewDataErrorContexts.Commit);};
-        AllowDrop=true;DragEnter+=(_,e)=>{if(e.Data?.GetDataPresent(DataFormats.FileDrop)==true)e.Effect=DragDropEffects.Copy;};DragDrop+=async(_,e)=>{if(!busy&&e.Data?.GetData(DataFormats.FileDrop) is string[] p&&p.Length>0){input.Text=p[0];await ReadAsync();}};FormClosing+=(_,e)=>{if(busy)e.Cancel=true;else SaveSession();};
+        AllowDrop=true;DragEnter+=(_,e)=>{if(e.Data?.GetDataPresent(DataFormats.FileDrop)==true)e.Effect=DragDropEffects.Copy;};DragDrop+=async(_,e)=>{if(!busy&&e.Data?.GetData(DataFormats.FileDrop) is string[] p&&p.Length>0){input.Text=p[0];await ReadAsync();}};FormClosing+=HandleClosing;
     }
     Control BuildBrand()
     {
         var p=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,BackColor=AppTheme.Navy,Padding=new Padding(14,6,14,6)};p.ColumnStyles.Add(new(SizeType.Absolute,76));p.ColumnStyles.Add(new(SizeType.Percent,100));
         using(var stream=GetType().Assembly.GetManifestResourceStream("ICTCoverage.whappy.png"))if(stream!=null)p.Controls.Add(new PictureBox{Image=new Bitmap(stream),Dock=DockStyle.Fill,SizeMode=PictureBoxSizeMode.Zoom},0,0);
-        var text=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=2};text.RowStyles.Add(new(SizeType.Absolute,45));text.RowStyles.Add(new(SizeType.Percent,100));text.Controls.Add(new Label{Text="设计人员：王开心 WANG KAIXIN · WHAPPY",Dock=DockStyle.Fill,ForeColor=Color.White,Font=new Font("Microsoft YaHei UI",22,FontStyle.Bold),TextAlign=ContentAlignment.MiddleLeft},0,0);text.Controls.Add(new Label{Text="本软件最终解释权归王开心   ·   ICT盲点表工具 v0.5.0",Dock=DockStyle.Fill,ForeColor=Color.FromArgb(196,215,239),Font=new Font("Microsoft YaHei UI",12)},0,1);p.Controls.Add(text,1,0);return p;
+        var text=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=2};text.RowStyles.Add(new(SizeType.Absolute,45));text.RowStyles.Add(new(SizeType.Percent,100));text.Controls.Add(new Label{Text="设计人员：王开心 WANG KAIXIN · WHAPPY",Dock=DockStyle.Fill,ForeColor=Color.White,Font=new Font("Microsoft YaHei UI",22,FontStyle.Bold),TextAlign=ContentAlignment.MiddleLeft},0,0);text.Controls.Add(new Label{Text="本软件最终解释权归王开心   ·   ICT盲点表工具 v0.5.1",Dock=DockStyle.Fill,ForeColor=Color.FromArgb(196,215,239),Font=new Font("Microsoft YaHei UI",12)},0,1);p.Controls.Add(text,1,0);return p;
     }
     Control BuildNav()
     {
@@ -70,7 +70,7 @@ public sealed partial class MainForm : Form
     }
     void ResetFilters(){refreshing=true;type.SelectedItem="全部";stateFilter.SelectedIndex=0;refFilter.Clear();valueFilter.Clear();reasonFilter.Clear();onlyCausePending=false;refreshing=false;RefreshResults();}
     void AddPage(string name,Control control){control.Dock=DockStyle.Fill;content.Controls.Add(control);pages[name]=control;}
-    void ShowPage(string name){foreach(var p in pages)p.Value.Visible=p.Key==name;pages[name].BringToFront();title.Text=name;statsPanel.Visible=name=="分类筛选";filterPanel.Visible=name is "分类筛选" or "复制" or "异常待确认";foreach(var pair in nav){bool active=pair.Key==name;pair.Value.BackColor=active?AppTheme.Blue:AppTheme.Navy;pair.Value.ForeColor=Color.White;}}
+    void ShowPage(string name){bool pending=filterDelay.Enabled;filterDelay.Stop();currentPage=name;if(pending)RefreshResults();foreach(var p in pages)p.Value.Visible=p.Key==name;pages[name].BringToFront();title.Text=name;statsPanel.Visible=name=="分类筛选";filterPanel.Visible=name is "分类筛选" or "复制" or "异常待确认";foreach(var pair in nav){bool active=pair.Key==name;pair.Value.BackColor=active?AppTheme.Blue:AppTheme.Navy;pair.Value.ForeColor=Color.White;}RefreshVisiblePage();}
     FilterOptions CurrentFilter()=>new(type.Text,valueFilter.Text.Trim(),reasonFilter.Text.Trim(),refFilter.Text.Trim(),false,(stateFilter.SelectedItem as StatusChoice)?.State,onlyCausePending);
     void ChooseInspection(InspectionKind? kind){if(kind.HasValue&&report!=null&&!report.Analyses.ContainsKey(kind.Value))return;selectedKind=kind;onlyCausePending=false;ActivateInspection();}
     void ActivateInspection(){analysis=report?.Analyses.GetValueOrDefault(selectedKind??InspectionKind.Missing)??report?.Analyses.Values.FirstOrDefault();RefreshResults();}
@@ -78,16 +78,13 @@ public sealed partial class MainForm : Form
     void RefreshChoices()
     {
         refreshing=true;string oldType=type.Text;var oldState=(stateFilter.SelectedItem as StatusChoice)?.State;type.Items.Clear();type.Items.AddRange(new object[]{"全部","待确认"});foreach(var t in cfg.KnownTypes)type.Items.Add(t);type.SelectedItem=type.Items.Contains(oldType)?oldType:"全部";
-        stateFilter.Items.Clear();stateFilter.Items.AddRange(new object[]{new StatusChoice(null,"全部状态"),new StatusChoice(TestState.Untestable,"Х 不可测"),new StatusChoice(TestState.Testable,"√ 可测"),new StatusChoice(TestState.NotApplicable,"∕ 不适用"),new StatusChoice(TestState.Unknown,"未知符号")});stateFilter.SelectedItem=stateFilter.Items.Cast<StatusChoice>().First(c=>c.State==oldState);RefreshBatchReasons();RefreshRules();refreshing=false;
+        stateFilter.Items.Clear();stateFilter.Items.AddRange(new object[]{new StatusChoice(null,"全部状态"),new StatusChoice(TestState.Untestable,"Х 不可测"),new StatusChoice(TestState.Testable,"√ 可测"),new StatusChoice(TestState.NotApplicable,"∕ 不适用"),new StatusChoice(TestState.Unknown,"未知符号")});stateFilter.SelectedItem=stateFilter.Items.Cast<StatusChoice>().First(c=>c.State==oldState);RefreshBatchReasons();dirtyPages.UnionWith(new[]{"规则设置","V2规则总览","盲点设置","人工修改日志"});refreshing=false;RefreshVisiblePage();
     }
     void RefreshResults()
     {
-        if(report==null||analysis==null)return;var f=CurrentFilter();var scope=ReportView.Scope(report,selectedKind,f);var rows=ReportView.Filter(scope,f,cfg);grid.DataSource=rows.Select(r=>new{元件类型=r.Anchor.GroupCategory,元件位置=r.Anchor.Reference,标准值=r.Anchor.Value,缺件=r.Symbol(InspectionKind.Missing),短路=r.Symbol(InspectionKind.Short),错件=r.Symbol(InspectionKind.Wrong),空焊=r.Symbol(InspectionKind.OpenSolder),盲点原因=r.Reasons(cfg)}).ToList();
-        foreach(var k in Enum.GetValues<InspectionKind>())if(grid.Columns.Contains(k.Name())){grid.Columns[k.Name()].AutoSizeMode=DataGridViewAutoSizeColumnMode.None;grid.Columns[k.Name()].Width=56;}
-        foreach(var name in new[]{"元件类型","元件位置","标准值"})if(grid.Columns.Contains(name)){grid.Columns[name].MinimumWidth=95;grid.Columns[name].FillWeight=name=="元件位置"?110:85;}
-        if(grid.Columns.Contains("盲点原因")){grid.Columns["盲点原因"].FillWeight=300;grid.Columns["盲点原因"].MinimumWidth=180;grid.Columns["盲点原因"].DefaultCellStyle.WrapMode=DataGridViewTriState.True;}foreach(DataGridViewRow row in grid.Rows){row.Height=58;row.Cells["盲点原因"].ToolTipText=row.Cells["盲点原因"].Value?.ToString();}
+        filterDelay.Stop();if(report==null||analysis==null)return;var f=CurrentFilter();var scope=ReportView.Scope(report,selectedKind,f);var rows=ReportView.Filter(scope,f,cfg);DisplayMainRows(rows);
         int[] values=[scope.Count,scope.Count(r=>r.State==TestState.Untestable),scope.Count(r=>r.State==TestState.Testable),scope.Count(r=>r.State==TestState.NotApplicable),scope.Count(r=>r.PendingCause(cfg))];var state=(stateFilter.SelectedItem as StatusChoice)?.State;int active=onlyCausePending?4:state switch{TestState.Untestable=>1,TestState.Testable=>2,TestState.NotApplicable=>3,null=>0,_=>-1};for(int i=0;i<5;i++)overview[i].Update(values[i],i==active);
-        scopeStats.Text=$"{(selectedKind?.Name()??"全部检测项目")} · 源记录 {scope.Count} · 当前显示 {rows.Count}；整板导出固定采用缺件Х";RefreshCopy();RefreshIssues(scope);RefreshSidebar();RefreshLog();
+        scopeStats.Text=$"{(selectedKind?.Name()??"全部检测项目")} · 源记录 {scope.Count} · 当前显示 {rows.Count}；整板导出固定采用缺件Х";RefreshSidebar();InvalidateDetailPages();
     }
     static void ColorStatus(object? sender,DataGridViewCellFormattingEventArgs e){if(e.CellStyle!=null&&e.Value is string value&&value is "Х" or "√" or "∕" or "?"){e.CellStyle.ForeColor=value=="Х"?Color.FromArgb(210,91,38):value=="√"?AppTheme.Green:AppTheme.Muted;e.CellStyle.Alignment=DataGridViewContentAlignment.MiddleCenter;e.CellStyle.Font=AppTheme.StatusFont;}}
     void RefreshSidebar()
@@ -97,11 +94,44 @@ public sealed partial class MainForm : Form
     }
     void RefreshLog()=>log.DataSource=report==null?null:ManualResults.Get(report,cfg).Select(c=>new{元件位号=c.Reference,元件类型=c.Type,检测项目=c.Inspection,标准值=c.Value,盲点原因=c.Reason}).ToList();
     async Task RunBusy(Func<Task> action){if(busy)return;busy=true;UseWaitCursor=true;foreach(Control c in Controls)c.Enabled=false;try{await action();}catch(Exception ex){status.Text=ex.Message;MessageBox.Show(this,ex.Message,"操作未完成",MessageBoxButtons.OK,MessageBoxIcon.Warning);}finally{busy=false;UseWaitCursor=false;foreach(Control c in Controls)c.Enabled=true;}}
-    async Task ReadAsync()=>await RunBusy(async()=>{if(!File.Exists(input.Text))throw new FileNotFoundException("请选择Coverage报告");SaveSession();var reader=new CoverageReader();var snapshot=await Task.Run(()=>CoverageSnapshot.Read(input.Text));var maps=await Task.Run(()=>reader.Locate(snapshot));if(maps.Count==0)throw new InvalidDataException("没有找到ICT检测表头、位号和标准值");var map=maps[0];if(maps.Count>1){using var choose=new ChoiceForm<FieldMap>("选择工作表",maps);if(choose.ShowDialog(this)!=DialogResult.OK)return;map=choose.Selected!;}report=await Task.Run(()=>{var r=reader.ReadReport(snapshot,map);ReportWorkflow.Analyze(r,cfg);return r;});LoadSession();selectedKind=null;CollapseCopyTools();RefreshChoices();ResetFilters();ActivateInspection();board.Text=analysis!.BoardNumber;product.Text=analysis.ProductNumber;ShowPage("分类筛选");status.Text=$"已读取{analysis.Total}条源记录；默认全部类型、全部检测项目、全部状态。";});
+    async Task ReadAsync()=>await RunBusy(async()=>
+    {
+        string path=input.Text;if(!File.Exists(path))throw new FileNotFoundException("请选择Coverage报告");
+        filterDelay.Stop();status.Text="正在保存上次修改…";await SaveSessionAsync();
+        var reader=new CoverageReader();status.Text="正在读取Coverage文件…";
+        var snapshot=await Task.Run(()=>CoverageSnapshot.Read(path));
+        status.Text="正在自动识别ICT检测列…";var maps=await Task.Run(()=>reader.Locate(snapshot));
+        if(maps.Count==0)throw new InvalidDataException("没有找到ICT检测表头、位号和标准值");
+        var map=maps[0];if(maps.Count>1){using var choose=new ChoiceForm<FieldMap>("选择工作表",maps);if(choose.ShowDialog(this)!=DialogResult.OK)return;map=choose.Selected!;}
+        status.Text="正在读取元件并匹配盲点原因…";
+        var incoming=await Task.Run(()=>{var r=reader.ReadReport(snapshot,map);ReportWorkflow.Analyze(r,cfg);return r;});
+        await LoadSessionAsync(incoming);
+        report=incoming;selectedKind=null;analysis=report.Analyses.GetValueOrDefault(InspectionKind.Missing)??report.Analyses.Values.First();
+        CollapseCopyTools();board.Text=analysis.BoardNumber;product.Text=analysis.ProductNumber;
+        // Reset filters once; hidden pages are refreshed only when opened.
+        currentPage="分类筛选";ResetFilters();ShowPage("分类筛选");
+        status.Text=$"已读取{analysis.Total}条源记录；默认全部类型、全部检测项目、全部状态。";
+    });
     async Task ExportAsync()=>await RunBusy(async()=>{if(report==null)throw new InvalidOperationException("请先导入报告");var selected=ReportView.FullBlindPoint(report,cfg);bool draft=selected.Result.DataIssues>0;if(draft&&MessageBox.Show(this,"整板缺件存在文件数据问题，是否生成待审核版本？","数据问题",MessageBoxButtons.YesNo)!=DialogResult.Yes)return;using var d=new SaveFileDialog{Filter="盲点表|*.xlsx",FileName=Path.GetFileNameWithoutExtension(report.SourcePath)+"-整板盲点表"+(draft?"-待审核":"")+".xlsx"};if(d.ShowDialog(this)!=DialogResult.OK)return;await WriteBlindPointAsync(d.FileName,new(board.Text,product.Text,needle.Text,note.Text,(int)width.Value,draft));using var result=new ExportResultForm(d.FileName);result.ShowDialog(this);});
     internal async Task WriteBlindPointAsync(string target,ExportOptions options){var selected=ReportView.FullBlindPoint(report??throw new InvalidOperationException("请导入报告"),cfg);await Task.Run(()=>new ExcelExporter(cfg).ExportFixed(selected.Result,target,options with{BoardTotal=selected.BoardTotal,ScopeTotal=selected.ScopeTotal,ScopeCoverage=selected.ScopeCoverage,ScopeLabel="整板全部元件 · 缺件Х"}));}
-    string SessionPath()=>Path.Combine(userDir,(report?.SourceFingerprint??throw new InvalidOperationException("未读取报告"))+"-"+Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(cfg,RuleConfig.JsonOptions)+report.ProjectProfile)))[..12]+".v5.session.json");
-    void SaveSession(){if(report!=null&&report.Analyses.Values.Any(a=>a.Edits.Count>0||a.Corrections.Count>0))BatchReasonService.Save(report,SessionPath());}
-    void LoadSession(){if(report==null)return;string? path=Directory.GetFiles(userDir,report.SourceFingerprint+"-*.session.json").OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault();if(path==null||MessageBox.Show(this,"恢复该报告的最终人工原因记录？","恢复记录",MessageBoxButtons.YesNo)!=DialogResult.Yes)return;try{string json=File.ReadAllText(path);using var doc=JsonDocument.Parse(json);CoverageReport saved;if(doc.RootElement.TryGetProperty("Analyses",out _)||doc.RootElement.TryGetProperty("analyses",out _))saved=JsonSerializer.Deserialize<CoverageReport>(json,RuleConfig.JsonOptions)!;else{var a=JsonSerializer.Deserialize<Analysis>(json,RuleConfig.JsonOptions)!;saved=new(){SourceFingerprint=a.SourceFingerprint,Analyses={{InspectionKind.Missing,a}}};}ReportWorkflow.Restore(report,saved,cfg);}catch(Exception ex){MessageBox.Show(this,"记录未能恢复："+ex.Message);}}
-    async Task ApplyRules(RuleConfig next){SaveSession();RuleManagementService.Save(next,RulePath);cfg=next;if(report!=null){var saved=report;report=JsonSerializer.Deserialize<CoverageReport>(JsonSerializer.Serialize(saved,RuleConfig.JsonOptions),RuleConfig.JsonOptions)!;await RunBusy(async()=>await Task.Run(()=>{foreach(var a in report.Analyses.Values){a.Edits.Clear();a.Corrections.Clear();}ReportWorkflow.Analyze(report,cfg);ReportWorkflow.Restore(report,saved,cfg);}));}RefreshChoices();ActivateInspection();SaveSession();status.Text="设置已保存并同步。";}
+    string SessionPath()=>SessionPath(report??throw new InvalidOperationException("未读取报告"),cfg);
+    string SessionPath(CoverageReport current,RuleConfig config)=>Path.Combine(userDir,current.SourceFingerprint+"-"+Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(config,RuleConfig.JsonOptions)+current.ProjectProfile)))[..12]+".v5.session.json");
+    async Task ApplyRules(RuleConfig next)=>await RunBusy(async()=>
+    {
+        status.Text="正在保存并重新匹配规则…";await SaveSessionAsync();var saved=report;
+        var updated=await Task.Run(()=>
+        {
+            CoverageReport? result=null;
+            if(saved!=null)
+            {
+                result=JsonSerializer.Deserialize<CoverageReport>(JsonSerializer.Serialize(saved,RuleConfig.JsonOptions),RuleConfig.JsonOptions)!;
+                foreach(var a in result.Analyses.Values){a.Edits.Clear();a.Corrections.Clear();}
+                ReportWorkflow.Analyze(result,next);ReportWorkflow.Restore(result,saved,next);
+            }
+            RuleManagementService.Save(next,RulePath);
+            if(result!=null&&result.Analyses.Values.Any(a=>a.Edits.Count>0||a.Corrections.Count>0))BatchReasonService.Save(result,SessionPath(result,next));
+            return result;
+        });
+        cfg=next;report=updated;RefreshChoices();ActivateInspection();status.Text="设置已保存并同步。";
+    });
 }

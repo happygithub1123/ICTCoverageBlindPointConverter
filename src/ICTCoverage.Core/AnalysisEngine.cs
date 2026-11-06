@@ -9,6 +9,9 @@ public sealed class AnalysisEngine(RuleConfig config)
     public void Analyze(Analysis a, string profile)
     {
         config.Validate();a.Profile=profile;a.RuleVersion=config.Version;a.Issues.Clear();
+        // Resolve inspection/project/type eligibility once, preserving the exact priority order.
+        var rulesByType=config.Rules.Where(r=>r.Enabled&&!r.Archived&&r.Inspections.Contains(a.Inspection)&&(r.Stage is "原因分类" or "可测性扩展")&&(r.Profile==null||r.Profile==profile)&&!r.ExcludeProfiles.Contains(profile))
+            .OrderBy(r=>r.Priority).ThenBy(r=>r.RuleId,StringComparer.Ordinal).SelectMany(r=>r.Types.Distinct().Select(t=>(Type:t,Rule:r))).ToLookup(p=>p.Type,p=>p.Rule);
         foreach(var c in a.Components)
         {
             c.Issues.Clear(); c.Reference=""; c.ReasonCode=""; c.RuleId="";c.ManuallyReviewed=false;c.MatchedRules.Clear();c.AppliedRuleIds=["F-01","N-01","N-02","V-02","V-03"];
@@ -39,10 +42,10 @@ public sealed class AnalysisEngine(RuleConfig config)
                 if(special?.Review==true){c.Value=c.RawValue;c.Issues.Add(new("classification","训练样表与源值/分类矛盾，待人工确认："+special.Source));continue;}
                 if(c.Type=="待确认") c.Issues.Add(new("type","未知元件前缀"));
                 if(string.IsNullOrWhiteSpace(c.RawValue)) c.Issues.Add(new("value","标准值为空"));
-                var matches=config.Rules.Where(r=>r.Enabled && !r.Archived && r.Inspections.Contains(a.Inspection) && (r.Stage is "原因分类" or "可测性扩展") && (r.Profile==null||r.Profile==profile) && !r.ExcludeProfiles.Contains(profile) && r.Types.Contains(c.Type) &&
+                var matches=rulesByType[c.Type].Where(r=>
                     (r.Prefixes.Length==0||r.Prefixes.Contains(match.Groups["prefix"].Value.ToUpperInvariant())) &&
                     (r.Suffix==null||normalized.Contains(r.Suffix)) && !r.ExcludeSuffixes.Any(normalized.Contains) && (!r.NoOtherSuffixes||normalized.Count==0) &&
-                    (r.ExactValue==null||r.ExactValue==c.RawValue) && (r.Reference==null||r.Reference==c.Reference)&&(r.References.Length==0||r.References.Contains(c.Reference))).OrderBy(r=>r.Priority).ThenBy(r=>r.RuleId,StringComparer.Ordinal).ToList();
+                    (r.ExactValue==null||r.ExactValue==c.RawValue) && (r.Reference==null||r.Reference==c.Reference)&&(r.References.Length==0||r.References.Contains(c.Reference))).ToList();
                 c.MatchedRules=matches.Select(r=>new RuleMatch(r.RuleId,r.Priority,r.Reason,r.Status,r.Source)).ToList();
                 c.AppliedRuleIds.AddRange(matches.Select(r=>r.RuleId));
                 // 测试结果已由Coverage确认。参考参数不触发重新确认可测性。

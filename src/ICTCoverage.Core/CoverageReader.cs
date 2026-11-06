@@ -8,7 +8,8 @@ namespace ICTCoverage.Core;
 public sealed class CoverageReader
 {
     private static readonly Regex ReferencePattern = new(@"^[A-Za-z]+\d+(?:[_/].*)?$", RegexOptions.Compiled);
-    private static string Text(ICell? c) => c == null ? "" : new DataFormatter(System.Globalization.CultureInfo.InvariantCulture).FormatCellValue(c).Trim();
+    [ThreadStatic] private static DataFormatter? formatter;
+    private static string Text(ICell? c) => c == null ? "" : (formatter??=new DataFormatter(System.Globalization.CultureInfo.InvariantCulture)).FormatCellValue(c).Trim();
     private static string MergedText(ISheet s, int r, int c)
     {
         foreach (var m in s.MergedRegions)

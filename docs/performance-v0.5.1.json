@@ -1,0 +1,28 @@
+{
+  "sampleRecords": 1202,
+  "environment": ".NET 8 / Windows x64; same machine, off-screen WinForms with active message loop",
+  "beforeVersion": "0.5.0",
+  "afterVersion": "0.5.1",
+  "before": {
+    "importMs": 2117.3854,
+    "maxImportHeartbeatGapMs": 757.8579,
+    "RefreshResultsMs": 1093.3498
+  },
+  "after": {
+    "importMs": 1194.4567,
+    "maxImportHeartbeatGapMs": 195.7623,
+    "heartbeatTicks": 35,
+    "RefreshResultsMs": 20.5092,
+    "RefreshCopyMs": 9.6661,
+    "RefreshLogMs": 0.6719,
+    "tenThousandRowViewMs": 104.7537,
+    "tenThousandIssuesMs": 195.1228,
+    "rows": 1202
+  },
+  "notes": [
+    "Timings are local observations, not guarantees on other machines.",
+    "20ms WinForms timer records the longest observed interval during import.",
+    "10000-row view and pending-issues checks use synthetic in-memory data.",
+    "Separate repeated parser/analysis probes are excluded from the comparison."
+  ]
+}

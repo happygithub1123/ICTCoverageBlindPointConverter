@@ -1,11 +1,15 @@
-# ICT盲点表工具 · WHAPPY v0.5.0
+# ICT盲点表工具 · WHAPPY v0.5.1
 
 **设计人员：王开心 WANG KAIXIN · WHAPPY**
 本软件最终解释权归王开心。
 
-[下载Windows x64运行包](https://github.com/happygithub1123/ICTCoverageBlindPointConverter/releases/latest) · [本版说明](docs/RELEASE-v0.5.0.md) · [四组规则与差异](docs/four-project-rule-analysis.md)
+[下载Windows x64运行包](https://github.com/happygithub1123/ICTCoverageBlindPointConverter/releases/latest) · [本版说明](docs/RELEASE-v0.5.1.md) · [四组规则与差异](docs/four-project-rule-analysis.md)
 
 本地C# WinForms软件，整理已经确认的Coverage检测结果，不依赖Microsoft Office。解压完整运行包，双击`ICT盲点表工具.exe`，保留同目录DLL和config。
+
+## 导入性能
+
+主表和异常列表按需绘制，隐藏页面打开时才刷新；搜索停顿180毫秒后统一筛选。文件读取、规则匹配、人工记录恢复与保存均在后台执行，状态栏显示当前阶段。万行视图、筛选、勾选及导入消息循环加入回归检查；[性能说明](docs/RELEASE-v0.5.1.md)记录本机样例对比。
 
 ## 查看报告
 
@@ -48,7 +52,7 @@
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\build.ps1
-powershell -ExecutionPolicy Bypass -File .\publish.ps1 -Version 0.5.0
+powershell -ExecutionPolicy Bypass -File .\publish.ps1 -Version 0.5.1
 ```
 
-运行包自带.NET。样例来源和历史说明在docs中保留；四组新原文件不随公开源码分发。缺少本地外部样例时明确跳过，不将历史结果当作本次重跑。本版回归123项：122通过，旧三组原文件缺失的一项跳过；四组新样例在本机逐点验证。
+运行包自带.NET。样例来源和历史说明在docs中保留；四组新原文件不随公开源码分发。缺少本地外部样例时明确跳过，不将历史结果当作本次重跑。本版回归124项：123通过，旧三组原文件缺失的一项跳过；四组新样例在本机逐点验证。
