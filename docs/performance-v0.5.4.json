@@ -1,0 +1,12 @@
+{
+  "importMs": 703.371,
+  "frames": 180,
+  "maxFrameMs": 25.5816,
+  "p95FrameMs": 19.0634,
+  "activeMs": 4853.2528,
+  "cpuMs": 1890.625,
+  "idleCpuMs": 0,
+  "paintedCells": 5728,
+  "logicalProcessors": 4,
+  "cpuMeasurement": "UI thread only"
+}

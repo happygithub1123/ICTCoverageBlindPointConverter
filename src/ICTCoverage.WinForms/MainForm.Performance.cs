@@ -72,7 +72,7 @@ public sealed partial class MainForm
         if(report!=null)
         {
             var filter=CurrentFilter();int count=report.Analyses.Where(p=>!selectedKind.HasValue||p.Key==selectedKind).Sum(p=>AnalysisEngine.Filter(p.Value,filter,cfg).Count(c=>c.Pending));
-            nav["异常待确认"].Text="异常待确认"+(count>0?" "+count:"");
+            UpdatePendingBadge(count);
         }
         RefreshVisiblePage();
     }

@@ -32,7 +32,7 @@ public sealed partial class MainForm
         issueTargets.Clear();if(report==null)return;
         foreach(var pair in report.Analyses.Where(p=>!selectedKind.HasValue||p.Key==selectedKind))foreach(var c in AnalysisEngine.Filter(pair.Value,CurrentFilter(),cfg).Where(c=>c.Pending))issueTargets.Add((new(pair.Key,c.Sheet,c.SourceRow,report.SourceFingerprint),c));
         checkedIssues.Clear();selectAllIssues.Checked=false;issues.RowCount=issueTargets.Count;issues.Invalidate();
-        nav["异常待确认"].Text="异常待确认"+(issueTargets.Count>0?" "+issueTargets.Count:"");
+        UpdatePendingBadge(issueTargets.Count);
     }
     async Task ConfirmBatch()
     {

@@ -1,4 +1,4 @@
-param([string]$Version = '0.5.3')
+﻿param([string]$Version = '0.5.4')
 $ErrorActionPreference = 'Stop'
 if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw '版本号格式应为 0.1.0' }
 $releaseName = "ICT盲点表工具-v$Version-win-x64"
