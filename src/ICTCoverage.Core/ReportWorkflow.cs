@@ -23,16 +23,19 @@ public static class ReportWorkflow
         foreach(var pair in saved.Analyses)
         {
             if(!fresh.Analyses.TryGetValue(pair.Key,out var current))continue;
+            var byRow=current.Components.ToLookup(c=>c.SourceRow);var knownTypes=cfg.KnownTypes.ToHashSet();
             foreach(var correction in ManualResults.Latest(pair.Value))
             {
-                var c=current.Components.FirstOrDefault(c=>c.SourceRow==correction.SourceRow);
+                var c=byRow[correction.SourceRow].FirstOrDefault();
                 if(c==null||c.SourceState!=TestState.Untestable||!cfg.Reasons.ContainsKey(correction.ReasonCode))continue;
                 if(!cfg.IsReasonActive(correction.ReasonCode)){current.Corrections[c.SourceRow]=correction;continue;}
-                int count=current.Edits.Count;
-                AnalysisEngine.Edit(current,c,correction.Reference,correction.Type,correction.Value,c.SourceState,correction.ReasonCode,correction.Note,"恢复已保存的原因选择",cfg);
-                if(current.Edits.Count>count)current.Edits[^1]=current.Edits[^1] with{Time=correction.Time};
-                current.Corrections[c.SourceRow]=correction;
+                string type=TypeManagementService.ResolveName(cfg,correction.Type);
+                if(!knownTypes.Contains(type)){current.Corrections[c.SourceRow]=correction;continue;}
+                if(string.IsNullOrWhiteSpace(correction.Value)||!System.Text.RegularExpressions.Regex.IsMatch(correction.Reference,@"^[A-Za-z]+\d+$|^PCB$"))throw new InvalidDataException("保存的人工记录包含无效位号或标准值");
+                c.Reference=correction.Reference;c.Type=type;c.Value=correction.Value;c.ReasonCode=correction.ReasonCode;c.Note=correction.Note;c.ManuallyReviewed=true;
+                c.Issues.RemoveAll(i=>i.Blocking);current.Corrections[c.SourceRow]=correction with{Type=type};
             }
+            AnalysisEngine.CheckDuplicates(current);
         }
     }
 }

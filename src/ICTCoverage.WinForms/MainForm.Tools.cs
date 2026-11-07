@@ -62,7 +62,7 @@ public sealed partial class MainForm
                 var result=await Task.Run(()=>
                 {
                     var nextCfg=newReason==null?originalCfg:ReasonManagementService.Upsert(originalCfg,code,newReason,reviewer,why);
-                    var next=JsonSerializer.Deserialize<CoverageReport>(JsonSerializer.Serialize(original,RuleConfig.JsonOptions),RuleConfig.JsonOptions)!;var a=next.Analyses[target.Target.Inspection];
+                    var next=original.Copy();var a=next.Analyses[target.Target.Inspection];
                     var item=a.Components.Single(c=>c.Sheet==target.Target.Sheet&&c.SourceRow==target.Target.SourceRow);
                     AnalysisEngine.Edit(a,item,item.Reference,componentType,value,item.SourceState,code,annotation,why,nextCfg,reviewer);
                     RuleManagementService.Save(nextCfg,RulePath);BatchReasonService.Save(next,SessionPath(next,nextCfg));return(Config:nextCfg,Report:next,Item:item);

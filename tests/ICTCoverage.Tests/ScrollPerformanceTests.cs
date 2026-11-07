@@ -48,19 +48,19 @@ public sealed class ScrollPerformanceTests
                     try
                     {
                         Field<TextBox>(form,"input").Text=Directory.GetFiles(Path.Combine(ConverterTests.Root,"samples"),"*.xls").Single();await(Task)Call(form,"ReadAsync")!;
-                        var grid=Field<DataGridView>(form,"grid");int valueCalls=0,formats=0;grid.CellValueNeeded+=(_,_)=>valueCalls++;grid.CellFormatting+=(_,_)=>formats++;
+                        var grid=Field<ReportTable>(form,"grid");long paintedBefore=grid.PaintedCellCount;
                         long last=Stopwatch.GetTimestamp();double maxGap=0,maxFrame=0;int beats=0;var frames=new List<double>();
                         using var heartbeat=new System.Windows.Forms.Timer{Interval=20};heartbeat.Tick+=(_,_)=>{long now=Stopwatch.GetTimestamp();maxGap=Math.Max(maxGap,Stopwatch.GetElapsedTime(last,now).TotalMilliseconds);last=now;beats++;};heartbeat.Start();await Task.Delay(50);
                         using var canvas=new Bitmap(grid.Width,grid.Height);
-                        var wheel=typeof(DataGridView).GetMethod("OnMouseWheel",Private)!;var burst=Stopwatch.StartNew();
+                        var wheel=typeof(ReportTable).GetMethod("OnMouseWheel",Private)!;var burst=Stopwatch.StartNew();
                         for(int i=0;i<600;i++)wheel.Invoke(grid,[new MouseEventArgs(MouseButtons.None,0,100,100,-120)]);
                         double burstMs=burst.Elapsed.TotalMilliseconds;await Task.Delay(70);grid.FirstDisplayedScrollingRowIndex=0;int layouts=0;grid.Layout+=(_,_)=>layouts++;
                         for(int i=0;i<90;i++)
                         {
                             var watch=Stopwatch.StartNew();
                             if(i%3==0)grid.FirstDisplayedScrollingRowIndex=(i*47)%Math.Max(1,grid.RowCount-15);
-                            else typeof(DataGridView).GetMethod("OnMouseWheel",Private)!.Invoke(grid,[new MouseEventArgs(MouseButtons.None,0,100,100,i%2==0?120:-120)]);
-                            int row=grid.FirstDisplayedScrollingRowIndex;grid.CurrentCell=grid.Rows[row].Cells["元件位置"];
+                            else typeof(ReportTable).GetMethod("OnMouseWheel",Private)!.Invoke(grid,[new MouseEventArgs(MouseButtons.None,0,100,100,i%2==0?120:-120)]);
+                            int row=grid.FirstDisplayedScrollingRowIndex;grid.SelectedRowIndex=row;
                             grid.DrawToBitmap(canvas,new Rectangle(Point.Empty,canvas.Size));
                             double elapsed=watch.Elapsed.TotalMilliseconds;frames.Add(elapsed);maxFrame=Math.Max(maxFrame,elapsed);await Task.Delay(16);
                         }
@@ -71,16 +71,16 @@ public sealed class ScrollPerformanceTests
                             foreach(var fixture in doc.RootElement.EnumerateArray())
                             {
                                 string? path=fixture.GetProperty("source").GetString();if(!File.Exists(path))continue;
-                                Field<TextBox>(form,"input").Text=path;await(Task)Call(form,"ReadAsync")!;extraReports.Add(grid.Rows.Count);
+                                Field<TextBox>(form,"input").Text=path;await(Task)Call(form,"ReadAsync")!;extraReports.Add(grid.RowCount);
                                 for(int i=0;i<10;i++)
                                 {
-                                    var watch=Stopwatch.StartNew();grid.FirstDisplayedScrollingRowIndex=(i*137)%Math.Max(1,grid.RowCount-15);grid.CurrentCell=grid.Rows[grid.FirstDisplayedScrollingRowIndex].Cells["元件位置"];grid.DrawToBitmap(canvas,new Rectangle(Point.Empty,canvas.Size));
+                                    var watch=Stopwatch.StartNew();grid.FirstDisplayedScrollingRowIndex=(i*137)%Math.Max(1,grid.RowCount-15);grid.SelectedRowIndex=grid.FirstDisplayedScrollingRowIndex;grid.DrawToBitmap(canvas,new Rectangle(Point.Empty,canvas.Size));
                                     double elapsed=watch.Elapsed.TotalMilliseconds;frames.Add(elapsed);maxFrame=Math.Max(maxFrame,elapsed);await Task.Delay(16);
                                 }
                             }
                         }
                         await Task.Delay(50);heartbeat.Stop();
-                        var result=new{burstMs,layouts,extraReportRows=extraReports,frames=frames.Count,maxFrameMs=maxFrame,p95FrameMs=frames.Order().ElementAt((int)(frames.Count*.95)),maxHeartbeatGapMs=maxGap,heartbeatTicks=beats,valueCalls,formats};
+                        var result=new{burstMs,layouts,extraReportRows=extraReports,frames=frames.Count,maxFrameMs=maxFrame,p95FrameMs=frames.Order().ElementAt((int)(frames.Count*.95)),maxHeartbeatGapMs=maxGap,heartbeatTicks=beats,paintedCells=grid.PaintedCellCount-paintedBefore};
                         string label=Environment.GetEnvironmentVariable("ICT_SCROLL_LABEL")??"latest";File.WriteAllText(Path.Combine(ConverterTests.Root,"outputs","scroll-"+label+".json"),JsonSerializer.Serialize(result,new JsonSerializerOptions{WriteIndented=true}));
                         Assert.True(beats>10);Assert.True(maxFrame<1500,$"单次滚动/选择/完整绘制阻塞 {maxFrame:F0}ms");Assert.True(maxGap<1500,$"连续滚动时消息循环阻塞 {maxGap:F0}ms");
                     }

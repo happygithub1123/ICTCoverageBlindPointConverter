@@ -35,6 +35,7 @@ public sealed class Component
     {
         get{string prefix=System.Text.RegularExpressions.Regex.Match(Reference,"^[A-Za-z]+").Value.ToUpperInvariant();return prefix=="TVS"?"TVS":Type=="待确认"?"待确认/"+prefix:Type;}
     }
+    public Component Copy(){var c=(Component)MemberwiseClone();c.Issues=[..Issues];c.MatchedRules=[..MatchedRules];c.AppliedRuleIds=[..AppliedRuleIds];return c;}
     public string OutputReasonCode => Issues.Any(i=>i.Code=="rule_conflict")?"":ReasonCode;
 }
 public record FieldMap(string Sheet, int HeaderRow, int ReferenceColumn, int ValueColumn, int StatusColumn)
@@ -54,6 +55,7 @@ public sealed class Analysis
     public List<Component> Components { get; set; } = [];
     public List<EditLog> Edits { get; set; } = [];
     public Dictionary<int,ManualCorrection> Corrections { get; set; } = [];
+    public Analysis Copy(){var a=(Analysis)MemberwiseClone();a.Components=Components.Select(c=>c.Copy()).ToList();a.Edits=[..Edits];a.Corrections=new(Corrections);a.Issues=[..Issues];return a;}
     public int Total => Components.Count;
     public int Testable => Components.Count(c => c.SourceState == TestState.Testable);
     public int SourceUntestable => Components.Count(c => c.SourceState == TestState.Untestable);
@@ -114,7 +116,12 @@ public sealed class RuleConfig
     public Dictionary<string,Dictionary<string,string>> ProjectPrefixTypes { get; set; } = [];
     public Dictionary<string,Dictionary<string,string>> ProjectSuffixAliases { get; set; } = [];
     public List<ComponentOverride> ComponentOverrides { get; set; } = [];
-    [JsonIgnore] public IEnumerable<string> KnownTypes=>PrefixTypes.Values.Concat(ProjectPrefixTypes.Values.SelectMany(m=>m.Values)).Concat(ComponentOverrides.Where(o=>o.Type!=null).Select(o=>o.Type!)).Concat(TypeValues.Keys).Distinct();
+    public HashSet<string> CustomTypes {get;set;}=[];
+    public HashSet<string> ArchivedTypes {get;set;}=[];
+    public Dictionary<string,string> TypeAliases {get;set;}=[];
+    public List<TypeChange> TypeChanges {get;set;}=[];
+    [JsonIgnore] public IEnumerable<string> AllTypes=>PrefixTypes.Values.Concat(ProjectPrefixTypes.Values.SelectMany(m=>m.Values)).Concat(ComponentOverrides.Where(o=>o.Type!=null).Select(o=>o.Type!)).Concat(TypeValues.Keys).Concat(CustomTypes).Distinct();
+    [JsonIgnore] public IEnumerable<string> KnownTypes=>AllTypes.Where(t=>!ArchivedTypes.Contains(t));
     public Dictionary<string,string> SuffixAliases { get; set; } = [];
     public string[] UntestableSymbols { get; set; } = ["X", "Х", "×"];
     public string[] TestableSymbols { get; set; } = ["√", "✓", "✔"];
@@ -148,7 +155,8 @@ public sealed class RuleConfig
         if(Rules.Any(r=>r.Stage is not ("筛选" or "位号解析" or "标准值" or "原因分类" or "可测性扩展" or "异常审核" or "分组" or "导出" or "统计" or "回归测试")))throw new InvalidDataException("未知规则阶段");
         if(Rules.Any(r=>(r.Stage is "原因分类" or "可测性扩展")&&(r.Types.Length==0||r.Priority<0||r.Scope=="project"&&string.IsNullOrWhiteSpace(r.Profile))))throw new InvalidDataException("分类规则缺类型、有效优先级或项目范围");
         if(Rules.Any(r=>r.Stage=="原因分类"&&!r.ReviewOnly&&string.IsNullOrWhiteSpace(r.Reason)))throw new InvalidDataException("自动分类规则缺少reasonCode");
-        if(Rules.Any(r=>r.Supersedes.Any(id=>!Rules.Any(other=>other.RuleId==id))))throw new InvalidDataException("优先关系引用不存在的规则编号");
+        var ruleIds=Rules.Select(r=>r.RuleId).ToHashSet(StringComparer.Ordinal);
+        if(Rules.Any(r=>r.Supersedes.Any(id=>!ruleIds.Contains(id))))throw new InvalidDataException("优先关系引用不存在的规则编号");
         if(Metadata.TryGetValue("referenceParameters",out var parameters)&&parameters.EnumerateArray().Any(p=>p.TryGetProperty("computeEnabled",out var on)&&on.GetBoolean()))throw new InvalidDataException("10%/30%定义尚未确认，本版本不支持启用计算公式");
         foreach(var id in new[]{"F-01","F-02","F-03","F-04","N-01","N-02","V-02","V-03","E-01","G-01","G-02","O-01","O-02","O-03"})
             if(!Rules.Any(r=>r.RuleId==id&&r.Enabled))throw new InvalidDataException($"管线规则 {id} 必须启用；未知/损坏数据不能通过关闭审核绕过");

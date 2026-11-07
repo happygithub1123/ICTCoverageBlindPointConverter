@@ -9,7 +9,6 @@ public sealed partial class MainForm
     string currentPage="分类筛选";
     object?[][] mainRows=[];
     readonly HashSet<int> checkedIssues=[];
-    readonly ToolTip reasonTip=new(){InitialDelay=450,ReshowDelay=250,AutoPopDelay=12000};
     CoverageReport? cachedReport;RuleConfig? cachedRules;
     readonly Dictionary<int,List<DisplayRow>> viewCache=[];
     sealed record DisplayRow(string Type,string Reference,string RawReference,string Value,string Reason,TestState State,bool Pending,bool PendingCause,object?[] Cells);
@@ -54,30 +53,17 @@ public sealed partial class MainForm
 
     void ConfigureMainGrid()
     {
-        grid.AutoGenerateColumns=false;grid.VirtualMode=true;grid.RowTemplate.Height=62;grid.ShowCellToolTips=false;
-        foreach(string name in new[]{"元件类型","元件位置","标准值","缺件","短路","错件","空焊","盲点原因"})
-        {
-            var column=new DataGridViewTextBoxColumn{Name=name,HeaderText=name,SortMode=DataGridViewColumnSortMode.NotSortable};
-            if(name is "缺件" or "短路" or "错件" or "空焊"){column.AutoSizeMode=DataGridViewAutoSizeColumnMode.None;column.Width=56;column.DefaultCellStyle.Font=AppTheme.StatusFont;}
-            else{column.MinimumWidth=name=="盲点原因"?180:95;column.FillWeight=name=="盲点原因"?300:name=="元件位置"?110:85;}
-            if(name=="盲点原因")column.DefaultCellStyle.WrapMode=DataGridViewTriState.True;
-            grid.Columns.Add(column);
-        }
-        grid.CellValueNeeded+=(_,e)=>{if(e.RowIndex>=0&&e.RowIndex<mainRows.Length)e.Value=mainRows[e.RowIndex][e.ColumnIndex];};
-        grid.CellMouseEnter+=(_,e)=>reasonTip.SetToolTip(grid,e.RowIndex>=0&&e.RowIndex<mainRows.Length&&e.ColumnIndex==7?mainRows[e.RowIndex][7]?.ToString():null);
-        grid.CellMouseLeave+=(_,_)=>reasonTip.SetToolTip(grid,null);
-        grid.Scroll+=(_,_)=>reasonTip.SetToolTip(grid,null);
         filterDelay.Tick+=(_,_)=>{filterDelay.Stop();RefreshResults();};
-        FormClosed+=(_,_)=>{filterDelay.Dispose();reasonTip.Dispose();};
+        FormClosed+=(_,_)=>filterDelay.Dispose();
     }
 
     void ScheduleFilter(){filterDelay.Stop();filterDelay.Start();}
 
     void DisplayMainRows(List<DisplayRow> rows)
     {
-        ((ResponsiveGrid)grid).CancelPendingScroll();
+        grid.CancelPendingScroll();
         mainRows=rows.Select(r=>r.Cells).ToArray();
-        if(grid.RowCount!=mainRows.Length)grid.RowCount=mainRows.Length;grid.Invalidate();
+        grid.SetRows(mainRows);
     }
 
     void InvalidateDetailPages()
@@ -101,9 +87,11 @@ public sealed partial class MainForm
             case "人工修改日志":RefreshLog();break;
             case "规则设置":case "规则总览":RefreshRules();break;
             case "盲点设置":RefreshReasons();break;
+            case "类型分类设置":RefreshTypes();break;
         }
     }
 
+    string SessionDirectory=>Path.Combine(userDir,"sessions-v6");
     bool closingAfterSave;
     async void HandleClosing(object? sender,FormClosingEventArgs e)
     {
@@ -124,7 +112,7 @@ public sealed partial class MainForm
 
     async Task LoadSessionAsync(CoverageReport incoming)
     {
-        string? path=await Task.Run(()=>Directory.GetFiles(userDir,incoming.SourceFingerprint+"-*.session.json").OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault());
+        string? path=await Task.Run(()=>Directory.GetFiles(SessionDirectory,incoming.SourceFingerprint+"-*.session.json").Concat(Directory.GetFiles(userDir,incoming.SourceFingerprint+"-*.session.json")).OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault());
         if(path==null||MessageBox.Show(this,"恢复该报告的最终人工原因记录？","恢复记录",MessageBoxButtons.YesNo)!=DialogResult.Yes)return;
         status.Text="正在恢复人工原因记录…";
         try

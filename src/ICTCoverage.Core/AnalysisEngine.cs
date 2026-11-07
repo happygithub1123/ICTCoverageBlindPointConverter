@@ -12,17 +12,21 @@ public sealed class AnalysisEngine(RuleConfig config)
         // Resolve inspection/project/type eligibility once, preserving the exact priority order.
         var rulesByType=config.Rules.Where(r=>r.Enabled&&!r.Archived&&r.Inspections.Contains(a.Inspection)&&(r.Stage is "原因分类" or "可测性扩展")&&(r.Profile==null||r.Profile==profile)&&!r.ExcludeProfiles.Contains(profile))
             .OrderBy(r=>r.Priority).ThenBy(r=>r.RuleId,StringComparer.Ordinal).SelectMany(r=>r.Types.Distinct().Select(t=>(Type:t,Rule:r))).ToLookup(p=>p.Type,p=>p.Rule);
+        var componentOverrides=config.ComponentOverrides.Where(o=>o.Project==profile).ToLookup(o=>(o.Reference,o.RawValue));
+        string resistorType=TypeManagementService.ResolveName(config,"电阻");bool valueOverrideEnabled=config.Rules.Any(r=>r.RuleId=="V-01"&&r.Enabled);
         foreach(var c in a.Components)
         {
             c.Issues.Clear(); c.Reference=""; c.ReasonCode=""; c.RuleId="";c.ManuallyReviewed=false;c.MatchedRules.Clear();c.AppliedRuleIds=["F-01","N-01","N-02","V-02","V-03"];
             var match=Regex.Match(c.RawReference.Trim(),@"^(?<ref>(?<prefix>[A-Za-z]+)\d+)(?<pins>(?:_[A-Za-z0-9]+)*)(?<suffix>(?:/.*)?)$");
+            string prefix=match.Success?match.Groups["prefix"].Value.ToUpperInvariant():"";
             if(c.RawReference.Trim().Equals("PCB",StringComparison.OrdinalIgnoreCase)){c.Reference="PCB";c.Type="PCB";}
             else if(!match.Success) { c.Reference=c.RawReference; c.Type="待确认"; c.Issues.Add(new("reference","无法识别位号")); }
-            else { c.Reference=match.Groups["ref"].Value.ToUpperInvariant(); c.Type=config.PrefixTypes.GetValueOrDefault(match.Groups["prefix"].Value.ToUpperInvariant(),"待确认"); }
-            if(match.Success&&config.ProjectPrefixTypes.TryGetValue(profile,out var prefixMap)&&prefixMap.TryGetValue(match.Groups["prefix"].Value.ToUpperInvariant(),out var mapped))c.Type=mapped;
-            var special=config.ComponentOverrides.FirstOrDefault(o=>o.Project==profile&&o.Reference==c.Reference&&o.RawValue==c.RawValue);
+            else { c.Reference=match.Groups["ref"].Value.ToUpperInvariant(); c.Type=config.PrefixTypes.GetValueOrDefault(prefix,"待确认"); }
+            if(match.Success&&config.ProjectPrefixTypes.TryGetValue(profile,out var prefixMap)&&prefixMap.TryGetValue(prefix,out var mapped))c.Type=mapped;
+            var special=componentOverrides[(c.Reference,c.RawValue)].FirstOrDefault();
             if(special?.Type!=null&&!special.Review)c.Type=special.Type;
             if(match.Success&&match.Groups["pins"].Length>0&&!Regex.IsMatch(match.Groups["pins"].Value,@"^(?:_\d+)+$|^_[A-Za-z]_\d+$"))c.Issues.Add(new("pins","未知管脚/门电路后缀"));
+            if(config.ArchivedTypes.Contains(c.Type))c.Type="待确认";
             var suffix=c.RawReference.Split('/').Skip(1).Where(x=>x.Length>0).Select(x=>x.ToUpperInvariant()).ToArray();
             var normalized=new HashSet<string>();
             foreach(var s in suffix)
@@ -35,7 +39,7 @@ public sealed class AnalysisEngine(RuleConfig config)
             if(c.State==TestState.Unknown) c.Issues.Add(new("status","空白或未知检测状态"));
             c.Value=config.TypeValues.GetValueOrDefault(c.Type,c.RawValue);
             if(special?.DisplayValue!=null&&!special.Review)c.Value=special.DisplayValue;
-            if(c.Type=="电阻" && config.Rules.Any(r=>r.RuleId=="V-01"&&r.Enabled) && config.ProfileValueOverrides.TryGetValue(profile,out var overrides)){c.Value=overrides.GetValueOrDefault(c.RawValue,c.RawValue);c.AppliedRuleIds.Add("V-01");}
+            if(c.Type==resistorType && valueOverrideEnabled && config.ProfileValueOverrides.TryGetValue(profile,out var overrides)){c.Value=overrides.GetValueOrDefault(c.RawValue,c.RawValue);c.AppliedRuleIds.Add("V-01");}
             if(yes||na){c.Issues.Clear();continue;}
             if(c.State==TestState.Untestable)
             {
@@ -43,7 +47,7 @@ public sealed class AnalysisEngine(RuleConfig config)
                 if(c.Type=="待确认") c.Issues.Add(new("type","未知元件前缀"));
                 if(string.IsNullOrWhiteSpace(c.RawValue)) c.Issues.Add(new("value","标准值为空"));
                 var matches=rulesByType[c.Type].Where(r=>
-                    (r.Prefixes.Length==0||r.Prefixes.Contains(match.Groups["prefix"].Value.ToUpperInvariant())) &&
+                    (r.Prefixes.Length==0||r.Prefixes.Contains(prefix)) &&
                     (r.Suffix==null||normalized.Contains(r.Suffix)) && !r.ExcludeSuffixes.Any(normalized.Contains) && (!r.NoOtherSuffixes||normalized.Count==0) &&
                     (r.ExactValue==null||r.ExactValue==c.RawValue) && (r.Reference==null||r.Reference==c.Reference)&&(r.References.Length==0||r.References.Contains(c.Reference))).ToList();
                 c.MatchedRules=matches.Select(r=>new RuleMatch(r.RuleId,r.Priority,r.Reason,r.Status,r.Source)).ToList();

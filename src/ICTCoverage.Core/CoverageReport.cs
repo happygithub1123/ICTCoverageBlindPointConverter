@@ -18,6 +18,7 @@ public sealed class CoverageReport
     public string SourceFingerprint { get; set; } = "";
     public Dictionary<InspectionKind,Analysis> Analyses { get; set; } = [];
     public string ProjectProfile { get; set; } = "";
+    public CoverageReport Copy()=>new(){SourcePath=SourcePath,SourceFingerprint=SourceFingerprint,ProjectProfile=ProjectProfile,Analyses=Analyses.ToDictionary(p=>p.Key,p=>p.Value.Copy())};
 }
 public record InspectionStatistics(int Total,int Testable,int Untestable,int NotApplicable,int Unknown)
 {
@@ -56,9 +57,10 @@ public static class ManualResults
         var results=new List<(DateTimeOffset Time,InspectionKind Kind,ManualCorrection Item)>();
         foreach(var pair in report.Analyses)
         {
-            var latest=new Dictionary<int,ManualCorrection>();
+            var latest=new Dictionary<int,ManualCorrection>(pair.Value.Corrections);
             foreach(var e in pair.Value.Edits.OrderBy(e=>e.Time))
             {
+                if(latest.TryGetValue(e.SourceRow,out var final)&&final.Time>=e.Time)continue;
                 try
                 {
                     var after=JsonSerializer.Deserialize<Component>(e.After,RuleConfig.JsonOptions);var before=JsonSerializer.Deserialize<Component>(e.Before,RuleConfig.JsonOptions);
