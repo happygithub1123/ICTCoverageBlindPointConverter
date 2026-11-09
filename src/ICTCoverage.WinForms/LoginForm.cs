@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
-using System.Security.Cryptography;
-using System.Text;
+using System.Drawing.Imaging;
 
 namespace ICTCoverage.WinForms;
 
@@ -10,9 +9,8 @@ internal static class LoginCredentials
     // Local startup gate; never persist the entered password in rules, sessions or logs.
     internal static bool Validate(string user,string password)
     {
-        byte[] actual=SHA256.HashData(Encoding.UTF8.GetBytes(password));
-        byte[] expected=Convert.FromHexString("8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92");
-        return string.Equals(user.Trim(),"陈俊杰",StringComparison.Ordinal)&&CryptographicOperations.FixedTimeEquals(actual,expected);
+        string name=user.Trim();
+        return (name is "君和辰" or "陈俊杰" or "WHAPPY" or "星联达")&&password.Length==6&&password.All(c=>c is >= '0' and <= '9')&&password.Sum(c=>c-'0')==20;
     }
 }
 
@@ -22,10 +20,10 @@ public sealed class LoginForm : Form
     public const string ChineseTitle="ICT 智能覆盖率识别与盲点自动化处理系统";
     readonly Image wallpaper;
     readonly Panel card=new(){BackColor=Color.FromArgb(250,252,255)};
-    readonly PictureBox logo=new(){SizeMode=PictureBoxSizeMode.Zoom};
+    readonly BreathingLogo logo=new();
     readonly Label welcome=new(){Text="欢迎登录",ForeColor=AppTheme.Ink,TextAlign=ContentAlignment.MiddleLeft};
     readonly Label userLabel=new(){Text="用户名",ForeColor=AppTheme.Muted},passwordLabel=new(){Text="密码",ForeColor=AppTheme.Muted};
-    readonly TextBox username=new(){Name="LoginUsername",Text="陈俊杰",TabIndex=0,BorderStyle=BorderStyle.FixedSingle};
+    readonly TextBox username=new(){Name="LoginUsername",TabIndex=0,BorderStyle=BorderStyle.FixedSingle};
     readonly TextBox password=new(){Name="LoginPassword",UseSystemPasswordChar=true,TabIndex=1,BorderStyle=BorderStyle.FixedSingle};
     readonly CheckBox showPassword=new(){Text="显示密码",TabIndex=2,ForeColor=AppTheme.Muted};
     readonly Label error=new(){Name="LoginError",ForeColor=Color.FromArgb(190,58,45),TextAlign=ContentAlignment.MiddleLeft};
@@ -34,12 +32,16 @@ public sealed class LoginForm : Form
     readonly Stopwatch clock=new();
     readonly List<Font> ownedFonts=[];
     Bitmap? background;
-    float layoutScale=1,progress,fontScale=float.NaN;
-    RectangleF englishBounds,chineseBounds;
+    float layoutScale=1,progress,fontScale=float.NaN,breath,focusUser,focusPassword;
+    Font titleFont=null!,subtitleFont=null!,smallFont=null!,companyFont=null!;
+    bool loggingIn,hover,pressed;
+    public const string CompanyTitle="江苏君和辰科技有限公司";
+    RectangleF englishBounds,chineseBounds,companyBounds;
     Point cardPosition;
     bool ready,shown;
     internal int BackgroundBuilds{get;private set;}
-    internal bool AnimationRunning=>entrance.Enabled;
+    internal bool AnimationRunning=>entrance.Enabled&&!loggingIn;
+    internal float LoopPhase=>breath;
     public LoginForm()
     {
         using var stream=GetType().Assembly.GetManifestResourceStream("ICTCoverage.login.jpg")??throw new InvalidOperationException("登录背景资源缺失");
@@ -50,17 +52,16 @@ public sealed class LoginForm : Form
         AccessibleName=ChineseTitle;login.FlatAppearance.BorderSize=0;login.Click+=(_,_)=>TryLogin();AcceptButton=login;
         showPassword.CheckedChanged+=(_,_)=>password.UseSystemPasswordChar=!showPassword.Checked;
         card.Controls.AddRange([logo,welcome,userLabel,username,passwordLabel,password,showPassword,error,login]);Controls.Add(card);
-        entrance.Tick+=(_,_)=>
-        {
-            progress=Math.Min(1,(float)clock.Elapsed.TotalMilliseconds/800);MoveCard();Invalidate(Rectangle.Ceiling(RectangleF.Union(englishBounds,chineseBounds)));
-            if(progress>=1){entrance.Stop();clock.Stop();}
-        };
+        login.MouseEnter+=(_,_)=>hover=true;login.MouseLeave+=(_,_)=>{hover=false;pressed=false;};login.MouseDown+=(_,_)=>pressed=true;login.MouseUp+=(_,_)=>pressed=false;
+        card.Paint+=(_,e)=>{DrawFocus(e.Graphics,username,focusUser);DrawFocus(e.Graphics,password,focusPassword);};
+        entrance.Tick+=(_,_)=>Animate();
         ready=true;Arrange();
     }
     void TryLogin()
     {
+        if(loggingIn)return;
         if(!LoginCredentials.Validate(username.Text,password.Text)){error.Text="用户名或密码错误";password.SelectAll();password.Focus();return;}
-        password.Clear();DialogResult=DialogResult.OK;Close();
+        loggingIn=true;password.Clear();username.Enabled=password.Enabled=showPassword.Enabled=login.Enabled=false;error.ForeColor=AppTheme.Green;error.Text="登录成功，正在进入…";clock.Restart();
     }
     protected override void OnShown(EventArgs e)
     {
@@ -69,15 +70,21 @@ public sealed class LoginForm : Form
         {
             var area=Screen.FromControl(this).WorkingArea;Size=new Size(Math.Min(Width,area.Width),Math.Min(Height,area.Height));Location=new Point(area.Left+(area.Width-Width)/2,area.Top+(area.Height-Height)/2);
         }
-        Arrange();clock.Restart();entrance.Start();password.Focus();
+        Arrange();clock.Restart();entrance.Start();username.Focus();
     }
-    protected override void OnResize(EventArgs e){base.OnResize(e);background?.Dispose();background=null;if(ready)Arrange();Invalidate();}
+    protected override void OnResize(EventArgs e)
+    {
+        base.OnResize(e);background?.Dispose();background=null;if(!ready)return;
+        if(WindowState==FormWindowState.Minimized){entrance.Stop();clock.Stop();return;}
+        Arrange();if(shown){clock.Start();entrance.Start();}Invalidate();
+    }
     protected override void OnDpiChanged(DpiChangedEventArgs e){base.OnDpiChanged(e);if(ready)Arrange();}
     void Arrange()
     {
         if(ClientSize.Width<=0||ClientSize.Height<=0||WindowState==FormWindowState.Minimized)return;
         layoutScale=Math.Min(ClientSize.Width/1200f,ClientSize.Height/720f);float s=layoutScale;
         int P(float value)=>(int)Math.Round(value*s);
+        companyBounds=new RectangleF(ClientSize.Width-P(420),P(18),P(390),P(32));
         englishBounds=new RectangleF(P(58),P(65),P(760),P(92));chineseBounds=new RectangleF(P(60),P(165),P(720),P(50));
         cardPosition=new Point(P(60),P(240));card.Size=new Size(P(410),P(360));
         void Place(Control control,int x,int y,int w,int h)=>control.SetBounds(P(x),P(y),P(w),P(h));
@@ -88,9 +95,26 @@ public sealed class LoginForm : Form
             var old=ownedFonts.ToArray();ownedFonts.Clear();
             Font Make(float pixels,bool bold=false){var font=new Font("Microsoft YaHei UI",pixels*s,bold?FontStyle.Bold:FontStyle.Regular,GraphicsUnit.Pixel);ownedFonts.Add(font);return font;}
             welcome.Font=Make(23,true);userLabel.Font=passwordLabel.Font=showPassword.Font=error.Font=Make(16);username.Font=password.Font=Make(19);login.Font=Make(19,true);
+            titleFont=new Font("Segoe UI",32*s,FontStyle.Bold,GraphicsUnit.Pixel);subtitleFont=Make(21);smallFont=new Font("Segoe UI",14*s,FontStyle.Regular,GraphicsUnit.Pixel);companyFont=Make(17,true);ownedFonts.Add(titleFont);ownedFonts.Add(smallFont);
             foreach(var font in old)font.Dispose();fontScale=s;
         }
         MoveCard();
+    }
+    static Color Blend(Color a,Color b,float amount)=>Color.FromArgb((int)(a.R+(b.R-a.R)*amount),(int)(a.G+(b.G-a.G)*amount),(int)(a.B+(b.B-a.B)*amount));
+    void DrawFocus(Graphics graphics,Control input,float amount)
+    {
+        var rect=input.Bounds;rect.Inflate(2,2);using var pen=new Pen(Blend(Color.FromArgb(218,226,238),AppTheme.Blue,amount),Math.Max(1,layoutScale));graphics.DrawRectangle(pen,rect);
+    }
+    void Animate()
+    {
+        if(loggingIn){if(clock.ElapsedMilliseconds>=300){entrance.Stop();clock.Stop();DialogResult=DialogResult.OK;Close();}return;}
+        progress=Math.Min(1,(float)clock.Elapsed.TotalMilliseconds/800);breath=(float)((Math.Sin(Math.Max(0,clock.Elapsed.TotalMilliseconds-800)*Math.PI/3000)+1)/2);
+        if(progress<1)MoveCard();else if(card.Location!=cardPosition)card.Location=cardPosition;
+        logo.Zoom=progress<1?.85f+.15f*progress:.98f+.04f*breath;logo.Alpha=progress;logo.Invalidate();
+        Invalidate(Rectangle.Ceiling(RectangleF.Union(englishBounds,chineseBounds)));Invalidate(Rectangle.Ceiling(companyBounds));
+        float u=focusUser,p=focusPassword;focusUser+=(username.Focused?1-focusUser:-focusUser)*.25f;focusPassword+=(password.Focused?1-focusPassword:-focusPassword)*.25f;
+        if(Math.Abs(u-focusUser)>.001f||Math.Abs(p-focusPassword)>.001f){var rect=Rectangle.Union(username.Bounds,password.Bounds);rect.Inflate(3,3);card.Invalidate(rect);}
+        var target=pressed?Color.FromArgb(24,76,181):hover?Color.FromArgb(62,130,240):AppTheme.Blue;var next=Blend(login.BackColor,target,.35f);if(next!=login.BackColor)login.BackColor=next;
     }
     void MoveCard(){float eased=1-(float)Math.Pow(1-progress,3);card.Location=new Point(cardPosition.X,cardPosition.Y+(int)(18*layoutScale*(1-eased)));}
     protected override void OnPaintBackground(PaintEventArgs e)
@@ -103,19 +127,36 @@ public sealed class LoginForm : Form
             g.DrawImage(wallpaper,(ClientSize.Width-w)/2,(ClientSize.Height-h)/2,w,h);
             using var wash=new LinearGradientBrush(new Point(0,0),new Point((int)(ClientSize.Width*.72),0),Color.FromArgb(210,247,250,255),Color.FromArgb(0,247,250,255));g.FillRectangle(wash,0,0,(int)(ClientSize.Width*.72),ClientSize.Height);BackgroundBuilds++;
         }
-        if(background!=null)e.Graphics.DrawImageUnscaled(background,0,0);
+        if(background!=null)e.Graphics.DrawImage(background,e.ClipRectangle,e.ClipRectangle,GraphicsUnit.Pixel);
     }
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);if(!ready)return;e.Graphics.TextRenderingHint=System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-        int alpha=(int)(255*progress);using var ink=new SolidBrush(Color.FromArgb(alpha,AppTheme.Ink));using var title=new Font("Segoe UI",32*layoutScale,FontStyle.Bold,GraphicsUnit.Pixel);using var subtitle=new Font("Microsoft YaHei UI",21*layoutScale,FontStyle.Regular,GraphicsUnit.Pixel);
-        e.Graphics.DrawString(EnglishTitle,title,ink,englishBounds);e.Graphics.DrawString(ChineseTitle,subtitle,ink,chineseBounds);
-        using var small=new Font("Segoe UI",14*layoutScale,FontStyle.Regular,GraphicsUnit.Pixel);using var muted=new SolidBrush(AppTheme.Muted);
-        e.Graphics.DrawString("WHAPPY  ·  ICT Coverage  ·  v0.5.4",small,muted,new PointF(60*layoutScale,640*layoutScale));
+        float titleMix=.12f+.14f*breath;using var ink=new SolidBrush(Color.FromArgb((int)(255*progress),Blend(AppTheme.Ink,AppTheme.Blue,titleMix)));
+        var english=englishBounds;english.Y+=10*layoutScale*(1-progress);e.Graphics.DrawString(EnglishTitle,titleFont,ink,english);
+        using var chineseInk=new SolidBrush(Color.FromArgb((int)(255*Math.Clamp((progress-.25f)/.75f,0,1)),Blend(AppTheme.Ink,AppTheme.Green,.15f*breath)));
+        e.Graphics.DrawString(ChineseTitle,subtitleFont,chineseInk,chineseBounds);
+        string[] parts=["江苏","君和辰","科技","有限公司"];Color[] colors=[Color.FromArgb(50,121,220),Color.FromArgb(24,156,128),Color.FromArgb(183,127,30),Color.FromArgb(50,121,220)];
+        float total=parts.Sum(t=>e.Graphics.MeasureString(t,companyFont,int.MaxValue,StringFormat.GenericTypographic).Width),x=companyBounds.Right-total;
+        for(int i=0;i<parts.Length;i++){using var brush=new SolidBrush(Blend(colors[i],Color.White,.10f+.16f*breath));e.Graphics.DrawString(parts[i],companyFont,brush,new PointF(x,companyBounds.Y),StringFormat.GenericTypographic);x+=e.Graphics.MeasureString(parts[i],companyFont,int.MaxValue,StringFormat.GenericTypographic).Width;}
+        using var muted=new SolidBrush(AppTheme.Muted);e.Graphics.DrawString("WHAPPY  ·  ICT Coverage  ·  v0.5.5",smallFont,muted,new PointF(60*layoutScale,640*layoutScale));
     }
     protected override void OnFormClosed(FormClosedEventArgs e){entrance.Stop();clock.Stop();password.Clear();base.OnFormClosed(e);}
     protected override void Dispose(bool disposing)
     {
         if(disposing){entrance.Dispose();background?.Dispose();wallpaper.Dispose();logo.Image?.Dispose();foreach(var font in ownedFonts)font.Dispose();}base.Dispose(disposing);
+    }
+}
+
+internal sealed class BreathingLogo : Control
+{
+    internal Image? Image{get;set;}
+    internal float Zoom{get;set;}=1;
+    internal float Alpha{get;set;}=1;
+    internal BreathingLogo(){SetStyle(ControlStyles.UserPaint|ControlStyles.OptimizedDoubleBuffer|ControlStyles.AllPaintingInWmPaint,true);}
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        base.OnPaint(e);if(Image==null)return;int size=(int)(Math.Min(Width,Height)*.95f*Zoom);using var attributes=new ImageAttributes();attributes.SetColorMatrix(new ColorMatrix{Matrix33=Alpha});
+        e.Graphics.InterpolationMode=InterpolationMode.HighQualityBicubic;e.Graphics.DrawImage(Image,new Rectangle((Width-size)/2,(Height-size)/2,size,size),0,0,Image.Width,Image.Height,GraphicsUnit.Pixel,attributes);
     }
 }

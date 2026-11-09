@@ -1,15 +1,17 @@
-# ICT盲点表工具 · WHAPPY v0.5.4
+# ICT盲点表工具 · WHAPPY v0.5.5
 
 **设计人员：王开心 WANG KAIXIN · WHAPPY**
 本软件最终解释权归王开心。
 
-[下载Windows x64运行包](https://github.com/happygithub1123/ICTCoverageBlindPointConverter/releases/latest) · [本版说明](docs/RELEASE-v0.5.4.md) · [使用说明](docs/使用说明.md) · [四组规则与差异](docs/four-project-rule-analysis.md)
+[下载Windows x64运行包](https://github.com/happygithub1123/ICTCoverageBlindPointConverter/releases/latest) · [本版说明](docs/RELEASE-v0.5.5.md) · [使用说明](docs/使用说明.md) · [四组规则与差异](docs/four-project-rule-analysis.md)
 
 本地C# WinForms软件，整理已经确认的Coverage检测结果，不依赖Microsoft Office。解压完整运行包，双击`ICT盲点表工具.exe`，保留同目录DLL和config。
 
 ## 登录
 
-启动后显示壁纸登录页，用户名默认“陈俊杰”，每次输入约定密码后进入软件。支持显示密码、Enter提交及错误提示；不联网、不记住密码。完整英文及中文标题搭配约0.8秒入场动画，结束后停止动画。
+启动后用户名和密码均为空。允许用户名：君和辰、陈俊杰、WHAPPY、星联达（WHAPPY须大写）。密码为恰好六个0—9数字，数字之和等于20，允许开头为0，例如234542、000299。支持显示密码、Enter提交及错误提示；不联网、不记住账号或密码。
+
+入场约0.8秒后，Logo、标题和右上角“江苏君和辰科技有限公司”以约6秒周期柔和循环；卡片及输入框保持固定。最小化暂停，登录成功显示短暂提示后进入主界面。
 
 ## 使用说明与导航
 
@@ -68,7 +70,7 @@
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\build.ps1
-powershell -ExecutionPolicy Bypass -File .\publish.ps1 -Version 0.5.4
+powershell -ExecutionPolicy Bypass -File .\publish.ps1 -Version 0.5.5
 ```
 
-运行包自带.NET。样例来源和历史说明在docs中保留；四组新原文件不随公开源码分发。缺少本地外部样例时明确跳过，不将历史结果当作本次重跑。本版回归144项：143通过，旧三组原文件缺失的一项跳过；四组新样例在本机逐点验证。
+运行包自带.NET。样例来源和历史说明在docs中保留；四组新原文件不随公开源码分发。缺少本地外部样例时明确跳过，不将历史结果当作本次重跑。本版回归146项：143通过，3项因本机原始样例缺失跳过；包含四组实表与MG0335原文件相关检查。现有样例和万行性能检查通过，历史实表结果不作为本次重跑。

@@ -44,6 +44,6 @@ public sealed partial class MainForm
         allInspection=SideKindButton("全部检测项目",AppTheme.Blue,()=>ChooseInspection(null));kinds.Controls.Add(allInspection,0,0);kinds.SetColumnSpan(allInspection,2);Color[] colors=[AppTheme.Blue,Color.FromArgb(124,82,193),Color.FromArgb(11,145,151),AppTheme.Orange];
         foreach(var kind in Enum.GetValues<ICTCoverage.Core.InspectionKind>()){var button=SideKindButton(kind.Name(),colors[(int)kind],()=>ChooseInspection(kind));inspectionButtons[kind]=button;kinds.Controls.Add(button,(int)kind%2,1+(int)kind/2);}outer.Controls.Add(kinds,0,1);
         sidebarStats.Padding=new Padding(15,0,0,0);outer.Controls.Add(sidebarStats,0,2);
-        var credit=new Label{Name="DesignerCredit",Text="Designed by WHAPPY\n设计人员：王开心\nWANG KAIXIN · v0.5.4\n本软件最终解释权归王开心",Dock=DockStyle.Fill,ForeColor=Color.FromArgb(208,218,235),Font=new Font("Microsoft YaHei UI",12,FontStyle.Bold),Padding=new Padding(15,4,0,4),TextAlign=ContentAlignment.MiddleLeft};outer.Controls.Add(credit,0,3);return outer;
+        var credit=new Label{Name="DesignerCredit",Text="Designed by WHAPPY\n设计人员：王开心\nWANG KAIXIN · v0.5.5\n本软件最终解释权归王开心",Dock=DockStyle.Fill,ForeColor=Color.FromArgb(208,218,235),Font=new Font("Microsoft YaHei UI",12,FontStyle.Bold),Padding=new Padding(15,4,0,4),TextAlign=ContentAlignment.MiddleLeft};outer.Controls.Add(credit,0,3);return outer;
     }
 }
