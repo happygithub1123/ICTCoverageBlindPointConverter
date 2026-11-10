@@ -19,16 +19,18 @@ public sealed class LoginForm : Form
     public const string EnglishTitle="ICT Smart Coverage Recognition\n& Blind Spot Automation System";
     public const string ChineseTitle="ICT 智能覆盖率识别与盲点自动化处理系统";
     readonly Image wallpaper;
-    readonly Panel card=new(){BackColor=Color.FromArgb(250,252,255)};
-    readonly BreathingLogo logo=new();
-    readonly Label welcome=new(){Text="欢迎登录",ForeColor=AppTheme.Ink,TextAlign=ContentAlignment.MiddleLeft};
-    readonly Label userLabel=new(){Text="用户名",ForeColor=AppTheme.Muted},passwordLabel=new(){Text="密码",ForeColor=AppTheme.Muted};
-    readonly TextBox username=new(){Name="LoginUsername",TabIndex=0,BorderStyle=BorderStyle.FixedSingle};
-    readonly TextBox password=new(){Name="LoginPassword",UseSystemPasswordChar=true,TabIndex=1,BorderStyle=BorderStyle.FixedSingle};
-    readonly CheckBox showPassword=new(){Text="显示密码",TabIndex=2,ForeColor=AppTheme.Muted};
-    readonly Label error=new(){Name="LoginError",ForeColor=Color.FromArgb(190,58,45),TextAlign=ContentAlignment.MiddleLeft};
+    readonly LoginCard card=new();
+    readonly BreathingLogo logo=new(){BackColor=Color.Transparent};
+    readonly LoginAnimatedText englishTitle=new(),chineseTitle=new(),companyTitle=new(true);
+    readonly Label welcome=new(){Text="欢迎登录",BackColor=Color.Transparent,ForeColor=AppTheme.Ink,TextAlign=ContentAlignment.MiddleLeft};
+    readonly Label userLabel=new(){Text="用户名",BackColor=Color.Transparent,ForeColor=AppTheme.Muted};
+    readonly Label passwordLabel=new(){Text="密码",BackColor=Color.Transparent,ForeColor=AppTheme.Muted};
+    readonly TextBox username=new(){Name="LoginUsername",AccessibleName="用户名",TabIndex=0,BorderStyle=BorderStyle.FixedSingle};
+    readonly TextBox password=new(){Name="LoginPassword",AccessibleName="密码",UseSystemPasswordChar=true,TabIndex=1,BorderStyle=BorderStyle.FixedSingle};
+    readonly CheckBox showPassword=new(){Text="显示密码",BackColor=Color.Transparent,TabIndex=2,ForeColor=AppTheme.Muted};
+    readonly Label error=new(){Name="LoginError",BackColor=Color.Transparent,ForeColor=Color.FromArgb(190,58,45),TextAlign=ContentAlignment.MiddleLeft};
     readonly Button login=new(){Text="登  录",TabIndex=3,FlatStyle=FlatStyle.Flat,BackColor=AppTheme.Blue,ForeColor=Color.White,Cursor=Cursors.Hand};
-    readonly System.Windows.Forms.Timer entrance=new(){Interval=33};
+    readonly System.Windows.Forms.Timer entrance=new(){Interval=42};
     readonly Stopwatch clock=new();
     readonly List<Font> ownedFonts=[];
     Bitmap? background;
@@ -38,7 +40,7 @@ public sealed class LoginForm : Form
     public const string CompanyTitle="江苏君和辰科技有限公司";
     RectangleF englishBounds,chineseBounds,companyBounds;
     Point cardPosition;
-    bool ready,shown;
+    bool ready,shown,closed;
     internal int BackgroundBuilds{get;private set;}
     internal bool AnimationRunning=>entrance.Enabled&&!loggingIn;
     internal float LoopPhase=>breath;
@@ -51,7 +53,7 @@ public sealed class LoginForm : Form
         Text="ICT · 用户登录";AutoScaleMode=AutoScaleMode.None;StartPosition=FormStartPosition.CenterScreen;Size=new Size(1200,760);MinimumSize=new Size(800,560);MaximizeBox=false;DoubleBuffered=true;
         AccessibleName=ChineseTitle;login.FlatAppearance.BorderSize=0;login.Click+=(_,_)=>TryLogin();AcceptButton=login;
         showPassword.CheckedChanged+=(_,_)=>password.UseSystemPasswordChar=!showPassword.Checked;
-        card.Controls.AddRange([logo,welcome,userLabel,username,passwordLabel,password,showPassword,error,login]);Controls.Add(card);
+        card.Controls.AddRange([logo,welcome,userLabel,username,passwordLabel,password,showPassword,error,login]);Controls.AddRange([card,englishTitle,chineseTitle,companyTitle]);
         login.MouseEnter+=(_,_)=>hover=true;login.MouseLeave+=(_,_)=>{hover=false;pressed=false;};login.MouseDown+=(_,_)=>pressed=true;login.MouseUp+=(_,_)=>pressed=false;
         card.Paint+=(_,e)=>{DrawFocus(e.Graphics,username,focusUser);DrawFocus(e.Graphics,password,focusPassword);};
         entrance.Tick+=(_,_)=>Animate();
@@ -74,9 +76,18 @@ public sealed class LoginForm : Form
     }
     protected override void OnResize(EventArgs e)
     {
-        base.OnResize(e);background?.Dispose();background=null;if(!ready)return;
+        base.OnResize(e);if(background!=null&&background.Size!=ClientSize){background.Dispose();background=null;}if(!ready)return;
         if(WindowState==FormWindowState.Minimized){entrance.Stop();clock.Stop();return;}
-        Arrange();if(shown){clock.Start();entrance.Start();}Invalidate();
+        Arrange();ResumeAnimation();Invalidate();
+    }
+    void ResumeAnimation()
+    {
+        if(shown&&Visible&&!closed&&WindowState!=FormWindowState.Minimized){clock.Start();entrance.Start();}
+    }
+    protected override void OnVisibleChanged(EventArgs e)
+    {
+        base.OnVisibleChanged(e);if(!ready)return;
+        if(!Visible){entrance.Stop();clock.Stop();}else ResumeAnimation();
     }
     protected override void OnDpiChanged(DpiChangedEventArgs e){base.OnDpiChanged(e);if(ready)Arrange();}
     void Arrange()
@@ -98,6 +109,13 @@ public sealed class LoginForm : Form
             titleFont=new Font("Segoe UI",32*s,FontStyle.Bold,GraphicsUnit.Pixel);subtitleFont=Make(21);smallFont=new Font("Segoe UI",14*s,FontStyle.Regular,GraphicsUnit.Pixel);companyFont=Make(17,true);ownedFonts.Add(titleFont);ownedFonts.Add(smallFont);
             foreach(var font in old)font.Dispose();fontScale=s;
         }
+        englishTitle.Bounds=Rectangle.Ceiling(englishBounds);chineseTitle.Bounds=Rectangle.Ceiling(chineseBounds);companyTitle.Bounds=Rectangle.Ceiling(companyBounds);
+        EnsureBackground();
+        if(background!=null)
+        {
+            englishTitle.Configure(background,EnglishTitle,titleFont);chineseTitle.Configure(background,ChineseTitle,subtitleFont);companyTitle.Configure(background,CompanyTitle,companyFont);
+            card.Configure(background,new Rectangle(cardPosition,new Size(card.Width,card.Height+P(20))));
+        }
         MoveCard();
     }
     static Color Blend(Color a,Color b,float amount)=>Color.FromArgb((int)(a.R+(b.R-a.R)*amount),(int)(a.G+(b.G-a.G)*amount),(int)(a.B+(b.B-a.B)*amount));
@@ -109,39 +127,37 @@ public sealed class LoginForm : Form
     {
         if(loggingIn){if(clock.ElapsedMilliseconds>=300){entrance.Stop();clock.Stop();DialogResult=DialogResult.OK;Close();}return;}
         progress=Math.Min(1,(float)clock.Elapsed.TotalMilliseconds/800);breath=(float)((Math.Sin(Math.Max(0,clock.Elapsed.TotalMilliseconds-800)*Math.PI/3000)+1)/2);
-        if(progress<1)MoveCard();else if(card.Location!=cardPosition)card.Location=cardPosition;
+        if(progress<1)MoveCard();else if(card.Location!=cardPosition){card.Location=cardPosition;card.BackgroundOffset=0;card.Invalidate(true);}
         logo.Zoom=progress<1?.85f+.15f*progress:.98f+.04f*breath;logo.Alpha=progress;logo.Invalidate();
-        Invalidate(Rectangle.Ceiling(RectangleF.Union(englishBounds,chineseBounds)));Invalidate(Rectangle.Ceiling(companyBounds));
+        float phase=(float)(clock.Elapsed.TotalSeconds%6/6);
+        englishTitle.Phase=phase;chineseTitle.Phase=(phase+.13f)%1;
+        companyTitle.Brightness=breath;
+        englishTitle.Invalidate();chineseTitle.Invalidate();companyTitle.Invalidate();
         float u=focusUser,p=focusPassword;focusUser+=(username.Focused?1-focusUser:-focusUser)*.25f;focusPassword+=(password.Focused?1-focusPassword:-focusPassword)*.25f;
         if(Math.Abs(u-focusUser)>.001f||Math.Abs(p-focusPassword)>.001f){var rect=Rectangle.Union(username.Bounds,password.Bounds);rect.Inflate(3,3);card.Invalidate(rect);}
         var target=pressed?Color.FromArgb(24,76,181):hover?Color.FromArgb(62,130,240):AppTheme.Blue;var next=Blend(login.BackColor,target,.35f);if(next!=login.BackColor)login.BackColor=next;
     }
-    void MoveCard(){float eased=1-(float)Math.Pow(1-progress,3);card.Location=new Point(cardPosition.X,cardPosition.Y+(int)(18*layoutScale*(1-eased)));}
+    void MoveCard(){float eased=1-(float)Math.Pow(1-progress,3);card.BackgroundOffset=(int)(18*layoutScale*(1-eased));card.Location=new Point(cardPosition.X,cardPosition.Y+card.BackgroundOffset);card.Invalidate(true);}
+    void EnsureBackground()
+    {
+        if(background!=null||!ready||ClientSize.Width<=0||ClientSize.Height<=0)return;
+        background=new Bitmap(ClientSize.Width,ClientSize.Height);using var g=Graphics.FromImage(background);g.InterpolationMode=InterpolationMode.HighQualityBicubic;
+        float factor=Math.Max((float)ClientSize.Width/wallpaper.Width,(float)ClientSize.Height/wallpaper.Height);float w=wallpaper.Width*factor,h=wallpaper.Height*factor;
+        g.DrawImage(wallpaper,(ClientSize.Width-w)/2,(ClientSize.Height-h)/2,w,h);
+        using var wash=new LinearGradientBrush(new Point(0,0),new Point((int)(ClientSize.Width*.72),0),Color.FromArgb(210,247,250,255),Color.FromArgb(0,247,250,255));g.FillRectangle(wash,0,0,(int)(ClientSize.Width*.72),ClientSize.Height);BackgroundBuilds++;
+    }
     protected override void OnPaintBackground(PaintEventArgs e)
     {
         if(!ready){base.OnPaintBackground(e);return;}
-        if(background==null&&ClientSize.Width>0&&ClientSize.Height>0)
-        {
-            background=new Bitmap(ClientSize.Width,ClientSize.Height);using var g=Graphics.FromImage(background);g.InterpolationMode=InterpolationMode.HighQualityBicubic;
-            float factor=Math.Max((float)ClientSize.Width/wallpaper.Width,(float)ClientSize.Height/wallpaper.Height);float w=wallpaper.Width*factor,h=wallpaper.Height*factor;
-            g.DrawImage(wallpaper,(ClientSize.Width-w)/2,(ClientSize.Height-h)/2,w,h);
-            using var wash=new LinearGradientBrush(new Point(0,0),new Point((int)(ClientSize.Width*.72),0),Color.FromArgb(210,247,250,255),Color.FromArgb(0,247,250,255));g.FillRectangle(wash,0,0,(int)(ClientSize.Width*.72),ClientSize.Height);BackgroundBuilds++;
-        }
+        EnsureBackground();
         if(background!=null)e.Graphics.DrawImage(background,e.ClipRectangle,e.ClipRectangle,GraphicsUnit.Pixel);
     }
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);if(!ready)return;e.Graphics.TextRenderingHint=System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-        float titleMix=.12f+.14f*breath;using var ink=new SolidBrush(Color.FromArgb((int)(255*progress),Blend(AppTheme.Ink,AppTheme.Blue,titleMix)));
-        var english=englishBounds;english.Y+=10*layoutScale*(1-progress);e.Graphics.DrawString(EnglishTitle,titleFont,ink,english);
-        using var chineseInk=new SolidBrush(Color.FromArgb((int)(255*Math.Clamp((progress-.25f)/.75f,0,1)),Blend(AppTheme.Ink,AppTheme.Green,.15f*breath)));
-        e.Graphics.DrawString(ChineseTitle,subtitleFont,chineseInk,chineseBounds);
-        string[] parts=["江苏","君和辰","科技","有限公司"];Color[] colors=[Color.FromArgb(50,121,220),Color.FromArgb(24,156,128),Color.FromArgb(183,127,30),Color.FromArgb(50,121,220)];
-        float total=parts.Sum(t=>e.Graphics.MeasureString(t,companyFont,int.MaxValue,StringFormat.GenericTypographic).Width),x=companyBounds.Right-total;
-        for(int i=0;i<parts.Length;i++){using var brush=new SolidBrush(Blend(colors[i],Color.White,.10f+.16f*breath));e.Graphics.DrawString(parts[i],companyFont,brush,new PointF(x,companyBounds.Y),StringFormat.GenericTypographic);x+=e.Graphics.MeasureString(parts[i],companyFont,int.MaxValue,StringFormat.GenericTypographic).Width;}
-        using var muted=new SolidBrush(AppTheme.Muted);e.Graphics.DrawString("WHAPPY  ·  ICT Coverage  ·  v0.5.5",smallFont,muted,new PointF(60*layoutScale,640*layoutScale));
+        using var muted=new SolidBrush(AppTheme.Muted);e.Graphics.DrawString("WHAPPY  ·  ICT Coverage  ·  v0.5.6",smallFont,muted,new PointF(60*layoutScale,640*layoutScale));
     }
-    protected override void OnFormClosed(FormClosedEventArgs e){entrance.Stop();clock.Stop();password.Clear();base.OnFormClosed(e);}
+    protected override void OnFormClosed(FormClosedEventArgs e){closed=true;entrance.Stop();clock.Stop();password.Clear();base.OnFormClosed(e);}
     protected override void Dispose(bool disposing)
     {
         if(disposing){entrance.Dispose();background?.Dispose();wallpaper.Dispose();logo.Image?.Dispose();foreach(var font in ownedFonts)font.Dispose();}base.Dispose(disposing);
@@ -150,13 +166,25 @@ public sealed class LoginForm : Form
 
 internal sealed class BreathingLogo : Control
 {
-    internal Image? Image{get;set;}
+    Image? image;
+    Bitmap? cachedImage;
+    readonly ImageAttributes attributes=new();
+    readonly ColorMatrix alphaMatrix=new();
+    internal Image? Image{get=>image;set{image=value;BuildCache();}}
     internal float Zoom{get;set;}=1;
     internal float Alpha{get;set;}=1;
-    internal BreathingLogo(){SetStyle(ControlStyles.UserPaint|ControlStyles.OptimizedDoubleBuffer|ControlStyles.AllPaintingInWmPaint,true);}
+    internal BreathingLogo(){SetStyle(ControlStyles.UserPaint|ControlStyles.OptimizedDoubleBuffer|ControlStyles.AllPaintingInWmPaint|ControlStyles.SupportsTransparentBackColor,true);}
+    protected override void OnSizeChanged(EventArgs e){base.OnSizeChanged(e);BuildCache();}
+    void BuildCache()
+    {
+        cachedImage?.Dispose();cachedImage=null;int side=Math.Min(Width,Height);
+        if(image==null||side<=0)return;
+        cachedImage=new Bitmap(side,side);using var g=Graphics.FromImage(cachedImage);g.InterpolationMode=InterpolationMode.HighQualityBicubic;g.DrawImage(image,0,0,side,side);
+    }
     protected override void OnPaint(PaintEventArgs e)
     {
-        base.OnPaint(e);if(Image==null)return;int size=(int)(Math.Min(Width,Height)*.95f*Zoom);using var attributes=new ImageAttributes();attributes.SetColorMatrix(new ColorMatrix{Matrix33=Alpha});
-        e.Graphics.InterpolationMode=InterpolationMode.HighQualityBicubic;e.Graphics.DrawImage(Image,new Rectangle((Width-size)/2,(Height-size)/2,size,size),0,0,Image.Width,Image.Height,GraphicsUnit.Pixel,attributes);
+        base.OnPaint(e);if(cachedImage==null)return;int size=(int)(Math.Min(Width,Height)*.95f*Zoom);alphaMatrix.Matrix33=Alpha;attributes.SetColorMatrix(alphaMatrix);
+        e.Graphics.InterpolationMode=InterpolationMode.Bilinear;e.Graphics.DrawImage(cachedImage,new Rectangle((Width-size)/2,(Height-size)/2,size,size),0,0,cachedImage.Width,cachedImage.Height,GraphicsUnit.Pixel,attributes);
     }
+    protected override void Dispose(bool disposing){if(disposing){cachedImage?.Dispose();attributes.Dispose();}base.Dispose(disposing);}
 }
