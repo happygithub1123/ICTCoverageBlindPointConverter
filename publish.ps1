@@ -1,4 +1,4 @@
-﻿param([string]$Version = '0.5.6')
+﻿param([string]$Version = '0.5.7')
 $ErrorActionPreference = 'Stop'
 if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw '版本号格式应为 0.1.0' }
 $releaseName = "ICT盲点表工具-v$Version-win-x64"
@@ -16,8 +16,12 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'docs') -Destination (Join-Path 
 $validationDir = Join-Path $publishDir 'validation'
 New-Item -ItemType Directory -Force -Path $validationDir | Out-Null
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'outputs\test-results\regression.trx') -Destination $validationDir
+if ($Version -eq '0.5.7') {
+    foreach ($name in @('company-flow-before.trx','company-flow-after.trx')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot "outputs\test-results\$name") -Destination $validationDir }
+    foreach ($name in @('company-flow-left.png','company-flow-middle.png','company-flow-right.png')) { Copy-Item -LiteralPath (Join-Path $PSScriptRoot "outputs\$name") -Destination $validationDir }
+}
 $sourceHashes = Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'src'),(Join-Path $PSScriptRoot 'config') -Recurse -File | Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' } | Get-FileHash -Algorithm SHA256 | Select-Object Path,Hash
-$metadata = [ordered]@{ version=$Version; releaseDate='2026-11-09'; target='win-x64'; selfContained=$true; ruleStatus='2.3.0; all inspection matrix; atomic batch causes; full-board Missing export; 326 preserved and learned rules; single workbook'; sourceHashes=$sourceHashes }
+$metadata = [ordered]@{ version=$Version; releaseDate=(Get-Date -Format 'yyyy-MM-dd'); target='win-x64'; selfContained=$true; ruleStatus='2.3.0; all inspection matrix; atomic batch causes; full-board Missing export; 326 preserved and learned rules; single workbook'; sourceHashes=$sourceHashes }
 $metadata | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $publishDir 'release-info.json') -Encoding UTF8
 $manifest = Get-ChildItem -LiteralPath $publishDir -Recurse -File | Sort-Object FullName | ForEach-Object { $hash=Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256; '{0}  {1}' -f $hash.Hash,$_.FullName.Substring($publishDir.Length+1) }
 $manifest | Set-Content -LiteralPath (Join-Path $publishDir 'SHA256SUMS.txt') -Encoding UTF8

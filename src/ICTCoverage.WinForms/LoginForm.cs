@@ -131,6 +131,7 @@ public sealed class LoginForm : Form
         logo.Zoom=progress<1?.85f+.15f*progress:.98f+.04f*breath;logo.Alpha=progress;logo.Invalidate();
         float phase=(float)(clock.Elapsed.TotalSeconds%6/6);
         englishTitle.Phase=phase;chineseTitle.Phase=(phase+.13f)%1;
+        companyTitle.Phase=phase;
         companyTitle.Brightness=breath;
         englishTitle.Invalidate();chineseTitle.Invalidate();companyTitle.Invalidate();
         float u=focusUser,p=focusPassword;focusUser+=(username.Focused?1-focusUser:-focusUser)*.25f;focusPassword+=(password.Focused?1-focusPassword:-focusPassword)*.25f;
@@ -155,7 +156,7 @@ public sealed class LoginForm : Form
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);if(!ready)return;e.Graphics.TextRenderingHint=System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-        using var muted=new SolidBrush(AppTheme.Muted);e.Graphics.DrawString("WHAPPY  ·  ICT Coverage  ·  v0.5.6",smallFont,muted,new PointF(60*layoutScale,640*layoutScale));
+        using var muted=new SolidBrush(AppTheme.Muted);e.Graphics.DrawString("WHAPPY  ·  ICT Coverage  ·  v0.5.7",smallFont,muted,new PointF(60*layoutScale,640*layoutScale));
     }
     protected override void OnFormClosed(FormClosedEventArgs e){closed=true;entrance.Stop();clock.Stop();password.Clear();base.OnFormClosed(e);}
     protected override void Dispose(bool disposing)

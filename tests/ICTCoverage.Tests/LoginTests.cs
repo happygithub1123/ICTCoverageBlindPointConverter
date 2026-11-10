@@ -19,6 +19,27 @@ public sealed class LoginTests
     }
     static LoginForm Form(int width=1200,int height=760)=>new(){ShowInTaskbar=false,StartPosition=FormStartPosition.Manual,Location=new Point(-20000,-20000),Size=new Size(width,height)};
     [System.Runtime.InteropServices.DllImport("user32.dll")]static extern uint GetGuiResources(IntPtr process,uint kind);
+    [Fact]public Task CompanyHighlightActuallyTravelsWithTimer()=>Sta(async()=>
+    {
+        using var form=Form();form.Show();await Task.Delay(900);
+        var company=Field<Control>(form,"companyTitle");var title=Field<Control>(form,"englishTitle");
+        float initial=Property<float>(company,"Phase");await Task.Delay(350);
+        Assert.NotEqual(initial,Property<float>(company,"Phase"));
+        Assert.InRange(Math.Abs(Property<float>(company,"Phase")-Property<float>(title,"Phase")),0,.001f);
+        form.Hide();int builds=Property<int>(company,"CacheBuilds");
+        double Center(float phase,string name)
+        {
+            company.GetType().GetProperty("Phase",Private)!.SetValue(company,phase);
+            using var image=new Bitmap(company.Width,company.Height);company.DrawToBitmap(image,company.ClientRectangle);
+            var layer=Field<Bitmap>(company,"flowOverlay");double weight=0,sum=0;
+            for(int y=0;y<layer.Height;y++)for(int x=0;x<layer.Width;x++){int alpha=layer.GetPixel(x,y).A;weight+=alpha;sum+=x*alpha;}
+            Assert.True(weight>500,"光带必须实际覆盖公司名称字形");
+            image.Save(Path.Combine(ConverterTests.Root,"outputs",$"company-flow-{name}.png"));return sum/weight;
+        }
+        double left=Center(.25f,"left"),middle=Center(.5f,"middle"),right=Center(.75f,"right");
+        Assert.True(middle>left+20&&right>middle+20,$"光带中心必须右移：{left:F1}, {middle:F1}, {right:F1}");
+        Assert.Equal(builds,Property<int>(company,"CacheBuilds"));form.Close();
+    });
     [Fact]public Task CachedFlowAndHalfTransparentCard()=>Sta(async()=>
     {
         using var form=Form();form.Show();await Task.Delay(1100);
